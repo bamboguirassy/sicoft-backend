@@ -1,0 +1,11 @@
+jms_serializer:
+    property_naming: 
+        id: 'jms_serializer.identical_property_naming_strategy'
+    visitors:
+        xml:
+            format_output: '%kernel.debug%'
+    metadata:
+        auto_detection: false
+    handlers:
+        datetime:
+            default_format: "Y-m-d H:i:s"
