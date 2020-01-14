@@ -39,11 +39,36 @@ class GroupController extends AbstractController {
         $group = new Group();
         $form = $this->createForm(GroupType::class, $group);
         $form->submit(Utils::serializeRequestContent($request));
-        $serializedData= json_decode($request->getContent());
-        if(!isset($serializedData->roles)){
+        $serializedData = json_decode($request->getContent());
+        if (!isset($serializedData->roles)) {
             throw $this->createNotFoundException("Les accès ne sont pas définis pour ce groupe...");
         }
-        $accessGroups=$serializedData->roles;
+        $accessGroups = $serializedData->roles;
+        $roles = [];
+        foreach ($accessGroups as $accessGroup) {
+            foreach ($accessGroup->accessModels as $accessModel) {
+                if ($accessModel->isCreateAllowed) {
+                    $roles[] = 'ROLE_' . $accessModel->tableCode . '_CREATE';
+                }
+                if ($accessModel->isIndexAllowed) {
+                    $roles[] = 'ROLE_' . $accessModel->tableCode . '_INDEX';
+                }
+                if ($accessModel->isShowAllowed) {
+                    $roles[] = 'ROLE_' . $accessModel->tableCode . '_SHOW';
+                }
+                if ($accessModel->isCloneAllowed) {
+                    $roles[] = 'ROLE_' . $accessModel->tableCode . '_CLONE';
+                }
+                if ($accessModel->isDeleteAllowed) {
+                    $roles[] = 'ROLE_' . $accessModel->tableCode . '_DELETE';
+                }
+                if ($accessModel->isEditAllowed) {
+                    $roles[] = 'ROLE_' . $accessModel->tableCode . '_EDIT';
+                }
+            }
+        }
+
+        $group->setRoles($roles);
 
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->persist($group);
