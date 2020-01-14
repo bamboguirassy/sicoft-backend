@@ -25,6 +25,9 @@ class Group extends BaseGroup
      * @ORM\Column(name="code", type="string", length=145, nullable=false)
      */
     private $code;
+    
+    public function __construct() {
+    }
 
 
     public function getId()
