@@ -15,20 +15,19 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 /**
  * @Route("/api/user")
  */
-class UserController extends AbstractController
-{
+class UserController extends AbstractController {
+
     /**
      * @Rest\Get(path="/", name="user_index")
      * @Rest\View(StatusCode = 200)
      * @IsGranted("ROLE_User_INDEX")
      */
-    public function index(): array
-    {
+    public function index(): array {
         $users = $this->getDoctrine()
-            ->getRepository(User::class)
-            ->findAll();
+                ->getRepository(User::class)
+                ->findAll();
 
-        return count($users)?$users:[];
+        return count($users) ? $users : [];
     }
 
     /**
@@ -36,14 +35,33 @@ class UserController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_User_CREATE")
      */
-    public function create(Request $request): User    {
+    public function create(Request $request, \Swift_Mailer $mailer, \Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface $passwordEncoder): User {
+        $entityManager = $this->getDoctrine()->getManager();
         $user = new User();
         $form = $this->createForm(UserType::class, $user);
         $form->submit(Utils::serializeRequestContent($request));
-
-        $entityManager = $this->getDoctrine()->getManager();
+        //check if email already exist
+        $searchedUserByEmail = $entityManager->getRepository(User::class)
+                ->findByEmail($user->getEmail());
+        if (count($searchedUserByEmail)) {
+            throw $this->createAccessDeniedException("Cette adresse email est déja utilisée pour un autre compte...");
+        }
+        $user->setUsername($user->getEmail());
+        $plainPassword= md5(random_bytes(10));
+        $user->setPassword($passwordEncoder->encodePassword($user, $plainPassword));
         $entityManager->persist($user);
         $entityManager->flush();
+
+        //send confirmation mail
+        $message = (new \Swift_Message('Creation Compte SICOFT'))
+                ->setFrom(\App\Utils\Utils::$senderEmail)
+                ->setTo($user->getEmail())
+                ->setBody(
+                $this->renderView(
+                        'emails/register.html.twig', ['user' => $user, 'siteUrl' => \App\Utils\Utils::$siteUrl,'password'=>$plainPassword]
+                ), 'text/html'
+        );
+        $mailer->send($message);
 
         return $user;
     }
@@ -53,17 +71,16 @@ class UserController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_User_SHOW")
      */
-    public function show(User $user): User    {
+    public function show(User $user): User {
         return $user;
     }
 
-    
     /**
      * @Rest\Put(path="/{id}/edit", name="user_edit",requirements = {"id"="\d+"})
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_User_EDIT")
      */
-    public function edit(Request $request, User $user): User    {
+    public function edit(Request $request, User $user): User {
         $form = $this->createForm(UserType::class, $user);
         $form->submit(Utils::serializeRequestContent($request));
 
@@ -71,20 +88,39 @@ class UserController extends AbstractController
 
         return $user;
     }
-    
+
     /**
      * @Rest\Put(path="/{id}/clone", name="user_clone",requirements = {"id"="\d+"})
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_User_CLONE")
      */
-    public function cloner(Request $request, User $user):  User {
-        $em=$this->getDoctrine()->getManager();
-        $userNew=new User();
+    public function cloner(Request $request, User $user, \Swift_Mailer $mailer, \Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface $passwordEncoder): User {
+        $entityManager = $this->getDoctrine()->getManager();
+        $userNew = new User();
         $form = $this->createForm(UserType::class, $userNew);
         $form->submit(Utils::serializeRequestContent($request));
-        $em->persist($userNew);
+        //check if email already exist
+        $searchedUserByEmail = $entityManager->getRepository(User::class)
+                ->findByEmail($userNew->getEmail());
+        if (count($searchedUserByEmail)) {
+            throw $this->createAccessDeniedException("Cette adresse email est déja utilisée pour un autre compte...");
+        }
+        $userNew->setUsername($userNew->getEmail());
+        $plainPassword= md5(random_bytes(10));
+        $userNew->setPassword($passwordEncoder->encodePassword($userNew, $plainPassword));
+        $entityManager->persist($userNew);
+        $entityManager->flush();
 
-        $em->flush();
+        //send confirmation mail
+        $message = (new \Swift_Message('Creation Compte SICOFT'))
+                ->setFrom(\App\Utils\Utils::$senderEmail)
+                ->setTo($userNew->getEmail())
+                ->setBody(
+                $this->renderView(
+                        'emails/register.html.twig', ['user' => $userNew, 'siteUrl' => \App\Utils\Utils::$siteUrl,'password'=>$plainPassword]
+                ), 'text/html'
+        );
+        $mailer->send($message);
 
         return $userNew;
     }
@@ -94,14 +130,14 @@ class UserController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_User_DELETE")
      */
-    public function delete(User $user): User    {
+    public function delete(User $user): User {
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->remove($user);
         $entityManager->flush();
 
         return $user;
     }
-    
+
     /**
      * @Rest\Post("/delete-selection/", name="user_selection_delete")
      * @Rest\View(StatusCode=200)
@@ -121,4 +157,5 @@ class UserController extends AbstractController
 
         return $users;
     }
+
 }

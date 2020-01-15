@@ -36,7 +36,121 @@ class GroupController extends AbstractController {
      * @IsGranted("ROLE_Group_CREATE")
      */
     public function create(Request $request): Group {
+        $entityManager = $this->getDoctrine()->getManager();
         $group = new Group();
+        $form = $this->createForm(GroupType::class, $group);
+        $form->submit(Utils::serializeRequestContent($request));
+        //check if code already exist
+        $searchedGroupByCode=$entityManager->getRepository(Group::class)
+                ->findByCode($group->getCode());
+        if(count($searchedGroupByCode)){
+            throw $this->createAccessDeniedException("Un groupe avec le même code existe déjà, merci de changer de code...");
+        }
+        //check if group already exist
+        $searchedGroupByName=$entityManager->getRepository(Group::class)
+                ->findByName($group->getName());
+        if(count($searchedGroupByName)){
+            throw $this->createAccessDeniedException("Un groupe avec le même nom existe déjà, merci de changer le nom...");
+        }
+        
+        $serializedData = json_decode($request->getContent());
+        if (!isset($serializedData->roles)) {
+            throw $this->createNotFoundException("Les accès ne sont pas définis pour ce groupe...");
+        }
+        $accessGroups = $serializedData->roles;
+        $roles = [];
+        foreach ($accessGroups as $accessGroup) {
+            foreach ($accessGroup->accessModels as $accessModel) {
+                if ($accessModel->isCreateAllowed) {
+                    $roles[] = 'ROLE_' . $accessModel->tableCode . '_CREATE';
+                }
+                if ($accessModel->isIndexAllowed) {
+                    $roles[] = 'ROLE_' . $accessModel->tableCode . '_INDEX';
+                }
+                if ($accessModel->isShowAllowed) {
+                    $roles[] = 'ROLE_' . $accessModel->tableCode . '_SHOW';
+                }
+                if ($accessModel->isCloneAllowed) {
+                    $roles[] = 'ROLE_' . $accessModel->tableCode . '_CLONE';
+                }
+                if ($accessModel->isDeleteAllowed) {
+                    $roles[] = 'ROLE_' . $accessModel->tableCode . '_DELETE';
+                }
+                if ($accessModel->isEditAllowed) {
+                    $roles[] = 'ROLE_' . $accessModel->tableCode . '_EDIT';
+                }
+            }
+        }
+
+        $group->setRoles($roles);
+
+        $entityManager->persist($group);
+        $entityManager->flush();
+
+        return $group;
+    }
+
+    /**
+     * @Rest\Get(path="/{id}", name="group_show",requirements = {"id"="\d+"})
+     * @Rest\View(StatusCode=200)
+     * @IsGranted("ROLE_Group_SHOW")
+     */
+    public function show(Group $group): Group {
+        $accessGroups = $this->getAccessGroups();
+        foreach ($accessGroups as $accessGroup) {
+            foreach ($accessGroup->accessModels as $accessModel) {
+                $indexAccess = 'ROLE_' . $accessModel->tableCode . '_INDEX';
+                $createAccess = 'ROLE_' . $accessModel->tableCode . '_CREATE';
+                $showAccess = 'ROLE_' . $accessModel->tableCode . '_SHOW';
+                $cloneAccess = 'ROLE_' . $accessModel->tableCode . '_CLONE';
+                $deleteAccess = 'ROLE_' . $accessModel->tableCode . '_DELETE';
+                $editAccess = 'ROLE_' . $accessModel->tableCode . '_EDIT';
+                if (in_array($indexAccess, $group->getRoles())) {
+                    $accessModel->isIndexAllowed = true;
+                }
+                if (in_array($createAccess, $group->getRoles())) {
+                    $accessModel->isCreateAllowed = true;
+                }
+                if (in_array($showAccess, $group->getRoles())) {
+                    $accessModel->isShowAllowed = true;
+                }
+                if (in_array($cloneAccess, $group->getRoles())) {
+                    $accessModel->isCloneAllowed = true;
+                }
+                if (in_array($deleteAccess, $group->getRoles())) {
+                    $accessModel->isDeleteAllowed = true;
+                }
+                if (in_array($editAccess, $group->getRoles())) {
+                    $accessModel->isEditAllowed = true;
+                }
+            }
+        }
+        $group->setRoles($accessGroups);
+        return $group;
+    }
+
+    /**
+     * @Rest\Get(path="/access-group/", name="tables_list")
+     * @Rest\View(StatusCode=200)
+     * @IsGranted("ROLE_Group_CREATE")
+     */
+    public function getAccessGroups(): array {
+        $accessGroups = [
+            new AccessGroup("Paramètrage", [
+                new AccessModel('User', "Utilisateur"),
+                new AccessModel('Group', "Groupe d'utilisateur")
+                    ]
+            )
+        ];
+        return $accessGroups;
+    }
+
+    /**
+     * @Rest\Put(path="/{id}/edit", name="group_edit",requirements = {"id"="\d+"})
+     * @Rest\View(StatusCode=200)
+     * @IsGranted("ROLE_Group_EDIT")
+     */
+    public function edit(Request $request, Group $group): Group {
         $form = $this->createForm(GroupType::class, $group);
         $form->submit(Utils::serializeRequestContent($request));
         $serializedData = json_decode($request->getContent());
@@ -69,48 +183,6 @@ class GroupController extends AbstractController {
         }
 
         $group->setRoles($roles);
-
-        $entityManager = $this->getDoctrine()->getManager();
-        $entityManager->persist($group);
-        $entityManager->flush();
-
-        return $group;
-    }
-
-    /**
-     * @Rest\Get(path="/{id}", name="group_show",requirements = {"id"="\d+"})
-     * @Rest\View(StatusCode=200)
-     * @IsGranted("ROLE_Group_SHOW")
-     */
-    public function show(Group $group): Group {
-        return $group;
-    }
-
-    /**
-     * @Rest\Get(path="/access-group/", name="tables_list")
-     * @Rest\View(StatusCode=200)
-     * @IsGranted("ROLE_Group_CREATE")
-     */
-    public function getAccessGroups(): array {
-        $accessGroups = [
-            new AccessGroup("Paramètrage", [
-                new AccessModel('User', "Utilisateur"),
-                new AccessModel('Group', "Groupe d'utilisateur")
-                    ]
-            )
-        ];
-        return $accessGroups;
-    }
-
-    /**
-     * @Rest\Put(path="/{id}/edit", name="group_edit",requirements = {"id"="\d+"})
-     * @Rest\View(StatusCode=200)
-     * @IsGranted("ROLE_Group_EDIT")
-     */
-    public function edit(Request $request, Group $group): Group {
-        $form = $this->createForm(GroupType::class, $group);
-        $form->submit(Utils::serializeRequestContent($request));
-
         $this->getDoctrine()->getManager()->flush();
 
         return $group;
@@ -126,6 +198,50 @@ class GroupController extends AbstractController {
         $groupNew = new Group();
         $form = $this->createForm(GroupType::class, $groupNew);
         $form->submit(Utils::serializeRequestContent($request));
+        
+        //check if code already exist
+        $searchedGroupByCode=$em->getRepository(Group::class)
+                ->findByCode($group->getCode());
+        if(count($searchedGroupByCode)){
+            throw $this->createAccessDeniedException("Un groupe avec le même code existe déjà, merci de changer de code...");
+        }
+        //check if group already exist
+        $searchedGroupByName=$em->getRepository(Group::class)
+                ->findByName($group->getName());
+        if(count($searchedGroupByName)){
+            throw $this->createAccessDeniedException("Un groupe avec le même nom existe déjà, merci de changer le nom...");
+        }
+        
+        $serializedData = json_decode($request->getContent());
+        if (!isset($serializedData->roles)) {
+            throw $this->createNotFoundException("Les accès ne sont pas définis pour ce groupe...");
+        }
+        $accessGroups = $serializedData->roles;
+        $roles = [];
+        foreach ($accessGroups as $accessGroup) {
+            foreach ($accessGroup->accessModels as $accessModel) {
+                if ($accessModel->isCreateAllowed) {
+                    $roles[] = 'ROLE_' . $accessModel->tableCode . '_CREATE';
+                }
+                if ($accessModel->isIndexAllowed) {
+                    $roles[] = 'ROLE_' . $accessModel->tableCode . '_INDEX';
+                }
+                if ($accessModel->isShowAllowed) {
+                    $roles[] = 'ROLE_' . $accessModel->tableCode . '_SHOW';
+                }
+                if ($accessModel->isCloneAllowed) {
+                    $roles[] = 'ROLE_' . $accessModel->tableCode . '_CLONE';
+                }
+                if ($accessModel->isDeleteAllowed) {
+                    $roles[] = 'ROLE_' . $accessModel->tableCode . '_DELETE';
+                }
+                if ($accessModel->isEditAllowed) {
+                    $roles[] = 'ROLE_' . $accessModel->tableCode . '_EDIT';
+                }
+            }
+        }
+
+        $groupNew->setRoles($roles);
         $em->persist($groupNew);
 
         $em->flush();

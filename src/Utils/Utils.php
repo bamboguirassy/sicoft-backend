@@ -17,6 +17,10 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class Utils {
 
+    static $senderName='SICOFT - Université de Thiès';
+    static $senderEmail='noreply@univ-thies.sn';
+    static $siteUrl='localhost:4200/login';
+    
     public static function serializeRequestContent(Request $request) {
         return json_decode($request->getContent(), true);
     }

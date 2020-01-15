@@ -1,0 +1,8 @@
+{%extends "email_template/template.html.twig"%}
+{% if siteUrl is defined and user is defined  %} 
+{% block  title %} Bonjour Mr/Mme {{user.prenom~' '~user.nom}} {% endblock %}
+{% block  paragraphe1 %}Bienvenue dans <b>SICOFT</b>.<br> Vous avez fait une demande de réinitialisation 
+de mot de passe{% endblock %}
+{% block  paragraphe2 %}Voici le lien de renitialisation du mot de passe:{% if token is defined  %}<a href="{{ siteUrl~'/resetting/'~token}}">{{ siteUrl~'/resetting/'~token}}{% endif %} {% endblock %}
+{% block  paragraphe3 %}Il vous sera demandé de changer votre mot de passe après la première connexion.{% endblock %}
+{% endif %}
