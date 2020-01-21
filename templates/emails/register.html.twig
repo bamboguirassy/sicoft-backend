@@ -3,8 +3,7 @@
 {% block  title %} Bonjour Mr/Mme {{user.prenom~' '~user.nom}} {% endblock %}
 {% block  paragraphe1 %}Bienvenue dans <b>SICOFT</b>.<br> Votre compte a été créé avec succès.{% endblock %}
 {% block  paragraphe2 %}Votre nom d'utilisateur est: {{user.username}}  <br> <br>
-    Votre mot de passe par défaut est: &nbsp;&nbsp; <b>{{password}}</b><br><br>
-    Le lien d'accès à l'application est: </a> {{siteUrl}} </a> <br>
+    Veuillez cliquer sur ce lien afin de confirmer la creation du compte: <a href="{{siteUrl}}"> {{siteUrl}} </a> <br>
 {% endblock %}
 {% block  paragraphe3 %} Merci de changer votre mot de passe après la première connexion. {% endblock %}
 {% endif %}

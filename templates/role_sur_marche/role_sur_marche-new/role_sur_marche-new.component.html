@@ -1,0 +1,25 @@
+<p-toast></p-toast>
+<!-- form role_sur_marche info -->
+<form *ngIf="'RoleSurMarche'|creable" class="form" role="form" #role_sur_marcheForm="ngForm" autocomplete="off">
+  <p-fieldset legend="Creation RoleSurMarche" [toggleable]="true">
+    <!-- debut body -->
+    <div class="row">
+          
+    </div>
+    <!-- fin body -->
+    <p-toolbar>
+      <button type="button" (click)="location.back()" class="btn btn-outline-secondary mr-1 pull-left"><i
+          class="fa fa-reply" aria-hidden="true"></i>
+        Retour</button>
+      <button type="reset" class="btn btn-secondary pull-left"><i class="fa fa-eraser" aria-hidden="true"></i>
+        Vider le formulaire</button>
+      <button [disabled]="role_sur_marcheForm.invalid" type="button" (click)="saveRoleSurMarcheAndExit()"
+        class="btn btn-outline-primary pull-right ml-1"> <i class="fa fa-save" aria-hidden="true"></i>
+        Enregistrer</button>
+      <button [disabled]="role_sur_marcheForm.invalid" type="button" (click)="saveRoleSurMarche()"
+        class="btn btn-outline-primary pull-right"> <i class="fa fa-save" aria-hidden="true"></i>
+        Enregistrer & Créer un autre</button>
+    </p-toolbar>
+  </p-fieldset>
+</form>
+<!-- /form role_sur_marche info -->

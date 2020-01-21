@@ -1,0 +1,32 @@
+
+<p-toast></p-toast>
+<!-- form role_sur_marche info -->
+<form *ngIf="'RoleSurMarche'|clonable" class="form" role="form" #role_sur_marcheForm="ngForm" autocomplete="off">
+    <p-fieldset legend="Clonage role_sur_marche" [toggleable]="true">
+        <p-toolbar>
+            <button type="button" (click)="location.back()" class="btn btn-outline-secondary mr-1 pull-left"><i
+                    class="fa fa-reply" aria-hidden="true"></i>
+                Retour</button>
+            <button type="reset" class="btn btn-secondary pull-left"><i class="fa fa-eraser" aria-hidden="true"></i>
+                Vider le formulaire</button>
+            <button [disabled]="role_sur_marcheForm.invalid" type="button" (click)="cloneRoleSurMarche()"
+                class="btn btn-outline-primary pull-right ml-1"> <i class="fa fa-save" aria-hidden="true"></i>
+                Enregistrer</button>
+        </p-toolbar>
+        <!-- debut body -->
+        <div class="row">
+                    </div>
+        <!-- fin body -->
+        <p-toolbar>
+            <button type="button" (click)="location.back()" class="btn btn-outline-secondary mr-1 pull-left"><i
+                    class="fa fa-reply" aria-hidden="true"></i>
+                Retour</button>
+            <button type="reset" class="btn btn-secondary pull-left"><i class="fa fa-eraser" aria-hidden="true"></i>
+                Vider le formulaire</button>
+            <button [disabled]="role_sur_marcheForm.invalid" type="button" (click)="cloneRoleSurMarche()"
+                class="btn btn-outline-primary pull-right ml-1"> <i class="fa fa-save" aria-hidden="true"></i>
+                Enregistrer</button>
+        </p-toolbar>
+    </p-fieldset>
+</form>
+<!-- /form role_sur_marche info -->

@@ -41,18 +41,18 @@ class GroupController extends AbstractController {
         $form = $this->createForm(GroupType::class, $group);
         $form->submit(Utils::serializeRequestContent($request));
         //check if code already exist
-        $searchedGroupByCode=$entityManager->getRepository(Group::class)
+        $searchedGroupByCode = $entityManager->getRepository(Group::class)
                 ->findByCode($group->getCode());
-        if(count($searchedGroupByCode)){
+        if (count($searchedGroupByCode)) {
             throw $this->createAccessDeniedException("Un groupe avec le même code existe déjà, merci de changer de code...");
         }
         //check if group already exist
-        $searchedGroupByName=$entityManager->getRepository(Group::class)
+        $searchedGroupByName = $entityManager->getRepository(Group::class)
                 ->findByName($group->getName());
-        if(count($searchedGroupByName)){
+        if (count($searchedGroupByName)) {
             throw $this->createAccessDeniedException("Un groupe avec le même nom existe déjà, merci de changer le nom...");
         }
-        
+
         $serializedData = json_decode($request->getContent());
         if (!isset($serializedData->roles)) {
             throw $this->createNotFoundException("Les accès ne sont pas définis pour ce groupe...");
@@ -138,9 +138,26 @@ class GroupController extends AbstractController {
         $accessGroups = [
             new AccessGroup("Paramètrage", [
                 new AccessModel('User', "Utilisateur"),
-                new AccessModel('Group', "Groupe d'utilisateur")
+                new AccessModel('Group', "Groupe d'utilisateur"),
+                new AccessModel('Entite', 'Entités'),
+                new AccessModel('TypeEntite', 'Type Entité'),
+                new AccessModel('Exercice', 'Exercice'),
+                new AccessModel('Classe', 'Classe'),
+                new AccessModel('Compte', 'Compte'),
+                new AccessModel('TypeDocument', 'Type Document'),
+                new AccessModel('TypePassation', 'Type Passation'),
+                new AccessModel('EtatMarche', 'Etat Marché'),
+                new AccessModel('Secteur', 'Secteur'),
+                new AccessModel('Fournisseur', 'Fournisseur'),
+                new AccessModel('TypeSourceFinancement', 'Type source financement'),
+                new AccessModel('SourceFinancement', 'source financement'),
                     ]
-            )
+            ),
+            new AccessGroup("Gestion des Marchés", [
+                new AccessModel('Budget', 'Budget'),
+                new AccessModel('Marche', 'Marché'),
+                new AccessModel('Mandat', 'Mandat'),
+            ])
         ];
         return $accessGroups;
     }
@@ -198,20 +215,20 @@ class GroupController extends AbstractController {
         $groupNew = new Group();
         $form = $this->createForm(GroupType::class, $groupNew);
         $form->submit(Utils::serializeRequestContent($request));
-        
+
         //check if code already exist
-        $searchedGroupByCode=$em->getRepository(Group::class)
+        $searchedGroupByCode = $em->getRepository(Group::class)
                 ->findByCode($group->getCode());
-        if(count($searchedGroupByCode)){
+        if (count($searchedGroupByCode)) {
             throw $this->createAccessDeniedException("Un groupe avec le même code existe déjà, merci de changer de code...");
         }
         //check if group already exist
-        $searchedGroupByName=$em->getRepository(Group::class)
+        $searchedGroupByName = $em->getRepository(Group::class)
                 ->findByName($group->getName());
-        if(count($searchedGroupByName)){
+        if (count($searchedGroupByName)) {
             throw $this->createAccessDeniedException("Un groupe avec le même nom existe déjà, merci de changer le nom...");
         }
-        
+
         $serializedData = json_decode($request->getContent());
         if (!isset($serializedData->roles)) {
             throw $this->createNotFoundException("Les accès ne sont pas définis pour ce groupe...");

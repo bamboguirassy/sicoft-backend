@@ -1,0 +1,31 @@
+
+<p-toast></p-toast>
+<!-- form role_sur_marche info -->
+<form *ngIf="'RoleSurMarche'|editable" class="form" role="form" #role_sur_marcheForm="ngForm" autocomplete="off" (ngSubmit)="updateRoleSurMarche()">
+  <p-fieldset legend="Modification role_sur_marche" [toggleable]="true">
+    <p-toolbar>$entity_twig_var_singular ?>" [toggleable]="true">
+    <p-toolbar>
+      <button type="button" (click)="location.back()" class="btn btn-outline-secondary pull-left"><i
+          class="fa fa-eraser" aria-hidden="true"></i>
+        Retour</button>
+      <button [disabled]="role_sur_marcheForm.invalid" type="submit" class="btn btn-outline-warning pull-right">
+        <i class="fa fa-edit" aria-hidden="true"></i>
+        Enregistrer</button>
+    </p-toolbar>
+    <!-- debut body -->
+    <div class="row">
+                
+      
+    </div>
+    <!-- fin body -->
+    <p-toolbar>
+      <button type="button" (click)="location.back()" class="btn btn-outline-secondary pull-left"><i
+          class="fa fa-eraser" aria-hidden="true"></i>
+        Retour</button>
+      <button [disabled]="role_sur_marcheForm.invalid" type="submit" class="btn btn-outline-warning pull-right">
+        <i class="fa fa-edit" aria-hidden="true"></i>
+        Enregistrer</button>
+    </p-toolbar>
+  </p-fieldset>
+</form>
+<!-- /form role_sur_marche info -->

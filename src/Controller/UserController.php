@@ -47,8 +47,11 @@ class UserController extends AbstractController {
             throw $this->createAccessDeniedException("Cette adresse email est déja utilisée pour un autre compte...");
         }
         $user->setUsername($user->getEmail());
-        $plainPassword= md5(random_bytes(10));
-        $user->setPassword($passwordEncoder->encodePassword($user, $plainPassword));
+        $confirmationToken = md5(random_bytes(20));
+        $user->setConfirmationToken($confirmationToken);
+        $user->setPasswordRequestedAt(new \DateTime());
+        $user->setPassword($passwordEncoder->encodePassword($user, 'bienvenue'));
+        $user->setEnabled(false);
         $entityManager->persist($user);
         $entityManager->flush();
 
@@ -58,7 +61,7 @@ class UserController extends AbstractController {
                 ->setTo($user->getEmail())
                 ->setBody(
                 $this->renderView(
-                        'emails/register.html.twig', ['user' => $user, 'siteUrl' => \App\Utils\Utils::$siteUrl,'password'=>$plainPassword]
+                        'emails/register.html.twig', ['user' => $user, 'siteUrl' => \App\Utils\Utils::$siteUrl.'/reset-password/'.$confirmationToken]
                 ), 'text/html'
         );
         $mailer->send($message);
