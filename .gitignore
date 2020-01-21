@@ -3,7 +3,9 @@
 /.env.local
 /.env.local.php
 /.env.*.local
+
 /nbproject/private/*
+
 /public/bundles/
 /var/
 /vendor/
