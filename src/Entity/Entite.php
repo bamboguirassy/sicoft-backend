@@ -26,7 +26,7 @@ class Entite
      *
      * @ORM\Column(name="entite", type="string", length=200, nullable=false)
      */
-    private $entite;
+    private $nom;
 
     /**
      * @var string
@@ -67,14 +67,14 @@ class Entite
         return $this->id;
     }
 
-    public function getEntite()
+    public function getNom()
     {
-        return $this->entite;
+        return $this->nom;
     }
 
-    public function setEntite(string $entite): self
+    public function setNom(string $entite): self
     {
-        $this->entite = $entite;
+        $this->nom = $entite;
 
         return $this;
     }
