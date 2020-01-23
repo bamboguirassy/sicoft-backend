@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * EtatMarche
@@ -31,9 +32,9 @@ class EtatMarche
     /**
      * @var string
      *
-     * @ORM\Column(name="liebelle", type="string", length=45, nullable=false)
+     * @ORM\Column(name="libelle", type="string", length=45, nullable=false)
      */
-    private $liebelle;
+    private $libelle;
 
     /**
      * @var string|null
@@ -43,7 +44,7 @@ class EtatMarche
     private $description;
 
     /**
-     * @var \EtatMarche
+     * @var EtatMarche
      *
      * @ORM\ManyToOne(targetEntity="EtatMarche")
      * @ORM\JoinColumns({
@@ -69,14 +70,14 @@ class EtatMarche
         return $this;
     }
 
-    public function getLiebelle()
+    public function getLibelle()
     {
-        return $this->liebelle;
+        return $this->libelle;
     }
 
-    public function setLiebelle(string $liebelle): self
+    public function setLibelle(string $liebelle): self
     {
-        $this->liebelle = $liebelle;
+        $this->libelle = $liebelle;
 
         return $this;
     }
