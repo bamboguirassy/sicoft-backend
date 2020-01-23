@@ -24,7 +24,7 @@ class Entite
     /**
      * @var string
      *
-     * @ORM\Column(name="entite", type="string", length=200, nullable=false)
+     * @ORM\Column(name="nom", type="string", length=200, nullable=false)
      */
     private $nom;
 
@@ -72,9 +72,9 @@ class Entite
         return $this->nom;
     }
 
-    public function setNom(string $entite): self
+    public function setNom(string $nom): self
     {
-        $this->nom = $entite;
+        $this->nom = $nom;
 
         return $this;
     }
