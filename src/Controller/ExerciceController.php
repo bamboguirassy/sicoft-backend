@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use App\Utils\Utils;
+use FOS\RestBundle\Decoder\JsonDecoder;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
 /**
@@ -40,6 +41,12 @@ class ExerciceController extends AbstractController
         $exercice = new Exercice();
         $form = $this->createForm(ExerciceType::class, $exercice);
         $form->submit(Utils::serializeRequestContent($request));
+
+        $requestData = Utils::getObjectFromRequest($request);
+        $datedebut = $requestData->dateDebut;
+        $datefin = $requestData->dateFin;
+        $exercice->setDateDebut(new \DateTime($datedebut));
+        $exercice->setDateFin(new \DateTime($datefin));
 
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->persist($exercice);
