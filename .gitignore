@@ -3,6 +3,13 @@
 /.env.local
 /.env.local.php
 /.env.*.local
+<<<<<<< HEAD
+/.env
+=======
+
+/nbproject/private/*
+
+>>>>>>> 774a846b7d5ba60e2afd546cec6b2c753b46a47d
 /public/bundles/
 /var/
 /vendor/
