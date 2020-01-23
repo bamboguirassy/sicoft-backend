@@ -40,6 +40,21 @@ class EtatMarcheController extends AbstractController
         $etatMarche = new EtatMarche();
         $form = $this->createForm(EtatMarcheType::class, $etatMarche);
         $form->submit(Utils::serializeRequestContent($request));
+        $em = $this->getDoctrine()->getManager();
+
+        $searchedEtatMarcheByCode = $em->getRepository(EtatMarche::class)
+            ->findOneByCode($etatMarche->getCode());
+
+        if($searchedEtatMarcheByCode) {
+            throw $this->createAccessDeniedException("Un Etat Marche avec le même code existe déjà.");
+        }
+
+        $searchedEtatMarcheByLabel = $em->getRepository(EtatMarche::class)
+            ->findOneByLibelle($etatMarche->getLibelle());
+
+        if($searchedEtatMarcheByLabel) {
+            throw $this->createAccessDeniedException("Un Etat Marche avec le même libelle existe déjà.");
+        }
 
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->persist($etatMarche);
@@ -82,8 +97,22 @@ class EtatMarcheController extends AbstractController
         $etatMarcheNew=new EtatMarche();
         $form = $this->createForm(EtatMarcheType::class, $etatMarcheNew);
         $form->submit(Utils::serializeRequestContent($request));
-        $em->persist($etatMarcheNew);
 
+        $searchedEtatMarcheByCode = $em->getRepository(EtatMarche::class)
+            ->findOneByCode($etatMarcheNew->getCode());
+
+        if($searchedEtatMarcheByCode) {
+            throw $this->createAccessDeniedException("Un Etat Marche avec le même code existe déjà.");
+        }
+
+        $searchedEtatMarcheByLabel = $em->getRepository(EtatMarche::class)
+            ->findOneByLibelle($etatMarcheNew->getLibelle());
+
+        if($searchedEtatMarcheByLabel) {
+            throw $this->createAccessDeniedException("Un Etat Marche avec le même libelle existe déjà.");
+        }
+
+        $em->persist($etatMarcheNew);
         $em->flush();
 
         return $etatMarcheNew;

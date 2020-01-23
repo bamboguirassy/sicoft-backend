@@ -13,7 +13,7 @@ class EtatMarcheType extends AbstractType
     {
         $builder
             ->add('code')
-            ->add('liebelle')
+            ->add('libelle')
             ->add('description')
             ->add('etatSuivant')
         ;
