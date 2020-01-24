@@ -72,7 +72,9 @@ class TypePassationController extends AbstractController {
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_TypePassation_EDIT")
      */
-    public function edit(Request $request, TypePassation $typePassation): TypePassation {
+    public function edit(Request $request, TypePassation $typePassation) {
+        
+        return $request->getContent();
         $form = $this->createForm(TypePassationType::class, $typePassation);
         $form->submit(Utils::serializeRequestContent($request));
 
