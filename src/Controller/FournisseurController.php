@@ -42,6 +42,35 @@ class FournisseurController extends AbstractController
         $form->submit(Utils::serializeRequestContent($request));
 
         $entityManager = $this->getDoctrine()->getManager();
+
+        $searchedProviderByTelephone = $entityManager->getRepository(Fournisseur::class)
+            ->findOneByTelephone($fournisseur->getTelephone());
+        if($searchedProviderByTelephone) {
+            throw $this->createAccessDeniedException("Un fournisseur avec ce même numéro existe déjà.");
+        }
+
+        $searchedProviderByEmail = $entityManager->getRepository(Fournisseur::class)
+            ->findOneByEmail($fournisseur->getEmail());
+        if($searchedProviderByEmail){
+            throw $this->createAccessDeniedException("Un fournisseur avec cette adresse e-mail existe déjà.");
+        }
+
+        $searchedProviderByNinea = $entityManager->getRepository(Fournisseur::class)
+            ->findOneByNinea($fournisseur->getNinea());
+        if($searchedProviderByNinea) {
+            throw $this->createAccessDeniedException("Un fournisseur avec ce même ninea existe déjà.");
+        }
+
+        $searchedProviderByTelContact = $entityManager->getRepository(Fournisseur::class)
+            ->findOneByTelephoneContact($fournisseur->getTelephoneContact());
+        if($searchedProviderByTelContact) {
+            throw $this->createAccessDeniedException("Ce numéro de contact existe déjà.");
+        }
+
+        if(!preg_match('/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/', $fournisseur->getEmail())) {
+            throw $this->createAccessDeniedException("Veuillez saisir une adresse e-mail valide.");
+        }
+
         $entityManager->persist($fournisseur);
         $entityManager->flush();
 
@@ -82,6 +111,36 @@ class FournisseurController extends AbstractController
         $fournisseurNew=new Fournisseur();
         $form = $this->createForm(FournisseurType::class, $fournisseurNew);
         $form->submit(Utils::serializeRequestContent($request));
+
+
+        $searchedProviderByTelephone = $em->getRepository(Fournisseur::class)
+            ->findOneByTelephone($fournisseurNew->getTelephone());
+        if($searchedProviderByTelephone) {
+            throw $this->createAccessDeniedException("Un fournisseur avec ce même numéro existe déjà.");
+        }
+
+        $searchedProviderByEmail = $em->getRepository(Fournisseur::class)
+            ->findOneByEmail($fournisseurNew->getEmail());
+        if($searchedProviderByEmail){
+            throw $this->createAccessDeniedException("Un fournisseur avec cette adresse e-mail existe déjà.");
+        }
+
+        $searchedProviderByNinea = $em->getRepository(Fournisseur::class)
+            ->findOneByNinea($fournisseurNew->getNinea());
+        if($searchedProviderByNinea) {
+            throw $this->createAccessDeniedException("Un fournisseur avec ce même ninea existe déjà.");
+        }
+
+        $searchedProviderByTelContact = $em->getRepository(Fournisseur::class)
+            ->findOneByTelephoneContact($fournisseurNew->getTelephoneContact());
+        if($searchedProviderByTelContact) {
+            throw $this->createAccessDeniedException("Ce numéro de contact existe déjà.");
+        }
+
+        if(!preg_match('/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/', $fournisseur->getEmail())) {
+            throw $this->createAccessDeniedException("Veuillez saisir une adresse e-mail valide.");
+        }
+
         $em->persist($fournisseurNew);
 
         $em->flush();

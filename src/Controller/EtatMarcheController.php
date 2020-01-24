@@ -40,16 +40,16 @@ class EtatMarcheController extends AbstractController
         $etatMarche = new EtatMarche();
         $form = $this->createForm(EtatMarcheType::class, $etatMarche);
         $form->submit(Utils::serializeRequestContent($request));
-        $em = $this->getDoctrine()->getManager();
+        $entityManager = $this->getDoctrine()->getManager();
 
-        $searchedEtatMarcheByCode = $em->getRepository(EtatMarche::class)
+        $searchedEtatMarcheByCode = $entityManager->getRepository(EtatMarche::class)
             ->findOneByCode($etatMarche->getCode());
 
         if($searchedEtatMarcheByCode) {
             throw $this->createAccessDeniedException("Un Etat Marche avec le même code existe déjà.");
         }
 
-        $searchedEtatMarcheByLabel = $em->getRepository(EtatMarche::class)
+        $searchedEtatMarcheByLabel = $entityManager->getRepository(EtatMarche::class)
             ->findOneByLibelle($etatMarche->getLibelle());
 
         if($searchedEtatMarcheByLabel) {
