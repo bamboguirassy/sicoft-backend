@@ -73,6 +73,12 @@ class ExerciceController extends AbstractController
     public function edit(Request $request, Exercice $exercice): Exercice    {
         $form = $this->createForm(ExerciceType::class, $exercice);
         $form->submit(Utils::serializeRequestContent($request));
+        
+        $requestData = Utils::getObjectFromRequest($request);
+        $datedebut = $requestData->dateDebut;
+        $datefin = $requestData->dateFin;
+        $exercice->setDateDebut(new \DateTime($datedebut));
+        $exercice->setDateFin(new \DateTime($datefin));
 
         $this->getDoctrine()->getManager()->flush();
 

@@ -24,7 +24,7 @@ class TypeSourceFinancement
     /**
      * @var string|null
      *
-     * @ORM\Column(name="libelle", type="string", length=45, nullable=true)
+     * @ORM\Column(name="libelle", type="string", length=45)
      */
     private $libelle;
 
