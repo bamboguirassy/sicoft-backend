@@ -12,6 +12,7 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 use App\Utils\Utils;
 use FOS\RestBundle\Decoder\JsonDecoder;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Component\Validator\Constraints\Length;
 
 /**
  * @Route("/api/exercice")
@@ -39,6 +40,7 @@ class ExerciceController extends AbstractController
      */
     public function create(Request $request): Exercice    {
         $exercice = new Exercice();
+        $entityManager = $this->getDoctrine()->getManager();
         $form = $this->createForm(ExerciceType::class, $exercice);
         $form->submit(Utils::serializeRequestContent($request));
 
@@ -48,7 +50,15 @@ class ExerciceController extends AbstractController
         $exercice->setDateDebut(new \DateTime($datedebut));
         $exercice->setDateFin(new \DateTime($datefin));
 
-        $entityManager = $this->getDoctrine()->getManager();
+        $odlCodeExcercice = $entityManager->getRepository(Exercice::class)->findOneByCode($requestData->code);
+            if ($odlCodeExcercice) {
+                throw $this->createAccessDeniedException('Le code existe dèjà');
+            }
+        $odlLibelleExcercice = $entityManager->getRepository(Exercice::class)->findOneByLibelle($requestData->libelle);
+            if ($odlLibelleExcercice) {
+                throw $this->createAccessDeniedException('Le libelle existe dèjà');
+            }
+           
         $entityManager->persist($exercice);
         $entityManager->flush();
 
@@ -95,6 +105,21 @@ class ExerciceController extends AbstractController
         $exerciceNew=new Exercice();
         $form = $this->createForm(ExerciceType::class, $exerciceNew);
         $form->submit(Utils::serializeRequestContent($request));
+
+        $requestData = Utils::getObjectFromRequest($request);
+        $datedebut = $requestData->dateDebut;
+        $datefin = $requestData->dateFin;
+        $exercice->setDateDebut(new \DateTime($datedebut));
+        $exercice->setDateFin(new \DateTime($datefin));
+        
+        $odlCodeExcercice = $em->getRepository(Exercice::class)->findOneByCode($requestData->code);
+            if ($odlCodeExcercice) {
+                throw $this->createAccessDeniedException('Le code existe dèjà');
+            }
+        $odlLibelleExcercice = $em->getRepository(Exercice::class)->findOneByLibelle($requestData->libelle);
+            if ($odlLibelleExcercice) {
+                throw $this->createAccessDeniedException('Le libelle existe dèjà');
+            }
         $em->persist($exerciceNew);
 
         $em->flush();
