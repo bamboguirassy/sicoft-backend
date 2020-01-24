@@ -49,6 +49,9 @@ class ExerciceController extends AbstractController
         $datefin = $requestData->dateFin;
         $exercice->setDateDebut(new \DateTime($datedebut));
         $exercice->setDateFin(new \DateTime($datefin));
+        if ($exercice->getDateDebut() > $exercice->getDateFin()) {
+            throw $this->createAccessDeniedException("La date de début d'exercie est supérieure à la date de fin");
+        }
 
         $odlCodeExcercice = $entityManager->getRepository(Exercice::class)->findOneByCode($requestData->code);
             if ($odlCodeExcercice) {
