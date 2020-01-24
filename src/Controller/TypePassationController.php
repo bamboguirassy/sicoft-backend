@@ -39,19 +39,19 @@ class TypePassationController extends AbstractController {
         $typePassation = new TypePassation();
         $form = $this->createForm(TypePassationType::class, $typePassation);
         $form->submit(Utils::serializeRequestContent($request));
+        $entityManager = $this->getDoctrine()->getManager();
 
         // check if code already exist
-        $searchedTypeByCode = $this->getDoctrine()->getRepository(TypePassation::class)->findByCode($typePassation->getCode());
+        $searchedTypeByCode = $entityManager->getRepository(TypePassation::class)->findByCode($typePassation->getCode());
         if (count($searchedTypeByCode)) {
             throw $this->createAccessDeniedException("Un type passation avec le même code existe déjà, merci de changer de code...");
         }
         // check if code and libelle already exist
-        $searchedTypeByLibelle = $this->getDoctrine()->getRepository(TypePassation::class)->findByLibelle($typePassation->getLibelle());
+        $searchedTypeByLibelle = $entityManager->getRepository(TypePassation::class)->findByLibelle($typePassation->getLibelle());
         if (count($searchedTypeByLibelle)) {
             throw $this->createAccessDeniedException("Un type passation avec le même libellé existe déjà, merci de changer de libellé...");
         }
 
-        $entityManager = $this->getDoctrine()->getManager();
         $entityManager->persist($typePassation);
         $entityManager->flush();
 
@@ -72,7 +72,7 @@ class TypePassationController extends AbstractController {
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_TypePassation_EDIT")
      */
-    public function edit(Request $request, TypePassation $typePassation) {
+    public function edit(Request $request, TypePassation $typePassation): TypePassation {
         
         $form = $this->createForm(TypePassationType::class, $typePassation);
         $form->submit(Utils::serializeRequestContent($request));
