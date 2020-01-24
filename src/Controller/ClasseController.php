@@ -40,8 +40,18 @@ class ClasseController extends AbstractController
         $classe = new Classe();
         $form = $this->createForm(ClasseType::class, $classe);
         $form->submit(Utils::serializeRequestContent($request));
-
         $entityManager = $this->getDoctrine()->getManager();
+         
+        // check if code already exist
+        $searchedClasseByNumero = $entityManager->getRepository(Classe::class)->findByNumero($classe->getNumero());
+        if(count($searchedClasseByNumero)) {
+             throw $this->createAccessDeniedException("Une classe avec le même numéro existe déjà, merci de changer de numéro...");
+        }
+        // check if libelle alredy exit
+        $searchedClasseByLibelle = $entityManager->getRepository(Classe::class)->findByLibelle($classe->getLibelle());
+        if(count($searchedClasseByLibelle)) {
+             throw $this->createAccessDeniedException("Une classe avec le même libellé existe déjà, merci de changer de libellé...");
+        }
         $entityManager->persist($classe);
         $entityManager->flush();
 
@@ -82,6 +92,16 @@ class ClasseController extends AbstractController
         $classeNew=new Classe();
         $form = $this->createForm(ClasseType::class, $classeNew);
         $form->submit(Utils::serializeRequestContent($request));
+        // check if code already exist
+        $searchedClasseByNumero = $em->getRepository(Classe::class)->findByNumero($classeNew->getNumero());
+        if(count($searchedClasseByNumero)) {
+             throw $this->createAccessDeniedException("Une classe avec le même numéro existe déjà, merci de changer de numéro...");
+        }
+        // check if libelle alredy exit
+        $searchedClasseByLibelle = $em->getRepository(Classe::class)->findByLibelle($classeNew->getLibelle());
+        if(count($searchedClasseByLibelle)) {
+             throw $this->createAccessDeniedException("Une classe avec le même libellé existe déjà, merci de changer de libellé...");
+        }
         $em->persist($classeNew);
 
         $em->flush();
