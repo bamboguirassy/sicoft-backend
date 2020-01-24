@@ -74,7 +74,6 @@ class TypePassationController extends AbstractController {
      */
     public function edit(Request $request, TypePassation $typePassation) {
         
-        return $request->getContent();
         $form = $this->createForm(TypePassationType::class, $typePassation);
         $form->submit(Utils::serializeRequestContent($request));
 
