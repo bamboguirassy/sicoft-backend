@@ -12,7 +12,7 @@ class EntiteType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('entite')
+            ->add('nom')
             ->add('code')
             ->add('etat')
             ->add('entiteParent')
