@@ -81,19 +81,10 @@ class ExerciceController extends AbstractController
      * @IsGranted("ROLE_Exercice_EDIT")
      */
     public function edit(Request $request, Exercice $exercice): Exercice    {
-        $entityManager = $this->getDoctrine()->getManager();
         $form = $this->createForm(ExerciceType::class, $exercice);
         $form->submit(Utils::serializeRequestContent($request));
         
         $requestData = Utils::getObjectFromRequest($request);
-        $odlCodeExcercice = $entityManager->getRepository(Exercice::class)->findOneByCode($requestData->code);
-            if ($odlCodeExcercice) {
-                throw $this->createAccessDeniedException('Le code existe dèjà');
-            }
-        $odlLibelleExcercice = $entityManager->getRepository(Exercice::class)->findOneByLibelle($requestData->libelle);
-            if ($odlLibelleExcercice) {
-                throw $this->createAccessDeniedException('Le libelle existe dèjà');
-            }
         $datedebut = $requestData->dateDebut;
         $datefin = $requestData->dateFin;
         $exercice->setDateDebut(new \DateTime($datedebut));
