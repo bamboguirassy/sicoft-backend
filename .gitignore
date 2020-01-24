@@ -4,7 +4,6 @@
 /.env.local.php
 /.env.*.local
 /.env/
-=======
 
 /nbproject/private/*
 
