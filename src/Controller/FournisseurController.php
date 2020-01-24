@@ -93,8 +93,7 @@ class FournisseurController extends AbstractController
         $autreFournisseurs = $this->getDoctrine()->getManager()
             ->createQuery(
                 'SELECT fournisseur FROM App\Entity\Fournisseur fournisseur
-                 WHERE fournisseur NOT IN (SELECT innerFournisseur FROM App\Entity\Fournisseur innerFournisseur
-                 WHERE innerFournisseur=:fournisseur) 
+                 WHERE fournisseur!=:fournisseur
             ')->setParameter('fournisseur', $fournisseur)->getResult();
 
         foreach ($autreFournisseurs as $currentFournisseur) {
