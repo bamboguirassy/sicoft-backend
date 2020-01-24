@@ -40,8 +40,21 @@ class TypeEntiteController extends AbstractController
         $typeEntite = new TypeEntite();
         $form = $this->createForm(TypeEntiteType::class, $typeEntite);
         $form->submit(Utils::serializeRequestContent($request));
-
         $entityManager = $this->getDoctrine()->getManager();
+
+
+        $searchedTypeEntiteByCode = $entityManager->getRepository(TypeEntite::class)
+            ->findOneByCode($typeEntite->getCode());
+
+        if($searchedTypeEntiteByCode) {
+            throw $this->createAccessDeniedException('Un Type Entite avec le même code existe déja.');
+        }
+
+        $searchedTypeEntiteByLabel = $entityManager->getRepository(TypeEntite::class)->findOneByLibelle($typeEntite->getLibelle());
+        if($searchedTypeEntiteByLabel) {
+            throw $this->createAccessDeniedException('Un Type Entite avec le même libelle existe déja.');
+        }
+
         $entityManager->persist($typeEntite);
         $entityManager->flush();
 
@@ -82,8 +95,20 @@ class TypeEntiteController extends AbstractController
         $typeEntiteNew=new TypeEntite();
         $form = $this->createForm(TypeEntiteType::class, $typeEntiteNew);
         $form->submit(Utils::serializeRequestContent($request));
-        $em->persist($typeEntiteNew);
 
+        $searchedTypeEntiteByCode = $em->getRepository(TypeEntite::class)
+            ->findOneByCode($typeEntiteNew->getCode());
+        if($searchedTypeEntiteByCode) {
+            throw $this->createAccessDeniedException('Un Type Entite avec le même code existe déja.');
+        }
+
+        $searchedTypeEntiteByLabel = $em->getRepository(TypeEntite::class)
+            ->findOneByLibelle($typeEntiteNew->getLibelle());
+        if($searchedTypeEntiteByLabel) {
+            throw $this->createAccessDeniedException('Un Type Entite avec le même libelle existe déja.');
+        }
+
+        $em->persist($typeEntiteNew);
         $em->flush();
 
         return $typeEntiteNew;
