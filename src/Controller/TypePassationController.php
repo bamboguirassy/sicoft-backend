@@ -15,20 +15,19 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 /**
  * @Route("/api/typePassation")
  */
-class TypePassationController extends AbstractController
-{
+class TypePassationController extends AbstractController {
+
     /**
      * @Rest\Get(path="/", name="type_passation_index")
      * @Rest\View(StatusCode = 200)
      * @IsGranted("ROLE_TypePassation_INDEX")
      */
-    public function index(): array
-    {
+    public function index(): array {
         $typePassations = $this->getDoctrine()
-            ->getRepository(TypePassation::class)
-            ->findAll();
+                ->getRepository(TypePassation::class)
+                ->findAll();
 
-        return count($typePassations)?$typePassations:[];
+        return count($typePassations) ? $typePassations : [];
     }
 
     /**
@@ -36,10 +35,21 @@ class TypePassationController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_TypePassation_CREATE")
      */
-    public function create(Request $request): TypePassation    {
+    public function create(Request $request): TypePassation {
         $typePassation = new TypePassation();
         $form = $this->createForm(TypePassationType::class, $typePassation);
         $form->submit(Utils::serializeRequestContent($request));
+
+        // check if code already exist
+        $searchedTypeByCode = $this->getDoctrine()->getRepository(TypePassation::class)->findByCode($typePassation->getCode());
+        if (count($searchedTypeByCode)) {
+            throw $this->createAccessDeniedException("Un type passation avec le même code existe déjà, merci de changer de code...");
+        }
+        // check if code and libelle already exist
+        $searchedTypeByLibelle = $this->getDoctrine()->getRepository(TypePassation::class)->findByLibelle($typePassation->getLibelle());
+        if (count($searchedTypeByLibelle)) {
+            throw $this->createAccessDeniedException("Un type passation avec le même libellé existe déjà, merci de changer de libellé...");
+        }
 
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->persist($typePassation);
@@ -53,17 +63,16 @@ class TypePassationController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_TypePassation_SHOW")
      */
-    public function show(TypePassation $typePassation): TypePassation    {
+    public function show(TypePassation $typePassation): TypePassation {
         return $typePassation;
     }
 
-    
     /**
      * @Rest\Put(path="/{id}/edit", name="type_passation_edit",requirements = {"id"="\d+"})
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_TypePassation_EDIT")
      */
-    public function edit(Request $request, TypePassation $typePassation): TypePassation    {
+    public function edit(Request $request, TypePassation $typePassation): TypePassation {
         $form = $this->createForm(TypePassationType::class, $typePassation);
         $form->submit(Utils::serializeRequestContent($request));
 
@@ -71,17 +80,28 @@ class TypePassationController extends AbstractController
 
         return $typePassation;
     }
-    
+
     /**
      * @Rest\Put(path="/{id}/clone", name="type_passation_clone",requirements = {"id"="\d+"})
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_TypePassation_CLONE")
      */
-    public function cloner(Request $request, TypePassation $typePassation):  TypePassation {
-        $em=$this->getDoctrine()->getManager();
-        $typePassationNew=new TypePassation();
+    public function cloner(Request $request, TypePassation $typePassation): TypePassation {
+        $em = $this->getDoctrine()->getManager();
+        $typePassationNew = new TypePassation();
         $form = $this->createForm(TypePassationType::class, $typePassationNew);
         $form->submit(Utils::serializeRequestContent($request));
+        // check if code already exist
+        $searchedTypeByCode = $this->getDoctrine()->getRepository(TypePassation::class)->findByCode($typePassationNew->getCode());
+        if (count($searchedTypeByCode)) {
+            throw $this->createAccessDeniedException("Un type passation avec le même code existe déjà, merci de changer de code...");
+        }
+        // check if code and libelle already exist
+        $searchedTypeByLibelle = $this->getDoctrine()->getRepository(TypePassation::class)->findByLibelle($typePassationNew->getLibelle());
+        if (count($searchedTypeByLibelle)) {
+            throw $this->createAccessDeniedException("Un type passation avec le même libellé existe déjà, merci de changer de libellé...");
+        }
+        
         $em->persist($typePassationNew);
 
         $em->flush();
@@ -94,14 +114,14 @@ class TypePassationController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_TypePassation_DELETE")
      */
-    public function delete(TypePassation $typePassation): TypePassation    {
+    public function delete(TypePassation $typePassation): TypePassation {
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->remove($typePassation);
         $entityManager->flush();
 
         return $typePassation;
     }
-    
+
     /**
      * @Rest\Post("/delete-selection/", name="type_passation_selection_delete")
      * @Rest\View(StatusCode=200)
@@ -121,4 +141,5 @@ class TypePassationController extends AbstractController
 
         return $typePassations;
     }
+
 }
