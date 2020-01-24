@@ -47,7 +47,7 @@ class Entite
      *
      * @ORM\ManyToOne(targetEntity="Entite")
      * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="entite_parent", referencedColumnName="id")
+     *   @ORM\JoinColumn(name="entite_parent", referencedColumnName="id", nullable=true)
      * })
      */
     private $entiteParent;
