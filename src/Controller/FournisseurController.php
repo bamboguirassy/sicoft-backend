@@ -28,7 +28,7 @@ class FournisseurController extends AbstractController
             ->getRepository(Fournisseur::class)
             ->findAll();
 
-        return count($fournisseurs)?$fournisseurs:[];
+        return count($fournisseurs) ? $fournisseurs : [];
     }
 
     /**
@@ -36,7 +36,8 @@ class FournisseurController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Fournisseur_CREATE")
      */
-    public function create(Request $request): Fournisseur    {
+    public function create(Request $request): Fournisseur
+    {
         $fournisseur = new Fournisseur();
         $form = $this->createForm(FournisseurType::class, $fournisseur);
         $form->submit(Utils::serializeRequestContent($request));
@@ -45,23 +46,23 @@ class FournisseurController extends AbstractController
 
         $searchedProviderByTelephone = $entityManager->getRepository(Fournisseur::class)
             ->findOneByTelephone($fournisseur->getTelephone());
-        if($searchedProviderByTelephone) {
+        if ($searchedProviderByTelephone) {
             throw $this->createAccessDeniedException("Un fournisseur avec ce même numéro existe déjà.");
         }
 
         $searchedProviderByEmail = $entityManager->getRepository(Fournisseur::class)
             ->findOneByEmail($fournisseur->getEmail());
-        if($searchedProviderByEmail){
+        if ($searchedProviderByEmail) {
             throw $this->createAccessDeniedException("Un fournisseur avec cette adresse e-mail existe déjà.");
         }
 
         $searchedProviderByNinea = $entityManager->getRepository(Fournisseur::class)
             ->findOneByNinea($fournisseur->getNinea());
-        if($searchedProviderByNinea) {
+        if ($searchedProviderByNinea) {
             throw $this->createAccessDeniedException("Un fournisseur avec ce même ninea existe déjà.");
         }
 
-        if(!preg_match('/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/', $fournisseur->getEmail())) {
+        if (!preg_match('/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/', $fournisseur->getEmail())) {
             throw $this->createAccessDeniedException("Veuillez saisir une adresse e-mail valide.");
         }
 
@@ -76,34 +77,41 @@ class FournisseurController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Fournisseur_SHOW")
      */
-    public function show(Fournisseur $fournisseur): Fournisseur    {
+    public function show(Fournisseur $fournisseur): Fournisseur
+    {
         return $fournisseur;
     }
 
-    
+
     /**
      * @Rest\Put(path="/{id}/edit", name="fournisseur_edit",requirements = {"id"="\d+"})
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Fournisseur_EDIT")
      */
-    public function edit(Request $request, Fournisseur $fournisseur): Fournisseur    {
+    public function edit(Request $request, Fournisseur $fournisseur): Fournisseur
+    {
         $form = $this->createForm(FournisseurType::class, $fournisseur);
         $form->submit(Utils::serializeRequestContent($request));
 
-        $autreFournisseurs = $this->getDoctrine()->getManager()
+        $targetFournisseur = $this->getDoctrine()->getManager()
             ->createQuery(
                 'SELECT fournisseur FROM App\Entity\Fournisseur fournisseur
-                 WHERE fournisseur!=:fournisseur
-            ')->setParameter('fournisseur', $fournisseur)->getResult();
-
-        foreach ($autreFournisseurs as $currentFournisseur) {
-            if($currentFournisseur->getEmail() == $fournisseur->getEmail()) {
+                 WHERE (fournisseur.telephone=:tel OR fournisseur.ninea=:ninea OR fournisseur.email=:email) AND fournisseur!=:fournisseur
+            ')->setParameter('tel', $fournisseur->getTelephone())
+            ->setParameter('ninea', $fournisseur->getNinea())
+            ->setParameter('email', $fournisseur->getEmail())
+            ->setParameter('fournisseur', $fournisseur)
+            ->getResult();
+        if($targetFournisseur) {
+            if ($targetFournisseur[0]->getEmail() == $fournisseur->getEmail()) {
                 throw $this->createAccessDeniedException("Cette adresse e-mail existe déjà.");
             }
-            if($currentFournisseur->getTelephone() == $fournisseur->getTelephone()) {
+
+            if($targetFournisseur[0]->getTelephone() == $fournisseur->getTelephone()) {
                 throw  $this->createAccessDeniedException("Ce numéro telephone existe déjà.");
             }
-            if($currentFournisseur->getNinea() == $fournisseur->getNinea()) {
+
+            if($targetFournisseur[0]->getNinea() == $fournisseur->getNinea()) {
                 throw  $this->createAccessDeniedException("Ce ninea existe déjà.");
             }
         }
@@ -112,44 +120,45 @@ class FournisseurController extends AbstractController
 
         return $fournisseur;
     }
-    
+
     /**
      * @Rest\Put(path="/{id}/clone", name="fournisseur_clone",requirements = {"id"="\d+"})
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Fournisseur_CLONE")
      */
-    public function cloner(Request $request, Fournisseur $fournisseur):  Fournisseur {
-        $em=$this->getDoctrine()->getManager();
-        $fournisseurNew=new Fournisseur();
+    public function cloner(Request $request, Fournisseur $fournisseur): Fournisseur
+    {
+        $em = $this->getDoctrine()->getManager();
+        $fournisseurNew = new Fournisseur();
         $form = $this->createForm(FournisseurType::class, $fournisseurNew);
         $form->submit(Utils::serializeRequestContent($request));
 
 
         $searchedProviderByTelephone = $em->getRepository(Fournisseur::class)
             ->findOneByTelephone($fournisseurNew->getTelephone());
-        if($searchedProviderByTelephone) {
+        if ($searchedProviderByTelephone) {
             throw $this->createAccessDeniedException("Un fournisseur avec ce même numéro existe déjà.");
         }
 
         $searchedProviderByEmail = $em->getRepository(Fournisseur::class)
             ->findOneByEmail($fournisseurNew->getEmail());
-        if($searchedProviderByEmail){
+        if ($searchedProviderByEmail) {
             throw $this->createAccessDeniedException("Un fournisseur avec cette adresse e-mail existe déjà.");
         }
 
         $searchedProviderByNinea = $em->getRepository(Fournisseur::class)
             ->findOneByNinea($fournisseurNew->getNinea());
-        if($searchedProviderByNinea) {
+        if ($searchedProviderByNinea) {
             throw $this->createAccessDeniedException("Un fournisseur avec ce même ninea existe déjà.");
         }
 
         $searchedProviderByTelContact = $em->getRepository(Fournisseur::class)
             ->findOneByTelephoneContact($fournisseurNew->getTelephoneContact());
-        if($searchedProviderByTelContact) {
+        if ($searchedProviderByTelContact) {
             throw $this->createAccessDeniedException("Ce numéro de contact existe déjà.");
         }
 
-        if(!preg_match('/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/', $fournisseur->getEmail())) {
+        if (!preg_match('/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/', $fournisseur->getEmail())) {
             throw $this->createAccessDeniedException("Veuillez saisir une adresse e-mail valide.");
         }
 
@@ -165,20 +174,22 @@ class FournisseurController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Fournisseur_DELETE")
      */
-    public function delete(Fournisseur $fournisseur): Fournisseur    {
+    public function delete(Fournisseur $fournisseur): Fournisseur
+    {
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->remove($fournisseur);
         $entityManager->flush();
 
         return $fournisseur;
     }
-    
+
     /**
      * @Rest\Post("/delete-selection/", name="fournisseur_selection_delete")
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Fournisseur_DELETE")
      */
-    public function deleteMultiple(Request $request): array {
+    public function deleteMultiple(Request $request): array
+    {
         $entityManager = $this->getDoctrine()->getManager();
         $fournisseurs = Utils::getObjectFromRequest($request);
         if (!count($fournisseurs)) {
