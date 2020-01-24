@@ -82,6 +82,25 @@ class EtatMarcheController extends AbstractController
         $form = $this->createForm(EtatMarcheType::class, $etatMarche);
         $form->submit(Utils::serializeRequestContent($request));
 
+        $targetEtat = $this->getDoctrine()->getManager()
+            ->createQuery(
+                'SELECT etatMarche FROM App\Entity\EtatMarche etatMarche
+                 WHERE (etatMarche.code=:code OR etatMarche.libelle=:label) AND etatMarche!=:etatMarche
+            ')->setParameter('code', $etatMarche->getCode())
+            ->setParameter('label', $etatMarche->getLibelle())
+            ->setParameter('etatMarche', $etatMarche)
+            ->getResult();
+
+        if($targetEtat) {
+            if ($targetEtat[0]->getCode() == $etatMarche->getCode()) {
+                throw $this->createAccessDeniedException("Ce code existe déjà.");
+            }
+
+            if($targetEtat[0]->getLibelle() == $etatMarche->getLibelle()) {
+                throw  $this->createAccessDeniedException("Ce libelle existe déjà.");
+            }
+        }
+
         $this->getDoctrine()->getManager()->flush();
 
         return $etatMarche;

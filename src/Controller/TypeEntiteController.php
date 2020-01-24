@@ -80,6 +80,26 @@ class TypeEntiteController extends AbstractController
         $form = $this->createForm(TypeEntiteType::class, $typeEntite);
         $form->submit(Utils::serializeRequestContent($request));
 
+        $targetTypeEntite = $this->getDoctrine()->getManager()
+            ->createQuery(
+                'SELECT typeEntite FROM App\Entity\TypeEntite typeEntite
+                 WHERE (typeEntite.code=:code OR typeEntite.libelle=:label) AND typeEntite!=:typeEntite
+            ')->setParameter('code', $typeEntite->getCode())
+            ->setParameter('label', $typeEntite->getLibelle())
+            ->setParameter('typeEntite', $typeEntite)
+            ->getResult();
+
+        if($targetTypeEntite) {
+            if ($targetTypeEntite[0]->getCode() == $typeEntite->getCode()) {
+                throw $this->createAccessDeniedException("Ce code existe déjà.");
+            }
+
+            if($targetTypeEntite[0]->getLibelle() == $typeEntite->getLibelle()) {
+                throw  $this->createAccessDeniedException("Ce libelle existe déjà.");
+            }
+        }
+
+
         $this->getDoctrine()->getManager()->flush();
 
         return $typeEntite;
