@@ -61,12 +61,6 @@ class FournisseurController extends AbstractController
             throw $this->createAccessDeniedException("Un fournisseur avec ce même ninea existe déjà.");
         }
 
-        $searchedProviderByTelContact = $entityManager->getRepository(Fournisseur::class)
-            ->findOneByTelephoneContact($fournisseur->getTelephoneContact());
-        if($searchedProviderByTelContact) {
-            throw $this->createAccessDeniedException("Ce numéro de contact existe déjà.");
-        }
-
         if(!preg_match('/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/', $fournisseur->getEmail())) {
             throw $this->createAccessDeniedException("Veuillez saisir une adresse e-mail valide.");
         }
@@ -95,6 +89,25 @@ class FournisseurController extends AbstractController
     public function edit(Request $request, Fournisseur $fournisseur): Fournisseur    {
         $form = $this->createForm(FournisseurType::class, $fournisseur);
         $form->submit(Utils::serializeRequestContent($request));
+
+        $autreFournisseurs = $this->getDoctrine()->getManager()
+            ->createQuery(
+                'SELECT fournisseur FROM App\Entity\Fournisseur fournisseur
+                 WHERE fournisseur NOT IN (SELECT innerFournisseur FROM App\Entity\Fournisseur innerFournisseur
+                 WHERE innerFournisseur=:fournisseur) 
+            ')->setParameter('fournisseur', $fournisseur)->getResult();
+
+        foreach ($autreFournisseurs as $currentFournisseur) {
+            if($currentFournisseur->getEmail() == $fournisseur->getEmail()) {
+                throw $this->createAccessDeniedException("Cette adresse e-mail existe déjà.");
+            }
+            if($currentFournisseur->getTelephone() == $fournisseur->getTelephone()) {
+                throw  $this->createAccessDeniedException("Ce numéro telephone existe déjà.");
+            }
+            if($currentFournisseur->getNinea() == $fournisseur->getNinea()) {
+                throw  $this->createAccessDeniedException("Ce ninea existe déjà.");
+            }
+        }
 
         $this->getDoctrine()->getManager()->flush();
 
