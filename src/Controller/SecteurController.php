@@ -61,20 +61,29 @@ class SecteurController extends AbstractController
     public function show(Secteur $secteur): Secteur    {
         return $secteur;
     }
-
-    
     /**
      * @Rest\Put(path="/{id}/edit", name="secteur_edit",requirements = {"id"="\d+"})
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Secteur_EDIT")
      */
-    public function edit(Request $request, Secteur $secteur): Secteur    {
+    public function edit(Request $request, Secteur $secteur,SecteurRepository $secteurRepository): Secteur    {
+        $othersSercteur =[];
+        $secteurs = $secteurRepository->findAll();
 
+        foreach ($secteurs as $value)
+        {
+            if ($value->getCode() !== $secteur->getCode() )
+                array_push($othersSercteur, $value);
+
+        }
         $form = $this->createForm(SecteurType::class, $secteur);
         $form->submit(Utils::serializeRequestContent($request));
-
+        foreach ($othersSercteur as $value)
+        {
+            if ($value->getCode() == $secteur->getCode() )
+                throw $this->createNotFoundException("Code du secteur exite déja");
+        }
         $this->getDoctrine()->getManager()->flush();
-
         return $secteur;
     }
     
