@@ -201,23 +201,4 @@ class Fournisseur
         return $this->secteurs;
     }
 
-    public function addSecteur(Secteur $secteur): self
-    {
-        if (!$this->secteurs->contains($secteur)) {
-            $this->secteurs[] = $secteur;
-        }
-
-        return $this;
-    }
-
-    public function removeSecteur(Secteur $secteur): self
-    {
-        if ($this->secteurs->contains($secteur)) {
-            $this->secteurs->removeElement($secteur);
-        }
-
-        return $this;
-    }
-
-
 }
