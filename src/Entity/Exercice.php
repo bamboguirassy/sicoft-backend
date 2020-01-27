@@ -48,6 +48,13 @@ class Exercice
      * @ORM\Column(name="date_fin", type="datetime", nullable=false)
      */
     private $dateFin;
+    
+    /**
+     * @var bool|null
+     *
+     * @ORM\Column(name="encours", type="boolean", nullable=true)
+     */
+    private $encours;
 
     public function getId()
     {
@@ -98,6 +105,18 @@ class Exercice
     public function setDateFin($dateFin): self
     {
         $this->dateFin = $dateFin;
+
+        return $this;
+    }
+
+    public function getEncours()
+    {
+        return $this->encours;
+    }
+
+    public function setEncours($encours): self
+    {
+        $this->encours = $encours;
 
         return $this;
     }
