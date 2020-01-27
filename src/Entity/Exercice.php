@@ -109,5 +109,17 @@ class Exercice
         return $this;
     }
 
+    public function getEncours()
+    {
+        return $this->encours;
+    }
+
+    public function setEncours($encours): self
+    {
+        $this->encours = $encours;
+
+        return $this;
+    }
+
 
 }
