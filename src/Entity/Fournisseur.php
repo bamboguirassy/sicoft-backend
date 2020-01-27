@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -187,6 +189,32 @@ class Fournisseur
     public function setFonctionContact($fonctionContact): self
     {
         $this->fonctionContact = $fonctionContact;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Secteur[]
+     */
+    public function getSecteurs(): Collection
+    {
+        return $this->secteurs;
+    }
+
+    public function addSecteur(Secteur $secteur): self
+    {
+        if (!$this->secteurs->contains($secteur)) {
+            $this->secteurs[] = $secteur;
+        }
+
+        return $this;
+    }
+
+    public function removeSecteur(Secteur $secteur): self
+    {
+        if ($this->secteurs->contains($secteur)) {
+            $this->secteurs->removeElement($secteur);
+        }
 
         return $this;
     }
