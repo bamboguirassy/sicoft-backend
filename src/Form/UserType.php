@@ -27,6 +27,7 @@ class UserType extends AbstractType
             ->add('nom')
             ->add('telephone')
             ->add('groups')
+            ->add('fonction')
         ;
     }
 
