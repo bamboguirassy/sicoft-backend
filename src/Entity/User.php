@@ -31,6 +31,15 @@ class User extends BaseUser
     protected $groups;
     
     /**
+     * @ORM\ManyToMany(targetEntity="App\Entity\Entite")
+     * @ORM\JoinTable(name="user_entite",
+     *      joinColumns={@ORM\JoinColumn(name="user", referencedColumnName="id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="entite", referencedColumnName="id")}
+     * )
+     */
+    protected $entites;
+    
+    /**
      * @var string
      *
      * @ORM\Column(name="prenom", type="string", length=145, nullable=true)
@@ -51,11 +60,26 @@ class User extends BaseUser
      */
     private $telephone;
     
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="fonction", type="string", length=45, nullable=true)
+     */
+    private $fonction;
+    
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="photo_url", type="string", length=145, nullable=true)
+     */
+    private $photoUrl;
+    
 
     public function __construct()
     {
         parent::__construct();
         $this->groups = new ArrayCollection();
+        $this->entites = new ArrayCollection();
     }
 
     public function getId()
