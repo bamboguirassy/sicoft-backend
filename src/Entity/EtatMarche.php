@@ -2,7 +2,10 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * EtatMarche
@@ -31,9 +34,9 @@ class EtatMarche
     /**
      * @var string
      *
-     * @ORM\Column(name="liebelle", type="string", length=45, nullable=false)
+     * @ORM\Column(name="libelle", type="string", length=45, nullable=false)
      */
-    private $liebelle;
+    private $libelle;
 
     /**
      * @var string|null
@@ -43,7 +46,7 @@ class EtatMarche
     private $description;
 
     /**
-     * @var \EtatMarche
+     * @var EtatMarche
      *
      * @ORM\ManyToOne(targetEntity="EtatMarche")
      * @ORM\JoinColumns({
@@ -51,6 +54,19 @@ class EtatMarche
      * })
      */
     private $etatSuivant;
+    
+    /**
+     * @ORM\ManyToMany(targetEntity="App\Entity\User")
+     * @ORM\JoinTable(name="role_sur_marche",
+     *      joinColumns={@ORM\JoinColumn(name="etat_marche", referencedColumnName="id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="user", referencedColumnName="id")}
+     * )
+     */
+    protected $users;
+    
+    public function __construct() {
+        $this->users = new ArrayCollection();
+    }
 
     public function getId()
     {
@@ -69,14 +85,14 @@ class EtatMarche
         return $this;
     }
 
-    public function getLiebelle()
+    public function getLibelle()
     {
-        return $this->liebelle;
+        return $this->libelle;
     }
 
-    public function setLiebelle(string $liebelle): self
+    public function setLibelle(string $liebelle): self
     {
-        $this->liebelle = $liebelle;
+        $this->libelle = $liebelle;
 
         return $this;
     }
@@ -101,6 +117,32 @@ class EtatMarche
     public function setEtatSuivant($etatSuivant): self
     {
         $this->etatSuivant = $etatSuivant;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|User[]
+     */
+    public function getUsers(): Collection
+    {
+        return $this->users;
+    }
+
+    public function addUser(User $user): self
+    {
+        if (!$this->users->contains($user)) {
+            $this->users[] = $user;
+        }
+
+        return $this;
+    }
+
+    public function removeUser(User $user): self
+    {
+        if ($this->users->contains($user)) {
+            $this->users->removeElement($user);
+        }
 
         return $this;
     }

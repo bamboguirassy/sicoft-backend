@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Secteur;
 use App\Form\SecteurType;
+use App\Repository\SecteurRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -36,15 +37,19 @@ class SecteurController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Secteur_CREATE")
      */
-    public function create(Request $request): Secteur    {
+    public function create(Request $request, SecteurRepository $secteurRepository): Secteur    {
         $secteur = new Secteur();
+        $secteurs = $secteurRepository->findAll();
         $form = $this->createForm(SecteurType::class, $secteur);
         $form->submit(Utils::serializeRequestContent($request));
-
         $entityManager = $this->getDoctrine()->getManager();
+        foreach ($secteurs as $value)
+        {
+            if ($value->getCode() == $secteur->getCode() )
+                throw $this->createNotFoundException("Code du secteur exite déja");
+        }
         $entityManager->persist($secteur);
         $entityManager->flush();
-
         return $secteur;
     }
 
@@ -56,19 +61,29 @@ class SecteurController extends AbstractController
     public function show(Secteur $secteur): Secteur    {
         return $secteur;
     }
-
-    
     /**
      * @Rest\Put(path="/{id}/edit", name="secteur_edit",requirements = {"id"="\d+"})
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Secteur_EDIT")
      */
-    public function edit(Request $request, Secteur $secteur): Secteur    {
+    public function edit(Request $request, Secteur $secteur,SecteurRepository $secteurRepository): Secteur    {
+        $othersSercteur =[];
+        $secteurs = $secteurRepository->findAll();
+
+        foreach ($secteurs as $value)
+        {
+            if ($value->getCode() !== $secteur->getCode() )
+                array_push($othersSercteur, $value);
+
+        }
         $form = $this->createForm(SecteurType::class, $secteur);
         $form->submit(Utils::serializeRequestContent($request));
-
+        foreach ($othersSercteur as $value)
+        {
+            if ($value->getCode() == $secteur->getCode() )
+                throw $this->createNotFoundException("Code du secteur exite déja");
+        }
         $this->getDoctrine()->getManager()->flush();
-
         return $secteur;
     }
     
@@ -77,13 +92,18 @@ class SecteurController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Secteur_CLONE")
      */
-    public function cloner(Request $request, Secteur $secteur):  Secteur {
+    public function cloner(Request $request, Secteur $secteur,SecteurRepository $secteurRepository):  Secteur {
         $em=$this->getDoctrine()->getManager();
         $secteurNew=new Secteur();
+        $secteurs = $secteurRepository->findAll();
         $form = $this->createForm(SecteurType::class, $secteurNew);
         $form->submit(Utils::serializeRequestContent($request));
         $em->persist($secteurNew);
-
+        foreach ($secteurs as $value)
+        {
+            if ($value->getCode() == $secteur->getCode() )
+                throw $this->createNotFoundException("Code du secteur exite déja");
+        }
         $em->flush();
 
         return $secteurNew;

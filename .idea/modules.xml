@@ -2,7 +2,11 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+<<<<<<< HEAD
       <module fileurl="file://$PROJECT_DIR$/.idea/sicoft-backend.iml" filepath="$PROJECT_DIR$/.idea/sicoft-backend.iml" />
+=======
+      <module fileurl="file://$PROJECT_DIR$/.idea/Sicoft-Backend.iml" filepath="$PROJECT_DIR$/.idea/Sicoft-Backend.iml" />
+>>>>>>> e0a9fac8cacf8611d0fe407276c7627c76f7c5a7
     </modules>
   </component>
 </project>

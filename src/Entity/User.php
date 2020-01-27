@@ -31,6 +31,15 @@ class User extends BaseUser
     protected $groups;
     
     /**
+     * @ORM\ManyToMany(targetEntity="App\Entity\Entite")
+     * @ORM\JoinTable(name="user_entite",
+     *      joinColumns={@ORM\JoinColumn(name="user", referencedColumnName="id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="entite", referencedColumnName="id")}
+     * )
+     */
+    protected $entites;
+    
+    /**
      * @var string
      *
      * @ORM\Column(name="prenom", type="string", length=145, nullable=true)
@@ -51,11 +60,36 @@ class User extends BaseUser
      */
     private $telephone;
     
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="fonction", type="string", length=45, nullable=true)
+     */
+    private $fonction;
+    
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="photo_url", type="string", length=145, nullable=true)
+     */
+    private $photoUrl;
+    
+    /**
+     * @ORM\ManyToMany(targetEntity="App\Entity\EtatMarche")
+     * @ORM\JoinTable(name="role_sur_marche",
+     *      joinColumns={@ORM\JoinColumn(name="user", referencedColumnName="id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="etat_marche", referencedColumnName="id")}
+     * )
+     */
+    protected $etatMarches;
+    
 
     public function __construct()
     {
         parent::__construct();
         $this->groups = new ArrayCollection();
+        $this->entites = new ArrayCollection();
+        $this->etatMarches = new ArrayCollection();
     }
 
     public function getId()
@@ -105,6 +139,100 @@ class User extends BaseUser
     public function getGroups(): Collection
     {
         return $this->groups;
+    }
+
+    public function getFonction()
+    {
+        return $this->fonction;
+    }
+
+    public function setFonction($fonction): self
+    {
+        $this->fonction = $fonction;
+
+        return $this;
+    }
+
+    public function getPhotoUrl()
+    {
+        return $this->photoUrl;
+    }
+
+    public function setPhotoUrl($photoUrl): self
+    {
+        $this->photoUrl = $photoUrl;
+
+        return $this;
+    }
+
+    public function addGroup(Group $group): self
+    {
+        if (!$this->groups->contains($group)) {
+            $this->groups[] = $group;
+        }
+
+        return $this;
+    }
+
+    public function removeGroup(Group $group): self
+    {
+        if ($this->groups->contains($group)) {
+            $this->groups->removeElement($group);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Entite[]
+     */
+    public function getEntites(): Collection
+    {
+        return $this->entites;
+    }
+
+    public function addEntite(Entite $entite): self
+    {
+        if (!$this->entites->contains($entite)) {
+            $this->entites[] = $entite;
+        }
+
+        return $this;
+    }
+
+    public function removeEntite(Entite $entite): self
+    {
+        if ($this->entites->contains($entite)) {
+            $this->entites->removeElement($entite);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|EtatMarche[]
+     */
+    public function getEtatMarches(): Collection
+    {
+        return $this->etatMarches;
+    }
+
+    public function addEtatMarche(EtatMarche $etatMarch): self
+    {
+        if (!$this->etatMarches->contains($etatMarch)) {
+            $this->etatMarches[] = $etatMarch;
+        }
+
+        return $this;
+    }
+
+    public function removeEtatMarche(EtatMarche $etatMarch): self
+    {
+        if ($this->etatMarches->contains($etatMarch)) {
+            $this->etatMarches->removeElement($etatMarch);
+        }
+
+        return $this;
     }
 
     /*public function addGroup(Group $group): self
