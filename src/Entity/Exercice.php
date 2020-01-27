@@ -48,6 +48,13 @@ class Exercice
      * @ORM\Column(name="date_fin", type="datetime", nullable=false)
      */
     private $dateFin;
+    
+    /**
+     * @var bool|null
+     *
+     * @ORM\Column(name="encours", type="boolean", nullable=true)
+     */
+    private $encours;
 
     public function getId()
     {
