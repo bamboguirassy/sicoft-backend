@@ -52,12 +52,12 @@ class Compte
      */
     private $compteDivisionnaire;
 
-    public function getId()
+    public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getNumero()
+    public function getNumero(): ?string
     {
         return $this->numero;
     }
@@ -69,7 +69,7 @@ class Compte
         return $this;
     }
 
-    public function getLibelle()
+    public function getLibelle(): ?string
     {
         return $this->libelle;
     }
@@ -81,24 +81,24 @@ class Compte
         return $this;
     }
 
-    public function getDescription()
+    public function getDescription(): ?string
     {
         return $this->description;
     }
 
-    public function setDescription($description): self
+    public function setDescription(?string $description): self
     {
         $this->description = $description;
 
         return $this;
     }
 
-    public function getCompteDivisionnaire()
+    public function getCompteDivisionnaire(): ?CompteDivisionnaire
     {
         return $this->compteDivisionnaire;
     }
 
-    public function setCompteDivisionnaire($compteDivisionnaire): self
+    public function setCompteDivisionnaire(?CompteDivisionnaire $compteDivisionnaire): self
     {
         $this->compteDivisionnaire = $compteDivisionnaire;
 
