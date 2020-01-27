@@ -27,6 +27,7 @@ class EntiteController extends AbstractController
         $entites = $this->getDoctrine()
             ->getRepository(Entite::class)
             ->findAll();
+      
 
         return count($entites)?$entites:[];
     }
