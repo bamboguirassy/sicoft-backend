@@ -165,48 +165,12 @@ class User extends BaseUser
         return $this;
     }
 
-    public function addGroup(Group $group): self
-    {
-        if (!$this->groups->contains($group)) {
-            $this->groups[] = $group;
-        }
-
-        return $this;
-    }
-
-    public function removeGroup(Group $group): self
-    {
-        if ($this->groups->contains($group)) {
-            $this->groups->removeElement($group);
-        }
-
-        return $this;
-    }
-
     /**
      * @return Collection|Entite[]
      */
     public function getEntites(): Collection
     {
         return $this->entites;
-    }
-
-    public function addEntite(Entite $entite): self
-    {
-        if (!$this->entites->contains($entite)) {
-            $this->entites[] = $entite;
-        }
-
-        return $this;
-    }
-
-    public function removeEntite(Entite $entite): self
-    {
-        if ($this->entites->contains($entite)) {
-            $this->entites->removeElement($entite);
-        }
-
-        return $this;
     }
 
     /**
@@ -216,40 +180,4 @@ class User extends BaseUser
     {
         return $this->etatMarches;
     }
-
-    public function addEtatMarche(EtatMarche $etatMarch): self
-    {
-        if (!$this->etatMarches->contains($etatMarch)) {
-            $this->etatMarches[] = $etatMarch;
-        }
-
-        return $this;
-    }
-
-    public function removeEtatMarche(EtatMarche $etatMarch): self
-    {
-        if ($this->etatMarches->contains($etatMarch)) {
-            $this->etatMarches->removeElement($etatMarch);
-        }
-
-        return $this;
-    }
-
-    /*public function addGroup(Group $group): self
-    {
-        if (!$this->groups->contains($group)) {
-            $this->groups[] = $group;
-        }
-
-        return $this;
-    }
-
-    public function removeGroup(Group $group): self
-    {
-        if ($this->groups->contains($group)) {
-            $this->groups->removeElement($group);
-        }
-
-        return $this;
-    }*/
 }

@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Exercice
  *
- * @ORM\Table(name="exercice")
+ * @ORM\Table(name="exercice", indexes={@ORM\Index(name="exercice_suivant", columns={"exercice_suivant"})})
  * @ORM\Entity
  */
 class Exercice
@@ -48,13 +48,23 @@ class Exercice
      * @ORM\Column(name="date_fin", type="datetime", nullable=false)
      */
     private $dateFin;
-    
+
     /**
      * @var bool|null
      *
      * @ORM\Column(name="encours", type="boolean", nullable=true)
      */
     private $encours;
+
+    /**
+     * @var \Exercice
+     *
+     * @ORM\ManyToOne(targetEntity="Exercice")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="exercice_suivant", referencedColumnName="id")
+     * })
+     */
+    private $exerciceSuivant;
 
     public function getId()
     {
@@ -66,7 +76,7 @@ class Exercice
         return $this->code;
     }
 
-    public function setCode(string $code)
+    public function setCode(string $code): self
     {
         $this->code = $code;
 
@@ -117,6 +127,18 @@ class Exercice
     public function setEncours($encours): self
     {
         $this->encours = $encours;
+
+        return $this;
+    }
+
+    public function getExerciceSuivant()
+    {
+        return $this->exerciceSuivant;
+    }
+
+    public function setExerciceSuivant($exerciceSuivant): self
+    {
+        $this->exerciceSuivant = $exerciceSuivant;
 
         return $this;
     }
