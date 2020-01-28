@@ -62,8 +62,18 @@ class ExerciceController extends AbstractController
                 throw $this->createAccessDeniedException('Le libelle existe dèjà');
             }
            
+        $entityManager->flush();  
         $entityManager->persist($exercice);
-        $entityManager->flush();
+        //$exercicePrecedant = $exercice->getExerciceSuivant();
+        $exercices = $entityManager->getRepository(Exercice::class)->findAll();
+        if (count($exercices) > 0){
+            $exercicePrecedant = end($exercices);
+            //var_dump($exercicePrecedant);
+            $exercicePrecedant->setExerciceSuivant($exercice);
+            $entityManager->flush();
+        }
+        
+        
 
         return $exercice;
     }
