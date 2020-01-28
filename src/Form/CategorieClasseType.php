@@ -2,25 +2,25 @@
 
 namespace App\Form;
 
-use App\Entity\RoleSurMarche;
+use App\Entity\CategorieClasse;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class RoleSurMarcheType extends AbstractType
+class CategorieClasseType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('etatMarche')
-            ->add('user')
+            ->add('code')
+            ->add('nom')
         ;
     }
 
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'data_class' => RoleSurMarche::class,
+            'data_class' => CategorieClasse::class,
         ]);
     }
 }

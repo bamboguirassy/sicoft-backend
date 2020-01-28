@@ -11,24 +11,24 @@ use Symfony\Component\Routing\Annotation\Route;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use App\Utils\Utils;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * @Route("/api/typePassation")
  */
-class TypePassationController extends AbstractController
-{
+class TypePassationController extends AbstractController {
+
     /**
      * @Rest\Get(path="/", name="type_passation_index")
      * @Rest\View(StatusCode = 200)
      * @IsGranted("ROLE_TypePassation_INDEX")
      */
-    public function index(): array
-    {
+    public function index(): array {
         $typePassations = $this->getDoctrine()
-            ->getRepository(TypePassation::class)
-            ->findAll();
+                ->getRepository(TypePassation::class)
+                ->findAll();
 
-        return count($typePassations)?$typePassations:[];
+        return count($typePassations) ? $typePassations : [];
     }
 
     /**
@@ -36,14 +36,16 @@ class TypePassationController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_TypePassation_CREATE")
      */
-    public function create(Request $request): TypePassation    {
+    public function create(Request $request, EntityManagerInterface $em): TypePassation {
         $typePassation = new TypePassation();
         $form = $this->createForm(TypePassationType::class, $typePassation);
         $form->submit(Utils::serializeRequestContent($request));
-
-        $entityManager = $this->getDoctrine()->getManager();
-        $entityManager->persist($typePassation);
-        $entityManager->flush();
+        
+        // check if code and libelle already exist
+        $this->checkCodeAndLibelle($typePassation, $em);
+        
+        $em->persist($typePassation);
+        $em->flush();
 
         return $typePassation;
     }
@@ -53,37 +55,42 @@ class TypePassationController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_TypePassation_SHOW")
      */
-    public function show(TypePassation $typePassation): TypePassation    {
+    public function show(TypePassation $typePassation): TypePassation {
         return $typePassation;
     }
 
-    
     /**
      * @Rest\Put(path="/{id}/edit", name="type_passation_edit",requirements = {"id"="\d+"})
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_TypePassation_EDIT")
      */
-    public function edit(Request $request, TypePassation $typePassation): TypePassation    {
+    public function edit(Request $request, TypePassation $typePassation, EntityManagerInterface $em): TypePassation {
+        
         $form = $this->createForm(TypePassationType::class, $typePassation);
         $form->submit(Utils::serializeRequestContent($request));
-
-        $this->getDoctrine()->getManager()->flush();
+        
+        // check if code and libelle already exist
+        $this->checkEditTypePassatonCodeAndLibelle($typePassation, $em);
+        
+        $em->flush();
 
         return $typePassation;
     }
-    
+
     /**
      * @Rest\Put(path="/{id}/clone", name="type_passation_clone",requirements = {"id"="\d+"})
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_TypePassation_CLONE")
      */
-    public function cloner(Request $request, TypePassation $typePassation):  TypePassation {
-        $em=$this->getDoctrine()->getManager();
-        $typePassationNew=new TypePassation();
+    public function cloner(Request $request, TypePassation $typePassation, EntityManagerInterface $em): TypePassation {
+        $typePassationNew = new TypePassation();
         $form = $this->createForm(TypePassationType::class, $typePassationNew);
         $form->submit(Utils::serializeRequestContent($request));
+        
+        // check if code and libelle already exist
+        $this->checkCodeAndLibelle($typePassationNew, $em);
+        
         $em->persist($typePassationNew);
-
         $em->flush();
 
         return $typePassationNew;
@@ -94,14 +101,14 @@ class TypePassationController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_TypePassation_DELETE")
      */
-    public function delete(TypePassation $typePassation): TypePassation    {
+    public function delete(TypePassation $typePassation): TypePassation {
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->remove($typePassation);
         $entityManager->flush();
 
         return $typePassation;
     }
-    
+
     /**
      * @Rest\Post("/delete-selection/", name="type_passation_selection_delete")
      * @Rest\View(StatusCode=200)
@@ -121,4 +128,32 @@ class TypePassationController extends AbstractController
 
         return $typePassations;
     }
+    
+     //////////////////////////////////////// Tests /////////////////////////////////////////////
+    
+    public function checkEditTypePassatonCodeAndLibelle(TypePassation $type, EntityManagerInterface $em) {
+        $searchedTypeByCode = $em->createQuery("select t from App\Entity\TypePassation t where t != :type and t.code = :code")->setParameter('type', $type)->setParameter('code', $type->getCode())->getResult();
+        if (count($searchedTypeByCode)) {
+            throw $this->createAccessDeniedException("Un Type Passation avec le même code existe déjà, merci de changer de code...");
+        }
+        // check if libelle already exist
+       $searchedTypeByLibelle = $em->createQuery("select t from App\Entity\TypePassation t where t != :type and t.libelle = :lib")->setParameter('type', $type)->setParameter('lib', $type->getLibelle())->getResult();
+        if (count($searchedTypeByLibelle)) {
+            throw $this->createAccessDeniedException("Un Type Passation avec le même libellé existe déjà, merci de changer de libellé...");
+        }
+    }
+    
+    
+    public function checkCodeAndLibelle(TypePassation $type, EntityManagerInterface $em) {
+        $searchedTypeByCode = $em->getRepository(TypePassation::class)->findByCode($type->getCode());
+        if (count($searchedTypeByCode)) {
+            throw $this->createAccessDeniedException("Un Type Passation avec le même code existe déjà, merci de changer de code...");
+        }
+        // check if libelle already exit
+        $searchedTypeByLibelle = $em->getRepository(TypePassation::class)->findByLibelle($type->getLibelle());
+        if (count($searchedTypeByLibelle)) {
+            throw $this->createAccessDeniedException("Un Type Passation avec le même libellé existe déjà, merci de changer de libellé...");
+        }
+    }
+
 }

@@ -24,9 +24,9 @@ class Entite
     /**
      * @var string
      *
-     * @ORM\Column(name="entite", type="string", length=200, nullable=false)
+     * @ORM\Column(name="nom", type="string", length=200, nullable=false)
      */
-    private $entite;
+    private $nom;
 
     /**
      * @var string
@@ -47,7 +47,7 @@ class Entite
      *
      * @ORM\ManyToOne(targetEntity="Entite")
      * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="entite_parent", referencedColumnName="id")
+     *   @ORM\JoinColumn(name="entite_parent", referencedColumnName="id", nullable=true)
      * })
      */
     private $entiteParent;
@@ -67,14 +67,14 @@ class Entite
         return $this->id;
     }
 
-    public function getEntite()
+    public function getNom()
     {
-        return $this->entite;
+        return $this->nom;
     }
 
-    public function setEntite(string $entite): self
+    public function setNom(string $nom): self
     {
-        $this->entite = $entite;
+        $this->nom = $nom;
 
         return $this;
     }
