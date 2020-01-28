@@ -42,6 +42,20 @@ class TypeClasseController extends AbstractController
         $form->submit(Utils::serializeRequestContent($request));
 
         $entityManager = $this->getDoctrine()->getManager();
+
+        $searchedProviderByCode = $entityManager->getRepository(TypeClasse::class)
+            ->findOneByCode($typeClasse->getCode());
+        if ($searchedProviderByCode) {
+            throw $this->createAccessDeniedException("Un type de classe avec ce même code existe déjà.");
+        }
+
+        $searchedProviderByNom = $entityManager->getRepository(TypeClasse::class)
+            ->findOneByNom($typeClasse->getNom());
+        if ($searchedProviderByNom) {
+            throw $this->createAccessDeniedException("Un type de classe avec ce nom existe déjà.");
+        }
+
+
         $entityManager->persist($typeClasse);
         $entityManager->flush();
 
@@ -67,6 +81,24 @@ class TypeClasseController extends AbstractController
         $form = $this->createForm(TypeClasseType::class, $typeClasse);
         $form->submit(Utils::serializeRequestContent($request));
 
+        $targetTypeClasse = $this->getDoctrine()->getManager()
+            ->createQuery(
+                'SELECT typeClasse FROM App\Entity\TypeClasse typeClasse
+                 WHERE (typeClasse.code=:code OR typeClasse.nom=:nom) AND typeClasse!=:typeClasse
+            ')->setParameter('code', $typeClasse->getCode())
+            ->setParameter('nom', $typeClasse->getNom())
+            ->setParameter('typeClasse', $typeClasse)
+            ->getResult();
+        if($targetTypeClasse) {
+            if ($targetTypeClasse[0]->getCode() == $typeClasse->getCode()) {
+                throw $this->createAccessDeniedException("Ce code existe déjà.");
+            }
+
+            if($targetTypeClasse[0]->getNom() == $typeClasse->getNom()) {
+                throw  $this->createAccessDeniedException("Ce nom existe déjà.");
+            }
+        }
+
         $this->getDoctrine()->getManager()->flush();
 
         return $typeClasse;
@@ -82,6 +114,19 @@ class TypeClasseController extends AbstractController
         $typeClasseNew=new TypeClasse();
         $form = $this->createForm(TypeClasseType::class, $typeClasseNew);
         $form->submit(Utils::serializeRequestContent($request));
+
+        $searchedProviderByCode = $em->getRepository(TypeClasse::class)
+            ->findOneByCode($typeClasseNew->getCode());
+        if ($searchedProviderByCode) {
+            throw $this->createAccessDeniedException("Un type de classe avec ce même code existe déjà.");
+        }
+
+        $searchedProviderByNom = $em->getRepository(TypeClasse::class)
+            ->findOneByNom($typeClasseNew->getNom());
+        if ($searchedProviderByNom) {
+            throw $this->createAccessDeniedException("Un type de classe avec ce nom existe déjà.");
+        }
+
         $em->persist($typeClasseNew);
 
         $em->flush();
