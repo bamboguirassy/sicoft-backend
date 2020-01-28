@@ -30,13 +30,9 @@ class EntiteController extends AbstractController
         $entites = $this->getDoctrine()
             ->getRepository(Entite::class)
             ->findAll();
-<<<<<<< HEAD
       
 
         return count($entites)?$entites:[];
-=======
-        return count($entites) ? $entites : [];
->>>>>>> 3386ab1528b4c3d73e0d2c23990833dd916e4dad
     }
 
     /**
