@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Classe
  *
- * @ORM\Table(name="classe", uniqueConstraints={@ORM\UniqueConstraint(name="numero_UNIQUE", columns={"numero"})})
+ * @ORM\Table(name="classe", uniqueConstraints={@ORM\UniqueConstraint(name="categorie_classe_2", columns={"categorie_classe", "type_classe"}), @ORM\UniqueConstraint(name="numero_UNIQUE", columns={"numero"})}, indexes={@ORM\Index(name="categorie_classe", columns={"categorie_classe"}), @ORM\Index(name="type_classe", columns={"type_classe"})})
  * @ORM\Entity
  */
 class Classe
@@ -42,12 +42,32 @@ class Classe
      */
     private $description;
 
-    public function getId()
+    /**
+     * @var \CategorieClasse
+     *
+     * @ORM\ManyToOne(targetEntity="CategorieClasse")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="categorie_classe", referencedColumnName="id")
+     * })
+     */
+    private $categorieClasse;
+
+    /**
+     * @var \TypeClasse
+     *
+     * @ORM\ManyToOne(targetEntity="TypeClasse")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="type_classe", referencedColumnName="id")
+     * })
+     */
+    private $typeClasse;
+
+    public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getNumero()
+    public function getNumero(): ?string
     {
         return $this->numero;
     }
@@ -59,7 +79,7 @@ class Classe
         return $this;
     }
 
-    public function getLibelle()
+    public function getLibelle(): ?string
     {
         return $this->libelle;
     }
@@ -71,14 +91,38 @@ class Classe
         return $this;
     }
 
-    public function getDescription()
+    public function getDescription(): ?string
     {
         return $this->description;
     }
 
-    public function setDescription($description): self
+    public function setDescription(?string $description): self
     {
         $this->description = $description;
+
+        return $this;
+    }
+
+    public function getCategorieClasse(): ?CategorieClasse
+    {
+        return $this->categorieClasse;
+    }
+
+    public function setCategorieClasse(?CategorieClasse $categorieClasse): self
+    {
+        $this->categorieClasse = $categorieClasse;
+
+        return $this;
+    }
+
+    public function getTypeClasse(): ?TypeClasse
+    {
+        return $this->typeClasse;
+    }
+
+    public function setTypeClasse(?TypeClasse $typeClasse): self
+    {
+        $this->typeClasse = $typeClasse;
 
         return $this;
     }

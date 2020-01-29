@@ -2,28 +2,25 @@
 
 namespace App\Form;
 
-use App\Entity\Classe;
+use App\Entity\CategorieClasse;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class ClasseType extends AbstractType
+class CategorieClasseType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('numero')
-            ->add('libelle')
-            ->add('description')
-            ->add('categorieClasse')
-            ->add('typeClasse')
+            ->add('code')
+            ->add('nom')
         ;
     }
 
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'data_class' => Classe::class,
+            'data_class' => CategorieClasse::class,
         ]);
     }
 }

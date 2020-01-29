@@ -4,9 +4,9 @@ namespace App\Controller;
 
 use App\Entity\Entite;
 use App\Form\EntiteType;
+use Doctrine\ORM\EntityManagerInterface as Manager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use App\Utils\Utils;
@@ -37,14 +37,14 @@ class EntiteController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Entite_CREATE")
      */
-    public function create(Request $request): Entite    {
+    public function create(Request $request, Manager $manager): Entite
+    {
         $entite = new Entite();
         $form = $this->createForm(EntiteType::class, $entite);
         $form->submit(Utils::serializeRequestContent($request));
-
-        $entityManager = $this->getDoctrine()->getManager();
-        $entityManager->persist($entite);
-        $entityManager->flush();
+        $this->checkCodeAndNom($entite, $manager);
+        $manager->persist($entite);
+        $manager->flush();
 
         return $entite;
     }
@@ -54,35 +54,37 @@ class EntiteController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Entite_SHOW")
      */
-    public function show(Entite $entite): Entite    {
+    public function show(Entite $entite)
+    {
         return $entite;
     }
 
-    
     /**
      * @Rest\Put(path="/{id}/edit", name="entite_edit",requirements = {"id"="\d+"})
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Entite_EDIT")
      */
-    public function edit(Request $request, Entite $entite): Entite    {
+    public function edit(Request $request, Entite $entite, Manager $manager): Entite
+    {
         $form = $this->createForm(EntiteType::class, $entite);
         $form->submit(Utils::serializeRequestContent($request));
-
+        $this->checkEditCodeAndNom($entite, $manager);
         $this->getDoctrine()->getManager()->flush();
-
         return $entite;
     }
-    
+
     /**
      * @Rest\Put(path="/{id}/clone", name="entite_clone",requirements = {"id"="\d+"})
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Entite_CLONE")
      */
-    public function cloner(Request $request, Entite $entite):  Entite {
-        $em=$this->getDoctrine()->getManager();
-        $entiteNew=new Entite();
+    public function cloner(Request $request, Entite $entite, Manager $manager): Entite
+    {
+        $em = $this->getDoctrine()->getManager();
+        $entiteNew = new Entite();
         $form = $this->createForm(EntiteType::class, $entiteNew);
         $form->submit(Utils::serializeRequestContent($request));
+        $this->checkCodeAndNom($entiteNew, $manager);
         $em->persist($entiteNew);
 
         $em->flush();
@@ -95,20 +97,22 @@ class EntiteController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Entite_DELETE")
      */
-    public function delete(Entite $entite): Entite    {
+    public function delete(Entite $entite): Entite
+    {
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->remove($entite);
         $entityManager->flush();
 
         return $entite;
     }
-    
+
     /**
      * @Rest\Post("/delete-selection/", name="entite_selection_delete")
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Entite_DELETE")
      */
-    public function deleteMultiple(Request $request): array {
+    public function deleteMultiple(Request $request): array
+    {
         $entityManager = $this->getDoctrine()->getManager();
         $entites = Utils::getObjectFromRequest($request);
         if (!count($entites)) {
@@ -121,5 +125,49 @@ class EntiteController extends AbstractController
         $entityManager->flush();
 
         return $entites;
+    }
+
+    /**
+     * @Rest\Get(path="/{id}/sous-entites", name="entite_sous_entites",requirements = {"id"="\d+"})
+     * @Rest\View(StatusCode=200)
+     * @IsGranted("ROLE_Entite_SHOW")
+     */
+    public function findSousEntites(Entite $entite, Manager $manager)
+    {
+        $sousEntites = $manager->createQuery('select e from App\Entity\Entite e where e.entiteParent = :parent')
+            ->setParameter('parent', $entite->getId())->getResult();
+
+        return $sousEntites;
+    }
+
+    ///////////////////////////////// Tests /////////////////////////////////
+
+    public function checkEditCodeAndNom(Entite $entite, Manager $manager)
+    {
+        // check if nom already exist
+        $searchedEntiteByCode = $manager->createQuery("select e from App\Entity\Entite e where e != :entite and e.code = :code")->setParameter('entite', $entite)->setParameter('code', $entite->getCode())->getResult();
+        if (count($searchedEntiteByCode)) {
+            throw $this->createAccessDeniedException("Une entité avec le même code existe déjà, merci de changer de code...");
+        }
+
+        // check if nom already exist
+        $searchedEntiteByNom = $manager->createQuery("select e from App\Entity\Entite e where e != :entite and e.nom = :name")->setParameter('entite', $entite)->setParameter('name', $entite->getNom())->getResult();
+        if (count($searchedEntiteByNom)) {
+            throw $this->createAccessDeniedException("Une entité avec le même nom existe déjà, merci de changer de nom...");
+        }
+    }
+
+    public function checkCodeAndNom(Entite $entite, Manager $manager)
+    {
+        // check if code already exit
+        $searchedEntiteByCode = $manager->getRepository(Entite::class)->findByCode($entite->getCode());
+        if (count($searchedEntiteByCode)) {
+            throw $this->createAccessDeniedException("Une entité avec le même code existe déjà, merci de changer de code...");
+        }
+        // check if nom already exit
+        $searchedEntiteByNom = $manager->getRepository(Entite::class)->findByNom($entite->getNom());
+        if (count($searchedEntiteByNom)) {
+            throw $this->createAccessDeniedException("Une entité avec le même nom existe déjà, merci de changer de nom...");
+        }
     }
 }

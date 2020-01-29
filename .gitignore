@@ -5,6 +5,7 @@
 /.env.*.local
 /.env
 
+
 /nbproject/private/*
 
 /public/bundles/
