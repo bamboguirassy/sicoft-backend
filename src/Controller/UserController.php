@@ -188,5 +188,4 @@ class UserController extends AbstractController {
         $serializedUsers = $serializer->serialize($users, 'json') ;
         return new Response($serializedUsers);
     }
-
 }
