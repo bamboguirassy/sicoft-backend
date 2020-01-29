@@ -61,7 +61,7 @@ class Exercice
      *
      * @ORM\ManyToOne(targetEntity="Exercice")
      * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="exercice_suivant", referencedColumnName="id")
+     *   @ORM\JoinColumn(name="exercice_suivant", referencedColumnName="id", nullable=true)
      * })
      */
     private $exerciceSuivant;
