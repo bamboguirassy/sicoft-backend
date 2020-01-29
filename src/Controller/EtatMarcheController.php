@@ -28,7 +28,7 @@ class EtatMarcheController extends AbstractController
             ->getRepository(EtatMarche::class)
             ->findAll();
 
-        return count($etatMarches)?$etatMarches:[];
+        return count($etatMarches) ? $etatMarches : [];
     }
 
     /**
@@ -36,30 +36,46 @@ class EtatMarcheController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_EtatMarche_CREATE")
      */
-    public function create(Request $request): EtatMarche    {
+    public function create(Request $request): EtatMarche
+    {
         $etatMarche = new EtatMarche();
         $form = $this->createForm(EtatMarcheType::class, $etatMarche);
         $form->submit(Utils::serializeRequestContent($request));
+
         $entityManager = $this->getDoctrine()->getManager();
 
         $searchedEtatMarcheByCode = $entityManager->getRepository(EtatMarche::class)
             ->findOneByCode($etatMarche->getCode());
 
-        if($searchedEtatMarcheByCode) {
+        if ($searchedEtatMarcheByCode) {
             throw $this->createAccessDeniedException("Un Etat Marche avec le même code existe déjà.");
         }
 
         $searchedEtatMarcheByLabel = $entityManager->getRepository(EtatMarche::class)
             ->findOneByLibelle($etatMarche->getLibelle());
 
-        if($searchedEtatMarcheByLabel) {
+        if ($searchedEtatMarcheByLabel) {
             throw $this->createAccessDeniedException("Un Etat Marche avec le même libelle existe déjà.");
         }
 
+        $etatPrec = $etatMarche->getEtatSuivant();
+
+        if ($etatMarche === $etatPrec) {
+            throw $this->createAccessDeniedException("Veuillez choisir un autre etat comme étant celui précédent.");
+        }
+
+        if($etatPrec && $etatPrec->getEtatSuivant()) {
+            throw $this->createAccessDeniedException("L'etat que vous avez choisie à déjà un Etat Suivant");
+        }
+
         $entityManager = $this->getDoctrine()->getManager();
+        $etatMarche->setEtatSuivant(null);
         $entityManager->persist($etatMarche);
         $entityManager->flush();
-
+        if ($etatPrec) {
+            $etatPrec->setEtatSuivant($etatMarche);
+            $entityManager->flush();
+        }
         return $etatMarche;
     }
 
@@ -68,17 +84,19 @@ class EtatMarcheController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_EtatMarche_SHOW")
      */
-    public function show(EtatMarche $etatMarche): EtatMarche    {
+    public function show(EtatMarche $etatMarche): EtatMarche
+    {
         return $etatMarche;
     }
 
-    
+
     /**
      * @Rest\Put(path="/{id}/edit", name="etat_marche_edit",requirements = {"id"="\d+"})
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_EtatMarche_EDIT")
      */
-    public function edit(Request $request, EtatMarche $etatMarche): EtatMarche    {
+    public function edit(Request $request, EtatMarche $etatMarche): EtatMarche
+    {
         $form = $this->createForm(EtatMarcheType::class, $etatMarche);
         $form->submit(Utils::serializeRequestContent($request));
 
@@ -91,49 +109,74 @@ class EtatMarcheController extends AbstractController
             ->setParameter('etatMarche', $etatMarche)
             ->getResult();
 
-        if($targetEtat) {
+        if ($targetEtat) {
             if ($targetEtat[0]->getCode() == $etatMarche->getCode()) {
                 throw $this->createAccessDeniedException("Ce code existe déjà.");
             }
 
-            if($targetEtat[0]->getLibelle() == $etatMarche->getLibelle()) {
+            if ($targetEtat[0]->getLibelle() == $etatMarche->getLibelle()) {
                 throw  $this->createAccessDeniedException("Ce libelle existe déjà.");
             }
         }
 
-        $this->getDoctrine()->getManager()->flush();
+        $etatPrec = $etatMarche->getEtatSuivant();
+        if ($etatPrec === $etatMarche) {
+            throw $this->createAccessDeniedException("Veuillez choisir un autre etat comme étant celui précendent.");
+        }
+
+        if($etatPrec && $etatPrec->getEtatSuivant()) {
+            throw $this->createAccessDeniedException("L'etat que vous avez choisie à déjà un Etat Suivant");
+        }
+
+        if ($etatPrec) {
+            $etatPrec->setEtatSuivant($etatMarche);
+            $this->getDoctrine()->getManager()->flush();
+        }
 
         return $etatMarche;
     }
-    
+
     /**
      * @Rest\Put(path="/{id}/clone", name="etat_marche_clone",requirements = {"id"="\d+"})
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_EtatMarche_CLONE")
      */
-    public function cloner(Request $request, EtatMarche $etatMarche):  EtatMarche {
-        $em=$this->getDoctrine()->getManager();
-        $etatMarcheNew=new EtatMarche();
+    public function cloner(Request $request, EtatMarche $etatMarche): EtatMarche
+    {
+        $em = $this->getDoctrine()->getManager();
+        $etatMarcheNew = new EtatMarche();
         $form = $this->createForm(EtatMarcheType::class, $etatMarcheNew);
         $form->submit(Utils::serializeRequestContent($request));
 
         $searchedEtatMarcheByCode = $em->getRepository(EtatMarche::class)
             ->findOneByCode($etatMarcheNew->getCode());
 
-        if($searchedEtatMarcheByCode) {
+        if ($searchedEtatMarcheByCode) {
             throw $this->createAccessDeniedException("Un Etat Marche avec le même code existe déjà.");
         }
 
         $searchedEtatMarcheByLabel = $em->getRepository(EtatMarche::class)
             ->findOneByLibelle($etatMarcheNew->getLibelle());
 
-        if($searchedEtatMarcheByLabel) {
+        if ($searchedEtatMarcheByLabel) {
             throw $this->createAccessDeniedException("Un Etat Marche avec le même libelle existe déjà.");
         }
+        $etatPrec = $etatMarcheNew->getEtatSuivant();
+        if ($etatPrec === $etatMarcheNew ) {
+            throw $this->createAccessDeniedException("Veuillez choisir un autre etat comme étant celui précendent.");
+        }
 
+        if($etatPrec && $etatPrec->getEtatSuivant()) {
+            throw $this->createAccessDeniedException("L'etat que vous avez choisie à déjà un Etat Suivant");
+        }
+
+        $etatMarcheNew->setEtatSuivant(null);
         $em->persist($etatMarcheNew);
         $em->flush();
-
+        if ($etatPrec) {
+            $etatPrec->setEtatSuivant($etatMarcheNew);
+            $em->flush();
+        }
         return $etatMarcheNew;
     }
 
@@ -142,30 +185,33 @@ class EtatMarcheController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_EtatMarche_DELETE")
      */
-    public function delete(EtatMarche $etatMarche): EtatMarche    {
+    public function delete(EtatMarche $etatMarche): EtatMarche
+    {
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->remove($etatMarche);
         $entityManager->flush();
 
         return $etatMarche;
     }
-    
+
     /**
      * @Rest\Post("/delete-selection/", name="etat_marche_selection_delete")
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_EtatMarche_DELETE")
      */
-    public function deleteMultiple(Request $request): array {
+    public function deleteMultiple(Request $request): array
+    {
         $entityManager = $this->getDoctrine()->getManager();
         $etatMarches = Utils::getObjectFromRequest($request);
+
         if (!count($etatMarches)) {
             throw $this->createNotFoundException("Selectionner au minimum un élément à supprimer.");
         }
         foreach ($etatMarches as $etatMarche) {
             $etatMarche = $entityManager->getRepository(EtatMarche::class)->find($etatMarche->id);
             $entityManager->remove($etatMarche);
+            $entityManager->flush();
         }
-        $entityManager->flush();
 
         return $etatMarches;
     }
