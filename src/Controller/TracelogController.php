@@ -11,9 +11,6 @@ use Symfony\Component\Routing\Annotation\Route;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Doctrine\ORM\EntityManagerInterface as Manager;
 
-/**
- * @Route("/api/tracelog")
- */
 class TracelogController extends AbstractController
 {
     /**
@@ -27,7 +24,7 @@ class TracelogController extends AbstractController
     }
 
     /**
-     * @Rest\Get("/", name="tracelog_index")
+     * @Rest\Get("/api/tracelog/", name="tracelog_index")
      * @Rest\View(StatusCode = 200)
      */
     public function index(): array
@@ -35,27 +32,27 @@ class TracelogController extends AbstractController
         $tracelogs = $this->manager
             ->getRepository(Tracelog::class)
             ->findAll();
-
         return count($tracelogs) ? $tracelogs : [];
     }
 
-    /**
-     * @Rest\Post("/create", name="tracelog_new")
-     * @Rest\View(statusCode=200)
-     */
-    public function new(Request $request): Tracelog
+    // not to be exposed
+    public function create($ressource, $operation, $oldValue, $newValue, $user_email): void
     {
         $tracelog = new Tracelog();
-        $form = $this->createForm(TracelogType::class, $tracelog);
-        $form->submit($request);
+        $tracelog
+            ->setDate(new \DateTime())
+            ->setNewvalue($newValue)
+            ->setOperation($operation)
+            ->setOldvalue($oldValue)
+            ->setRessource($ressource)
+            ->setUserEmail($user_email);
+
         $this->manager->persist($tracelog);
         $this->manager->flush();
-
-        return $tracelog;
     }
 
     /**
-     * @Rest\Get("/{id}", name="tracelog_show")
+     * @Rest\Get("/api/tracelog/{id}", name="tracelog_show")
      * @Rest\View(statusCode=200)
      */
     public function show(Tracelog $tracelog): Tracelog
@@ -64,7 +61,7 @@ class TracelogController extends AbstractController
     }
 
     /**
-     * @Rest\Delete("/{id}", name="tracelog_delete")
+     * @Rest\Delete("/api/tracelog/{id}", name="tracelog_delete")
      * @Rest\View(statusCode=200)
      */
     public function delete(Tracelog $tracelog): Tracelog
@@ -78,6 +75,9 @@ class TracelogController extends AbstractController
     // remove given tracelogs from database
     public function deleteTracelogs($tracelogs): array
     {
+        if (!count($tracelogs)) {
+            throw $this->createNotFoundException("Sélectionner au minimum un élément à supprimer.");
+        }
         foreach ($tracelogs as $tracelog) {
             $tracelog = $this->manager->getRepository(Tracelog::class)->find($tracelog->id);
             $this->manager->remove($tracelog);
@@ -88,21 +88,17 @@ class TracelogController extends AbstractController
     }
 
     /**
-     * @Rest\Post(path="/delete-selection", name="tracelog_selection_delete")
+     * @Rest\Post(path="/api/tracelog/delete-selection", name="tracelog_selection_delete")
      * @Rest\View(statusCode=200)
      */
     public function deleteMultiple(Request $request): array
     {
         $tracelogs = Utils::getObjectFromRequest($request);
-        if (!count($tracelogs)) {
-            throw $this->createNotFoundException("Sélectionner au minimum un élément à supprimer.");
-        }
         return $this->deleteTracelogs($tracelogs);
     }
 
-
     /**
-     * @Rest\Post(path="/delete-all", name="tracelog_selection_delete_all")
+     * @Rest\Post(path="/api/tracelog/delete-all", name="tracelog_selection_delete_all")
      * @Rest\View(statusCode=200)
      */
     public function emptyTracelogs(): array
