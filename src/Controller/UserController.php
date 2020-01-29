@@ -163,5 +163,4 @@ class UserController extends AbstractController {
 
         return $users;
     }
-
 }

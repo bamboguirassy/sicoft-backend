@@ -44,6 +44,8 @@ class ClasseController extends AbstractController {
 
         // check if numero and libelle already exist
         $this->checkNumeroAndLibelle($classe, $entityManager);
+        $this->checkCategorieAndType($classe);
+
         $entityManager->persist($classe);
         $entityManager->flush();
 
@@ -70,6 +72,8 @@ class ClasseController extends AbstractController {
 
         // check if numero and libelle already exist
         $this->checkEditClasseNumeroAndLibelle($classe, $em);
+        $this->checkCategorieAndType($classe);
+
         $em->flush();
 
         return $classe;
@@ -87,6 +91,7 @@ class ClasseController extends AbstractController {
         $form->submit(Utils::serializeRequestContent($request));
         // check if numero already exist
         $this->checkNumeroAndLibelle($classeNew, $em);
+        $this->checkCategorieAndType($classeNew);
         $em->persist($classeNew);
 
         $em->flush();
@@ -152,6 +157,22 @@ class ClasseController extends AbstractController {
         $searchedClasseByLibelle = $em->getRepository(Classe::class)->findByLibelle($classe->getLibelle());
         if (count($searchedClasseByLibelle)) {
             throw $this->createAccessDeniedException("Une classe avec le même libellé existe déjà, merci de changer de libellé...");
+        }
+    }
+
+    public function checkCategorieAndType(Classe $classe){
+        $targetClasse = $this->getDoctrine()->getManager()
+            ->createQuery(
+                'SELECT classe FROM App\Entity\Classe classe
+                 WHERE (classe.categorieClasse=:categorie AND classe.typeClasse=:type) 
+            ')->setParameter('categorie', $classe->getCategorieClasse())
+            ->setParameter('type', $classe->getTypeClasse())
+            ->getResult();
+
+        if($targetClasse){
+            if(count($targetClasse)!=0){
+                throw $this->createAccessDeniedException("Une classe avec les mêmes catégorie et type existent déjà.");
+            }
         }
     }
 

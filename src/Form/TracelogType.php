@@ -2,29 +2,29 @@
 
 namespace App\Form;
 
-use App\Entity\Exercice;
+use App\Entity\Tracelog;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class ExerciceType extends AbstractType
+class TracelogType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('code')
-            ->add('libelle')
-            ->add('dateDebut')
-            ->add('dateFin')
-            ->add('encours')
-            ->add('exerciceSuivant')
+            ->add('date')
+            ->add('ressource')
+            ->add('operation')
+            ->add('oldvalue')
+            ->add('newvalue')
+            ->add('userEmail')
         ;
     }
 
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'data_class' => Exercice::class,
+            'data_class' => Tracelog::class,
         ]);
     }
 }
