@@ -20,10 +20,23 @@
         "symfony/orm-pack": "^1.0",
         "symfony/security-csrf": "4.4.*",
         "symfony/swiftmailer-bundle": "^3.3",
+<<<<<<< HEAD
         "symfony/translation": "4.4.*",
         "symfony/twig-bundle": "4.4.*",
         "symfony/validator": "4.4.*",
+<<<<<<< HEAD
+        "symfony/yaml": "4.4.*",
+      "ext-json": "*"
+=======
         "symfony/yaml": "4.4.*"
+=======
+        "symfony/translation": "4.3.*",
+        "symfony/twig-bundle": "4.3.*",
+        "symfony/validator": "4.3.*",
+        "symfony/yaml": "4.3.*",
+      "ext-json": "*"
+>>>>>>> 3386ab1528b4c3d73e0d2c23990833dd916e4dad
+>>>>>>> 45a275c324d4e352b92d4391c9ccfd300aac17ce
     },
     "require-dev": {
         "symfony/maker-bundle": "^1.14",

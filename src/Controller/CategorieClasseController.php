@@ -40,8 +40,20 @@ class CategorieClasseController extends AbstractController
         $categorieClasse = new CategorieClasse();
         $form = $this->createForm(CategorieClasseType::class, $categorieClasse);
         $form->submit(Utils::serializeRequestContent($request));
-
         $entityManager = $this->getDoctrine()->getManager();
+
+        $searchedProviderByCode= $entityManager->getRepository(CategorieClasse::class)
+            ->findOneByCode($categorieClasse->getCode());
+        if ($searchedProviderByCode) {
+            throw $this->createAccessDeniedException("Une Catégorie classe avec ce même code existe déjà.");
+        }
+
+
+        $searchedProviderByNom= $entityManager->getRepository(CategorieClasse::class)
+            ->findOneByNom($categorieClasse->getNom());
+        if ($searchedProviderByNom) {
+            throw $this->createAccessDeniedException("Une Catégorie Classe avec ce même nom existe déjà.");
+        }
         $entityManager->persist($categorieClasse);
         $entityManager->flush();
 
@@ -67,6 +79,26 @@ class CategorieClasseController extends AbstractController
         $form = $this->createForm(CategorieClasseType::class, $categorieClasse);
         $form->submit(Utils::serializeRequestContent($request));
 
+        $targetFournisseur = $this->getDoctrine()->getManager()
+            ->createQuery(
+                'SELECT categorieClasse FROM App\Entity\CategorieClasse categorieClasse
+                 WHERE (categorieClasse.nom=:nom OR categorieClasse.code=:code) AND categorieClasse!=:categorieClasse
+            ')->setParameter('code', $categorieClasse->getCode())
+            ->setParameter('nom', $categorieClasse->getNom())
+            ->setParameter('categorieClasse', $categorieClasse)
+            ->getResult();
+        if($targetFournisseur) {
+            if ($targetFournisseur[0]->getCode() == $categorieClasse->getCode()) {
+                throw $this->createAccessDeniedException("Une Catégorie Classe avec ce même code existe déjà.");
+            }
+
+            if($targetFournisseur[0]->getNom() == $categorieClasse->getNom()) {
+                throw $this->createAccessDeniedException("Une Catégorie Classe avec ce même nom existe déjà.");
+            }
+
+
+        }
+
         $this->getDoctrine()->getManager()->flush();
 
         return $categorieClasse;
@@ -82,8 +114,21 @@ class CategorieClasseController extends AbstractController
         $categorieClasseNew=new CategorieClasse();
         $form = $this->createForm(CategorieClasseType::class, $categorieClasseNew);
         $form->submit(Utils::serializeRequestContent($request));
-        $em->persist($categorieClasseNew);
 
+
+        $searchedProviderByCode = $em->getRepository(CategorieClasse::class)
+            ->findOneByCode($categorieClasseNew->getCode());
+        if ($searchedProviderByCode) {
+            throw $this->createAccessDeniedException("Une Catégorie Classe avec ce même code existe déjà.");
+        }
+
+        $searchedProviderByNom = $em->getRepository(CategorieClasse::class)
+            ->findOneByNom($categorieClasseNew->getNom());
+        if ($searchedProviderByNom) {
+            throw $this->createAccessDeniedException("Une Catégorie Classe avec ce même nom existe déjà.");
+        }
+
+        $em->persist($categorieClasseNew);
         $em->flush();
 
         return $categorieClasseNew;

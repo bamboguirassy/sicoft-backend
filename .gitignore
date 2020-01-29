@@ -5,6 +5,7 @@
 /.env.*.local
 /.env
 
+
 /nbproject/private/*
 
 /public/bundles/
@@ -20,3 +21,6 @@
 /config/jwt/*.pem
 ###< lexik/jwt-authentication-bundle ###
 /nbproject
+/.idea
+/.idea/modules.xml
+/.idea/sicoft-backend.iml

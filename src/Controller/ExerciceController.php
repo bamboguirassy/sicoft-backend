@@ -74,18 +74,6 @@ class ExerciceController extends AbstractController
             $exercicePrecedant->setExerciceSuivant($exercice);
             $entityManager->flush();
         }
-        //$exercicePrecedant = $exercice->getExerciceSuivant();
-        /*$exercices = $entityManager->getRepository(Exercice::class)->findAll();
-        if (count($exercices) > 0){
-            $exercicePrecedant = end($exercices);
-            //var_dump($exercicePrecedant);
-            $oldExerciceSuivant = $entityManager->getRepository(Exercice::class)->findOneByExerciceSuivant($exercice->getId());
-            if ($oldExerciceSuivant){
-                throw $this->createAccessDeniedException("l'exercice précédant n'est pas correct!");
-            }
-            $exercicePrecedant->setExerciceSuivant($exercice);
-            $entityManager->flush();
-        }*/
         
         return $exercice;
     }

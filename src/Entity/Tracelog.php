@@ -63,24 +63,24 @@ class Tracelog
      */
     private $userEmail;
 
-    public function getId()
+    public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getDate()
+    public function getDate(): ?\DateTimeInterface
     {
         return $this->date;
     }
 
-    public function setDate($date): self
+    public function setDate(\DateTimeInterface $date): self
     {
         $this->date = $date;
 
         return $this;
     }
 
-    public function getRessource()
+    public function getRessource(): ?string
     {
         return $this->ressource;
     }
@@ -92,7 +92,7 @@ class Tracelog
         return $this;
     }
 
-    public function getOperation()
+    public function getOperation(): ?string
     {
         return $this->operation;
     }
@@ -104,31 +104,31 @@ class Tracelog
         return $this;
     }
 
-    public function getOldvalue()
+    public function getOldvalue(): ?string
     {
         return $this->oldvalue;
     }
 
-    public function setOldvalue($oldvalue): self
+    public function setOldvalue(?string $oldvalue): self
     {
         $this->oldvalue = $oldvalue;
 
         return $this;
     }
 
-    public function getNewvalue()
+    public function getNewvalue(): ?string
     {
         return $this->newvalue;
     }
 
-    public function setNewvalue($newvalue): self
+    public function setNewvalue(?string $newvalue): self
     {
         $this->newvalue = $newvalue;
 
         return $this;
     }
 
-    public function getUserEmail()
+    public function getUserEmail(): ?string
     {
         return $this->userEmail;
     }
