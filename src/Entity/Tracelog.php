@@ -139,6 +139,4 @@ class Tracelog
 
         return $this;
     }
-
-
 }
