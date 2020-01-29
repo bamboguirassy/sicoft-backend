@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -76,6 +78,19 @@ class Fournisseur
      * @ORM\Column(name="fonction_contact", type="string", length=45, nullable=true)
      */
     private $fonctionContact;
+    
+    /**
+     * @ORM\ManyToMany(targetEntity="App\Entity\Secteur")
+     * @ORM\JoinTable(name="fournisseur_secteur",
+     *      joinColumns={@ORM\JoinColumn(name="fournisseur", referencedColumnName="id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="secteur", referencedColumnName="id")}
+     * )
+     */
+    protected $secteurs;
+    
+    public function __construct() {
+        $this->secteurs = new ArrayCollection();
+    }
 
     public function getId()
     {
@@ -178,5 +193,12 @@ class Fournisseur
         return $this;
     }
 
+    /**
+     * @return Collection|Secteur[]
+     */
+    public function getSecteurs(): Collection
+    {
+        return $this->secteurs;
+    }
 
 }

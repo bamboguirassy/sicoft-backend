@@ -151,6 +151,8 @@ class GroupController extends AbstractController {
                 new AccessModel('Fournisseur', 'Fournisseur'),
                 new AccessModel('TypeSourceFinancement', 'Type source financement'),
                 new AccessModel('SourceFinancement', 'source financement'),
+                new AccessModel('TypeClasse', 'Type Classe'),
+                new AccessModel('CategorieClasse', 'Catégorie Classe'),
                     ]
             ),
             new AccessGroup("Gestion des Marchés", [

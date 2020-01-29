@@ -15,6 +15,8 @@ class ClasseType extends AbstractType
             ->add('numero')
             ->add('libelle')
             ->add('description')
+            ->add('categorieClasse')
+            ->add('typeClasse')
         ;
     }
 

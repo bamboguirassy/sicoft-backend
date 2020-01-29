@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -52,6 +54,19 @@ class EtatMarche
      * })
      */
     private $etatSuivant;
+    
+    /**
+     * @ORM\ManyToMany(targetEntity="App\Entity\User")
+     * @ORM\JoinTable(name="role_sur_marche",
+     *      joinColumns={@ORM\JoinColumn(name="etat_marche", referencedColumnName="id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="user", referencedColumnName="id")}
+     * )
+     */
+    protected $users;
+    
+    public function __construct() {
+        $this->users = new ArrayCollection();
+    }
 
     public function getId()
     {
@@ -104,6 +119,14 @@ class EtatMarche
         $this->etatSuivant = $etatSuivant;
 
         return $this;
+    }
+
+    /**
+     * @return Collection|User[]
+     */
+    public function getUsers(): Collection
+    {
+        return $this->users;
     }
 
 

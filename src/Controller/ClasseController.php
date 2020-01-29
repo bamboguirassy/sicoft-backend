@@ -25,8 +25,8 @@ class ClasseController extends AbstractController {
      */
     public function index(): array {
         $classes = $this->getDoctrine()
-                ->getRepository(Classe::class)
-                ->findAll();
+            ->getRepository(Classe::class)
+            ->findAll();
 
         return count($classes) ? $classes : [];
     }
@@ -41,7 +41,7 @@ class ClasseController extends AbstractController {
         $form = $this->createForm(ClasseType::class, $classe);
         $form->submit(Utils::serializeRequestContent($request));
         $entityManager = $this->getDoctrine()->getManager();
-        
+
         // check if numero and libelle already exist
         $this->checkNumeroAndLibelle($classe, $entityManager);
         $entityManager->persist($classe);
@@ -67,7 +67,7 @@ class ClasseController extends AbstractController {
     public function edit(Request $request, Classe $classe, EntityManagerInterface $em) {
         $form = $this->createForm(ClasseType::class, $classe);
         $form->submit(Utils::serializeRequestContent($request));
-        
+
         // check if numero and libelle already exist
         $this->checkEditClasseNumeroAndLibelle($classe, $em);
         $em->flush();
@@ -128,7 +128,7 @@ class ClasseController extends AbstractController {
     }
 
     //////////////////////////////////////// Tests /////////////////////////////////////////////
-    
+
     public function checkEditClasseNumeroAndLibelle(Classe $classe, EntityManagerInterface $em) {
         $searchedClasseByCode = $em->createQuery("select c from App\Entity\Classe c where c != :classe and c.numero = :num")->setParameter('classe', $classe)->setParameter('num', $classe->getNumero())->getResult();
         if (count($searchedClasseByCode)) {
@@ -141,8 +141,8 @@ class ClasseController extends AbstractController {
             throw $this->createAccessDeniedException("Une classe avec le même libellé existe déjà, merci de changer de libellé...");
         }
     }
-    
-    
+
+
     public function checkNumeroAndLibelle(Classe $classe, EntityManagerInterface $em) {
         $searchedClasseByNumero = $em->getRepository(Classe::class)->findByNumero($classe->getNumero());
         if (count($searchedClasseByNumero)) {

@@ -3,12 +3,10 @@
 /.env.local
 /.env.local.php
 /.env.*.local
-/.env/
-=======
+/.env
 
 
 /nbproject/private/*
-/nbproject
 
 /public/bundles/
 /var/
