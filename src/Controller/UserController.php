@@ -4,6 +4,9 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Form\UserType;
+use App\Repository\UserRepository;
+use FOS\RestBundle\Controller\AbstractFOSRestController;
+use JMS\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -159,6 +162,31 @@ class UserController extends AbstractController {
         $entityManager->flush();
 
         return $users;
+    }
+
+    /**
+     * @param $term
+     * @Rest\Get(path="/search/")
+     * @Rest\QueryParam(
+     *     name="term",
+     *     nullable=true,
+     *     description="Le terme a rechercher"
+     * )
+     * @Rest\QueryParam(
+     *     name="sortOrder",
+     *     nullable=true,
+     *     requirements="asc|desc",
+     *     default="asc",
+     *     description="Ordre d'affichage des user"
+     * )
+     * @return mixed
+     */
+
+    public function findUserByTerm($term, $sortOrder, UserRepository $userRepository, SerializerInterface $serializer) {
+
+        $users = $userRepository->searchByTerm($term, $sortOrder);
+        $serializedUsers = $serializer->serialize($users, 'json') ;
+        return new Response($serializedUsers);
     }
 
 }
