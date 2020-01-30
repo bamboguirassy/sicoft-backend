@@ -36,6 +36,7 @@ class TracelogController extends AbstractController
         return count($tracelogs) ? $tracelogs : [];
     }
 
+<<<<<<< HEAD
     // not to be exposed as api service
     public function create($ressource, $operation, $oldValue, $newValue, $user_email): void
     {
@@ -48,6 +49,8 @@ class TracelogController extends AbstractController
         $this->manager->flush();
     }
 
+=======
+>>>>>>> 3ff744dbe142aef92c52ec7009ba2fa083acb83f
     /**
      * @Rest\Get("/api/tracelog/{id}", name="tracelog_show")
      * @Rest\View(statusCode=200)
