@@ -97,12 +97,11 @@ class EntiteController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Entite_DELETE")
      */
-    public function delete(Entite $entite): Entite
+    public function delete(Entite $entite, TracelogController $controller): Entite
     {
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->remove($entite);
         $entityManager->flush();
-
         return $entite;
     }
 

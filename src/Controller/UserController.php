@@ -163,30 +163,4 @@ class UserController extends AbstractController {
 
         return $users;
     }
-
-    /**
-     * @param $term
-     * @Rest\Get(path="/search/")
-     * @Rest\QueryParam(
-     *     name="term",
-     *     nullable=true,
-     *     description="Le terme a rechercher"
-     * )
-     * @Rest\QueryParam(
-     *     name="sortOrder",
-     *     nullable=true,
-     *     requirements="asc|desc",
-     *     default="asc",
-     *     description="Ordre d'affichage des user"
-     * )
-     * @return mixed
-     */
-
-    public function findUserByTerm($term, $sortOrder, UserRepository $userRepository, SerializerInterface $serializer) {
-
-        $users = $userRepository->searchByTerm($term, $sortOrder);
-        $serializedUsers = $serializer->serialize($users, 'json') ;
-        return new Response($serializedUsers);
-    }
-
 }

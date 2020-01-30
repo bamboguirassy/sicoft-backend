@@ -94,11 +94,10 @@ class CompteController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Compte_DELETE")
      */
-    public function delete(Compte $compte): Compte    {
+    public function delete(Compte $compte, TracelogController $controller): Compte    {
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->remove($compte);
         $entityManager->flush();
-
         return $compte;
     }
     
