@@ -20,6 +20,7 @@ class FournisseurType extends AbstractType
             ->add('nomContact')
             ->add('telephoneContact')
             ->add('fonctionContact')
+            ->add('secteurs')
         ;
     }
 
