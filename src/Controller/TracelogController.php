@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Doctrine\ORM\EntityManagerInterface as Manager;
+use JMS\Serializer\SerializerBuilder as Serializer;
 
 class TracelogController extends AbstractController
 {
@@ -38,6 +39,14 @@ class TracelogController extends AbstractController
     // not to be exposed
     public function create($ressource, $operation, $oldValue, $newValue, $user_email): void
     {
+        $serializer = Serializer::create()->build();
+        $oldValue = $serializer->serialize($oldValue, 'json');
+
+        // checks if the value is declared and not null
+        if(!isset($newValue)) {
+            $newValue = $serializer->serialize($newValue, 'json');
+        }
+
         $tracelog = new Tracelog();
         $tracelog
             ->setDate(new \DateTime())
