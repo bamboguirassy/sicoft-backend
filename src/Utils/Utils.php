@@ -41,7 +41,7 @@ class Utils
         return $serializer->serialize($object, 'json');
     }
     
-    public static function createTracelog(ObjectManager $manager, $ressource, $operation, $oldValue, $newValue, $user_email): void
+    public static function createTracelog($manager, $ressource, $operation, $oldValue, $newValue, $user_email): void
     {
         if(isset($oldValue)) $oldValue = Utils::serialize($oldValue);
         if(isset($newValue)) $newValue = Utils::serialize($newValue);

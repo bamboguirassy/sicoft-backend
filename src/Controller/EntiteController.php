@@ -46,6 +46,7 @@ class EntiteController extends AbstractController
         $this->checkCodeAndNom($entite, $manager);
         $manager->persist($entite);
         $manager->flush();
+        Utils::createTracelog($manager, 'entite', 'create', null, $entite, $this->getUser()->getEmail());
         return $entite;
     }
 
@@ -66,10 +67,12 @@ class EntiteController extends AbstractController
      */
     public function edit(Request $request, Entite $entite, Manager $manager): Entite
     {
+        $oldEntity = clone($entite);
         $form = $this->createForm(EntiteType::class, $entite);
         $form->submit(Utils::serializeRequestContent($request));
         $this->checkEditCodeAndNom($entite, $manager);
         $this->getDoctrine()->getManager()->flush();
+        Utils::createTracelog($manager, 'entite', 'edit', $oldEntity, $entite, $this->getUser()->getEmail());
         return $entite;
     }
 
@@ -86,8 +89,8 @@ class EntiteController extends AbstractController
         $form->submit(Utils::serializeRequestContent($request));
         $this->checkCodeAndNom($entiteNew, $manager);
         $em->persist($entiteNew);
-
         $em->flush();
+        Utils::createTracelog($em, 'entite', 'clone', $entite, $entiteNew, $this->getUser()->getEmail());
 
         return $entiteNew;
     }
@@ -99,10 +102,11 @@ class EntiteController extends AbstractController
      */
     public function delete(Entite $entite): Entite
     {
+        $deletedEntity = clone($entite);
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->remove($entite);
         $entityManager->flush();
-        Utils::createTracelog($entityManager, 'entite', 'delete', $entite, null, $this->getUser()->getEmail());
+        Utils::createTracelog($entityManager, 'entite', 'delete', $deletedEntity, null, $this->getUser()->getEmail());
         return $entite;
     }
 
