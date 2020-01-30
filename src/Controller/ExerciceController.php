@@ -53,18 +53,28 @@ class ExerciceController extends AbstractController
             throw $this->createAccessDeniedException("La date de début d'exercie est supérieure à la date de fin");
         }
 
-        $odlCodeExcercice = $entityManager->getRepository(Exercice::class)->findOneByCode($requestData->code);
-            if ($odlCodeExcercice) {
+        $oldExcerciceByCode = $entityManager->getRepository(Exercice::class)->findOneByCode($exercice->getCode());
+            if ($oldExcerciceByCode) {
                 throw $this->createAccessDeniedException('Le code existe dèjà');
             }
-        $odlLibelleExcercice = $entityManager->getRepository(Exercice::class)->findOneByLibelle($requestData->libelle);
-            if ($odlLibelleExcercice) {
+        $oldExcerciceByLibelle = $entityManager->getRepository(Exercice::class)->findOneByLibelle($exercice->getLibelle());
+            if ($oldExcerciceByLibelle) {
                 throw $this->createAccessDeniedException('Le libelle existe dèjà');
             }
-           
+
+        $exercicePrecedant = $exercice->getExerciceSuivant();
+        $exercice->setExerciceSuivant(NULL);
         $entityManager->persist($exercice);
         $entityManager->flush();
-
+        if ($exercicePrecedant) {
+            if ($exercicePrecedant->getExerciceSuivant()) {
+                throw $this->createAccessDeniedException("L'excercie précédant est incorrect");
+            }
+            $exercicePrecedant->setExerciceSuivant($exercice);
+            $entityManager->flush();
+        }
+        Utils::create($entityManager, 'exercice', 'create', null, $exercice, $this->getUser());
+        
         return $exercice;
     }
 
@@ -94,6 +104,11 @@ class ExerciceController extends AbstractController
         $exercice->setDateFin(new \DateTime($datefin));
         if ($exercice->getDateDebut() > $exercice->getDateFin()) {
             throw $this->createAccessDeniedException("La date de début d'exercie est supérieure à la date de fin");
+        }
+        $exerciceSuivant = $exercice->getExerciceSuivant(); 
+        if ($exerciceSuivant && $exerciceSuivant->getExerciceSuivant()) { 
+                throw $this->createAccessDeniedException("L'excercie précédant est incorrect");
+            //$exercicePrecedant->setExerciceSuivant($exercice);
         }
 
         $this->getDoctrine()->getManager()->flush();
@@ -129,9 +144,20 @@ class ExerciceController extends AbstractController
             if ($odlLibelleExcercice) {
                 throw $this->createAccessDeniedException('Le libelle existe dèjà');
             }
+
+        $exercicePrecedant = $exercice->getExerciceSuivant();
+        $exercice->setExerciceSuivant(NULL);
+
         $em->persist($exerciceNew);
 
         $em->flush();
+        if ($exercicePrecedant) {
+            if ($exercicePrecedant->getExerciceSuivant()) {
+                throw $this->createAccessDeniedException("L'excercie précédant est incorrect");
+            }
+            $exercicePrecedant->setExerciceSuivant($exercice);
+            $em->flush();
+        }
 
         return $exerciceNew;
     }
@@ -141,11 +167,11 @@ class ExerciceController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Exercice_DELETE")
      */
-    public function delete(Exercice $exercice): Exercice    {
+    public function delete(Exercice $exercice, TracelogController $tracelog): Exercice    {
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->remove($exercice);
         $entityManager->flush();
-
+        $tracelog->create('exercice', 'delete', $exercice, null, $this->getUser()->getEmail());
         return $exercice;
     }
     

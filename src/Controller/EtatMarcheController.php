@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\EtatMarche;
+use App\Entity\User;
 use App\Form\EtatMarcheType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -64,7 +65,7 @@ class EtatMarcheController extends AbstractController
             throw $this->createAccessDeniedException("Veuillez choisir un autre etat comme étant celui précédent.");
         }
 
-        if($etatPrec && $etatPrec->getEtatSuivant()) {
+        if ($etatPrec && $etatPrec->getEtatSuivant()) {
             throw $this->createAccessDeniedException("L'etat que vous avez choisie à déjà un Etat Suivant");
         }
 
@@ -119,17 +120,17 @@ class EtatMarcheController extends AbstractController
             }
         }
 
-        $etatPrec = $etatMarche->getEtatSuivant();
-        if ($etatPrec === $etatMarche) {
+        $etatSuiv = $etatMarche->getEtatSuivant();
+        if ($etatSuiv === $etatMarche) {
             throw $this->createAccessDeniedException("Veuillez choisir un autre etat comme étant celui précendent.");
         }
 
-        if($etatPrec && $etatPrec->getEtatSuivant()) {
-            throw $this->createAccessDeniedException("L'etat que vous avez choisie à déjà un Etat Suivant");
+        if ($etatSuiv && $etatSuiv->getEtatSuivant() && ($etatSuiv !== $etatMarche->getEtatSuivant())) {
+            throw $this->createAccessDeniedException("L'etat que vous avez choisie à déjà un Etat Suivant.");
         }
 
-        if ($etatPrec) {
-            $etatPrec->setEtatSuivant($etatMarche);
+        if ($etatSuiv) {
+            $etatSuiv->setEtatSuivant($etatMarche);
             $this->getDoctrine()->getManager()->flush();
         }
 
@@ -162,11 +163,11 @@ class EtatMarcheController extends AbstractController
             throw $this->createAccessDeniedException("Un Etat Marche avec le même libelle existe déjà.");
         }
         $etatPrec = $etatMarcheNew->getEtatSuivant();
-        if ($etatPrec === $etatMarcheNew ) {
+        if ($etatPrec === $etatMarcheNew) {
             throw $this->createAccessDeniedException("Veuillez choisir un autre etat comme étant celui précendent.");
         }
 
-        if($etatPrec && $etatPrec->getEtatSuivant()) {
+        if ($etatPrec && $etatPrec->getEtatSuivant()) {
             throw $this->createAccessDeniedException("L'etat que vous avez choisie à déjà un Etat Suivant");
         }
 
@@ -214,5 +215,27 @@ class EtatMarcheController extends AbstractController
         }
 
         return $etatMarches;
+    }
+
+    /**
+     * @Rest\Get(path="/{id}/users", name="not_added_users")
+     * @Rest\View(statusCode=200)
+     * @IsGranted("ROLE_EtatMarche_INDEX")
+     */
+    public function fetchNotAddedUser(EtatMarche $etatMarche)
+    {
+        $addedUsers = $etatMarche->getUsers()->toArray();
+        $users = $this->getDoctrine()->getRepository(User::class)
+            ->findAll();
+        $notAddedUser = [];
+        if(!count($addedUsers)) {
+            return $users;
+        }
+        foreach ($users as $user) {
+            if(!in_array($user, $addedUsers)) {
+                $notAddedUser[] = $user;
+            }
+        }
+        return $notAddedUser;
     }
 }

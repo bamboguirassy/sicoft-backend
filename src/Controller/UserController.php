@@ -49,6 +49,12 @@ class UserController extends AbstractController {
         if (count($searchedUserByEmail)) {
             throw $this->createAccessDeniedException("Cette adresse email est déja utilisée pour un autre compte...");
         }
+        //verification numéro de téléphone unique
+        $searchedUserBytelephone = $entityManager->getRepository(User::class)
+            ->findByTelephone($user->getTelephone());
+        if (count($searchedUserBytelephone)) {
+            throw $this->createAccessDeniedException("Cette numéro est déja utilisée pour un autre compte...");
+        }
         $user->setUsername($user->getEmail());
         $confirmationToken = md5(random_bytes(20));
         $user->setConfirmationToken($confirmationToken);
@@ -111,6 +117,12 @@ class UserController extends AbstractController {
         if (count($searchedUserByEmail)) {
             throw $this->createAccessDeniedException("Cette adresse email est déja utilisée pour un autre compte...");
         }
+        //verification numéro de téléphone unique
+        $searchedUserBytelephone = $entityManager->getRepository(User::class)
+            ->findByTelephone($user->getTelephone());
+        if (count($searchedUserBytelephone)) {
+            throw $this->createAccessDeniedException("Cette numéro est déja utilisée pour un autre compte...");
+        }
         $userNew->setUsername($userNew->getEmail());
         $plainPassword= md5(random_bytes(10));
         $userNew->setPassword($passwordEncoder->encodePassword($userNew, $plainPassword));
@@ -163,30 +175,4 @@ class UserController extends AbstractController {
 
         return $users;
     }
-
-    /**
-     * @param $term
-     * @Rest\Get(path="/search/")
-     * @Rest\QueryParam(
-     *     name="term",
-     *     nullable=true,
-     *     description="Le terme a rechercher"
-     * )
-     * @Rest\QueryParam(
-     *     name="sortOrder",
-     *     nullable=true,
-     *     requirements="asc|desc",
-     *     default="asc",
-     *     description="Ordre d'affichage des user"
-     * )
-     * @return mixed
-     */
-
-    public function findUserByTerm($term, $sortOrder, UserRepository $userRepository, SerializerInterface $serializer) {
-
-        $users = $userRepository->searchByTerm($term, $sortOrder);
-        $serializedUsers = $serializer->serialize($users, 'json') ;
-        return new Response($serializedUsers);
-    }
-
 }

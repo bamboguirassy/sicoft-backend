@@ -16,6 +16,8 @@ class ExerciceType extends AbstractType
             ->add('libelle')
             ->add('dateDebut')
             ->add('dateFin')
+            ->add('encours')
+            ->add('exerciceSuivant')
         ;
     }
 
