@@ -9,10 +9,12 @@
 namespace App\Utils;
 
 use App\Entity\Tracelog;
+use Normalizer as GlobalNormalizer;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
+use Symfony\Component\Serializer\Normalizer;
 
 /**
  * Description of Utils
@@ -40,7 +42,7 @@ class Utils
         if ($object != null) {
             $encoders = new JsonEncoder();
             $normalizers = new ObjectNormalizer();
-            $normalizer->setCircularReferenceHandler(function ($object) {
+            $normalizers->setCircularReferenceHandler(function ($object) {
                 return $object->getId(); // Change this to a valid method of your object
             });
 
@@ -61,7 +63,7 @@ class Utils
             ->setUserEmail($user_email);
 
         $em->persist($tracelog);
-        $em->manager->flush();
+        $em->flush();
     }
 
 }
