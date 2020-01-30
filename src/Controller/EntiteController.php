@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Entite;
 use App\Form\EntiteType;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityManagerInterface as Manager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -45,7 +46,6 @@ class EntiteController extends AbstractController
         $this->checkCodeAndNom($entite, $manager);
         $manager->persist($entite);
         $manager->flush();
-
         return $entite;
     }
 
@@ -97,12 +97,12 @@ class EntiteController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Entite_DELETE")
      */
-    public function delete(Entite $entite, TracelogController $tracelog): Entite
+    public function delete(Entite $entite): Entite
     {
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->remove($entite);
         $entityManager->flush();
-        $tracelog->create('entite', 'delete', $entite, null, $this->getUser()->getEmail());
+        Utils::createTracelog($entityManager, 'entite', 'delete', $entite, null, $this->getUser()->getEmail());
         return $entite;
     }
 

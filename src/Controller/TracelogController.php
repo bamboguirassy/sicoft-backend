@@ -3,15 +3,14 @@
 namespace App\Controller;
 
 use App\Entity\Tracelog;
-use App\Form\TracelogType;
 use App\Utils\Utils;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Doctrine\ORM\EntityManagerInterface as Manager;
-use JMS\Serializer\SerializerBuilder as Serializer;
+use Symfony\Component\Routing\Annotation\Route;
 
+/**@Route("/api/tracelog")*/
 class TracelogController extends AbstractController
 {
     /**
@@ -25,7 +24,7 @@ class TracelogController extends AbstractController
     }
 
     /**
-     * @Rest\Get("/api/tracelog/", name="tracelog_index")
+     * @Rest\Get("/", name="tracelog_index")
      * @Rest\View(StatusCode = 200)
      */
     public function index(): array
@@ -36,23 +35,8 @@ class TracelogController extends AbstractController
         return count($tracelogs) ? $tracelogs : [];
     }
 
-<<<<<<< HEAD
-    // not to be exposed as api service
-    public function create($ressource, $operation, $oldValue, $newValue, $user_email): void
-    {
-        $oldValue = Utils::serialize($oldValue);
-        # new value might not exist when on delete
-        if(!isset($newValue)) $newValue = Utils::serialize($newValue);
-        $tracelog = new Tracelog();
-        $tracelog->setDate(new \DateTime())->setNewvalue($newValue)->setOperation($operation)->setOldvalue($oldValue)->setRessource($ressource)->setUserEmail($user_email);
-        $this->manager->persist($tracelog);
-        $this->manager->flush();
-    }
-
-=======
->>>>>>> 3ff744dbe142aef92c52ec7009ba2fa083acb83f
     /**
-     * @Rest\Get("/api/tracelog/{id}", name="tracelog_show")
+     * @Rest\Get("/{id}", name="tracelog_show")
      * @Rest\View(statusCode=200)
      */
     public function show(Tracelog $tracelog): Tracelog
@@ -61,7 +45,7 @@ class TracelogController extends AbstractController
     }
 
     /**
-     * @Rest\Delete("/api/tracelog/{id}", name="tracelog_delete")
+     * @Rest\Delete("/{id}", name="tracelog_delete")
      * @Rest\View(statusCode=200)
      */
     public function delete(Tracelog $tracelog): Tracelog
@@ -88,7 +72,7 @@ class TracelogController extends AbstractController
     }
 
     /**
-     * @Rest\Post(path="/api/tracelog/delete-selection", name="tracelog_selection_delete")
+     * @Rest\Post(path="/delete-selection", name="tracelog_selection_delete")
      * @Rest\View(statusCode=200)
      */
     public function deleteMultiple(Request $request): array
@@ -98,7 +82,7 @@ class TracelogController extends AbstractController
     }
 
     /**
-     * @Rest\Post(path="/api/tracelog/delete-all", name="tracelog_selection_delete_all")
+     * @Rest\Post(path="/delete-all", name="tracelog_selection_delete_all")
      * @Rest\View(statusCode=200)
      */
     public function emptyTracelogs(): array
