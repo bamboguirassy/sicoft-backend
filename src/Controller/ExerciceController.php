@@ -65,8 +65,7 @@ class ExerciceController extends AbstractController
         $exercicePrecedant = $exercice->getExerciceSuivant();
         $exercice->setExerciceSuivant(NULL);
         $entityManager->persist($exercice);
-        $entityManager->flush();  
-
+        $entityManager->flush();
         if ($exercicePrecedant) {
             if ($exercicePrecedant->getExerciceSuivant()) {
                 throw $this->createAccessDeniedException("L'excercie précédant est incorrect");
@@ -74,6 +73,7 @@ class ExerciceController extends AbstractController
             $exercicePrecedant->setExerciceSuivant($exercice);
             $entityManager->flush();
         }
+        Utils::create($entityManager, 'Exercice', 'create', null, $exercice, $this->getUser());
         
         return $exercice;
     }
