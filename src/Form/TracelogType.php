@@ -2,28 +2,29 @@
 
 namespace App\Form;
 
-use App\Entity\EtatMarche;
+use App\Entity\Tracelog;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class EtatMarcheType extends AbstractType
+class TracelogType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('code')
-            ->add('libelle')
-            ->add('description')
-            ->add('etatSuivant')
-            ->add('users')
+            ->add('date')
+            ->add('ressource')
+            ->add('operation')
+            ->add('oldvalue')
+            ->add('newvalue')
+            ->add('userEmail')
         ;
     }
 
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'data_class' => EtatMarche::class,
+            'data_class' => Tracelog::class,
         ]);
     }
 }
