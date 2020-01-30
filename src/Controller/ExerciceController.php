@@ -73,7 +73,6 @@ class ExerciceController extends AbstractController
             $exercicePrecedant->setExerciceSuivant($exercice);
             $entityManager->flush();
         }
-        Utils::create($entityManager, 'exercice', 'create', null, $exercice, $this->getUser());
         
         return $exercice;
     }
@@ -93,7 +92,8 @@ class ExerciceController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Exercice_EDIT")
      */
-    public function edit(Request $request, Exercice $exercice): Exercice    {
+    public function edit(Request $request, Exercice $exercice): Exercice {
+        $entityManager = $this->getDoctrine()->getManager();
         $form = $this->createForm(ExerciceType::class, $exercice);
         $form->submit(Utils::serializeRequestContent($request));
         
@@ -111,7 +111,7 @@ class ExerciceController extends AbstractController
             //$exercicePrecedant->setExerciceSuivant($exercice);
         }
 
-        $this->getDoctrine()->getManager()->flush();
+        $entityManager->flush();
 
         return $exercice;
     }
