@@ -9,6 +9,7 @@
 namespace App\Utils;
 
 use App\Entity\Tracelog;
+use Doctrine\Common\Persistence\ObjectManager;
 use JMS\Serializer\SerializerBuilder as Serializer;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -33,26 +34,21 @@ class Utils
     {
         return json_decode($request->getContent());
     }
-    
-    public static function create($em, $ressource, $operation, $oldValue, $newValue, $user_email): void
-    {
-        $tracelog = new Tracelog();
-        $tracelog
-            ->setDate(new \DateTime())
-            ->setNewvalue(Utils::serialize($newValue))
-            ->setOperation($operation)
-            ->setOldvalue(Utils::serialize($oldValue))
-            ->setRessource($ressource)
-            ->setUserEmail($user_email);
-
-        $em->persist($tracelog);
-        $em->flush();
-    }
 
     public static function serialize($object)
     {
         $serializer = Serializer::create()->build();
         return $serializer->serialize($object, 'json');
     }
+    
+    public static function createTracelog($manager, $ressource, $operation, $oldValue, $newValue, $user_email): void
+    {
+        if(isset($oldValue)) $oldValue = Utils::serialize($oldValue);
+        if(isset($newValue)) $newValue = Utils::serialize($newValue);
 
+        $tracelog = new Tracelog();
+        $tracelog->setDate(new \DateTime())->setNewvalue($newValue)->setOperation($operation)->setOldvalue($oldValue)->setRessource($ressource)->setUserEmail($user_email);
+        $manager->persist($tracelog);
+        $manager->flush();
+    }
 }

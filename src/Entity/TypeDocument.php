@@ -35,12 +35,12 @@ class TypeDocument
      */
     private $description;
 
-    public function getId()
+    public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getLibelle()
+    public function getLibelle(): ?string
     {
         return $this->libelle;
     }
@@ -52,12 +52,12 @@ class TypeDocument
         return $this;
     }
 
-    public function getDescription()
+    public function getDescription(): ?string
     {
         return $this->description;
     }
 
-    public function setDescription($description): self
+    public function setDescription(?string $description): self
     {
         $this->description = $description;
 
