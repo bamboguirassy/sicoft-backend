@@ -39,23 +39,11 @@ class TracelogController extends AbstractController
     // not to be exposed
     public function create($ressource, $operation, $oldValue, $newValue, $user_email): void
     {
-        $serializer = Serializer::create()->build();
-        $oldValue = $serializer->serialize($oldValue, 'json');
-
-        // checks if the value is declared and not null
-        if(!isset($newValue)) {
-            $newValue = $serializer->serialize($newValue, 'json');
-        }
-
+        $oldValue = Utils::serialize($oldValue);
+        # new value might not exist on delete
+        if(!isset($newValue)) $newValue = Utils::serialize($newValue);
         $tracelog = new Tracelog();
-        $tracelog
-            ->setDate(new \DateTime())
-            ->setNewvalue($newValue)
-            ->setOperation($operation)
-            ->setOldvalue($oldValue)
-            ->setRessource($ressource)
-            ->setUserEmail($user_email);
-
+        $tracelog->setDate(new \DateTime())->setNewvalue($newValue)->setOperation($operation)->setOldvalue($oldValue)->setRessource($ressource)->setUserEmail($user_email);
         $this->manager->persist($tracelog);
         $this->manager->flush();
     }

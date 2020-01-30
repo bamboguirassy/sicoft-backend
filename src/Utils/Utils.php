@@ -8,6 +8,7 @@
 
 namespace App\Utils;
 
+use JMS\Serializer\SerializerBuilder as Serializer;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -27,6 +28,12 @@ class Utils {
     
     public static function getObjectFromRequest(Request $request) {
         return json_decode($request->getContent());
+    }
+
+    public static function serialize($object)
+    {
+        $serializer = Serializer::create()->build();
+        return $serializer->serialize($object, 'json');
     }
 
 }

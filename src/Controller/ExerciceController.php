@@ -167,11 +167,11 @@ class ExerciceController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Exercice_DELETE")
      */
-    public function delete(Exercice $exercice): Exercice    {
+    public function delete(Exercice $exercice, TracelogController $tracelog): Exercice    {
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->remove($exercice);
         $entityManager->flush();
-
+        $tracelog->create('exercice', 'delete', $exercice, null, $this->getUser()->getEmail());
         return $exercice;
     }
     
