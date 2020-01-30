@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Doctrine\ORM\EntityManagerInterface as Manager;
+use JMS\Serializer\SerializerBuilder as Serializer;
 
 class TracelogController extends AbstractController
 {
@@ -33,22 +34,6 @@ class TracelogController extends AbstractController
             ->getRepository(Tracelog::class)
             ->findAll();
         return count($tracelogs) ? $tracelogs : [];
-    }
-
-    // not to be exposed
-    public function create($ressource, $operation, $oldValue, $newValue, $user_email): void
-    {
-        $tracelog = new Tracelog();
-        $tracelog
-            ->setDate(new \DateTime())
-            ->setNewvalue($newValue)
-            ->setOperation($operation)
-            ->setOldvalue($oldValue)
-            ->setRessource($ressource)
-            ->setUserEmail($user_email);
-
-        $this->manager->persist($tracelog);
-        $this->manager->flush();
     }
 
     /**

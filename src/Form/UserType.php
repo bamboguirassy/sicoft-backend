@@ -28,6 +28,7 @@ class UserType extends AbstractType
             ->add('telephone')
             ->add('groups')
             ->add('fonction')
+            ->add('entites')
         ;
     }
 
