@@ -1,18 +1,18 @@
 import { Component, OnInit } from '@angular/core';
-import { <?= $entity_class_name ?> } from '../user';
+import { <?= $entity_class_name ?> } from '../<?= $route_name ?>';
 import { ActivatedRoute, Router } from '@angular/router';
-import { <?= $entity_class_name ?>Service } from '../user.service';
-import { <?= $entity_twig_var_singular ?>Columns, allowed<?= $entity_class_name ?>FieldsForFilter } from '../user.columns';
-import { ExportService } from 'src/app/shared/services/export.service';
+import { <?= $entity_class_name ?>Service } from '../<?= $route_name ?>.service';
+import { <?= $entity_twig_var_singular ?>Columns, allowed<?= $entity_class_name ?>FieldsForFilter } from '../<?= $route_name ?>.columns';
+import { ExportService } from 'app/shared/services/export.service';
 import { MenuItem } from 'primeng/api';
-import { AuthService } from 'src/app/shared/services/auth.service';
-import { NotificationService } from 'src/app/shared/services/notification.service';
+import { AuthService } from 'app/shared/services/auth.service';
+import { NotificationService } from 'app/shared/services/notification.service';
 
 
 @Component({
-  selector: 'app-user-list',
-  templateUrl: './user-list.component.html',
-  styleUrls: ['./user-list.component.scss']
+  selector: 'app-<?= $route_name ?>-list',
+  templateUrl: './<?= $route_name ?>-list.component.html',
+  styleUrls: ['./<?= $route_name ?>-list.component.scss']
 })
 export class <?= $entity_class_name ?>ListComponent implements OnInit {
 
@@ -69,8 +69,12 @@ export class <?= $entity_class_name ?>ListComponent implements OnInit {
   }
 
   deleteSelected<?= $entity_class_name ?>s(<?= $entity_twig_var_singular ?>: <?= $entity_class_name ?>) {
-    this.<?= $entity_twig_var_singular ?>Srv.removeSelection(this.selected<?= $entity_class_name ?>s)
+    if(this.selected<?= $entity_class_name ?>s){
+      this.<?= $entity_twig_var_singular ?>Srv.removeSelection(this.selected<?= $entity_class_name ?>s)
       .subscribe(data => this.refreshList(), error => this.<?= $entity_twig_var_singular ?>Srv.httpSrv.handleError(error));
+      } else {
+      this.<?= $entity_twig_var_singular ?>Srv.httpSrv.notificationSrv.showError("Selectionner au moins un élement à supprimer");
+    }
   }
 
   refreshList() {
