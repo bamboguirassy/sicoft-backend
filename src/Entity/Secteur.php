@@ -41,6 +41,19 @@ class Secteur
      * @ORM\Column(name="description", type="text", length=0, nullable=true)
      */
     private $description;
+    
+    /**
+     * @ORM\ManyToMany(targetEntity="App\Entity\Fournisseur")
+     * @ORM\JoinTable(name="fournisseur_secteur",
+     *      joinColumns={@ORM\JoinColumn(name="secteur", referencedColumnName="id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="fournisseur", referencedColumnName="id")}
+     * )
+     */
+    protected $fournisseurs;
+    
+    public function __construct() {
+        $this->fournisseurs = new ArrayCollection();
+    }
 
     public function getId()
     {
