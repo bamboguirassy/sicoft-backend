@@ -3,7 +3,7 @@ import { <?= $entity_class_name ?> } from '../<?= $route_name ?>';
 import { ActivatedRoute, Router } from '@angular/router';
 import { <?= $entity_class_name ?>Service } from '../<?= $route_name ?>.service';
 import { Location } from '@angular/common';
-import { NotificationService } from 'src/app/shared/services/notification.service';
+import { NotificationService } from 'app/shared/services/notification.service';
 
 @Component({
   selector: 'app-<?= $route_name ?>-show',

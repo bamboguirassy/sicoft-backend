@@ -1,6 +1,6 @@
 
 import { Injectable } from '@angular/core';
-import { HttpService } from 'src/app/shared/services/http.service';
+import { HttpService } from 'app/shared/services/http.service';
 import { <?= $entity_class_name ?> } from './<?= $route_name ?>';
 
 @Injectable({

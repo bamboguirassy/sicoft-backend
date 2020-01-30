@@ -73,7 +73,7 @@ class Tracelog
         return $this->date;
     }
 
-    public function setDate($date): self
+    public function setDate(\DateTimeInterface $date): self
     {
         $this->date = $date;
 
@@ -139,4 +139,6 @@ class Tracelog
 
         return $this;
     }
+
+
 }

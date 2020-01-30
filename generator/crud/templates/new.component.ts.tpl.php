@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { <?= $entity_class_name ?> } from '../<?= $route_name ?>';
 import { <?= $entity_class_name ?>Service } from '../<?= $route_name ?>.service';
-import { NotificationService } from 'src/app/shared/services/notification.service';
+import { NotificationService } from 'app/shared/services/notification.service';
 import { Router } from '@angular/router';
 import { Location } from '@angular/common';
 
