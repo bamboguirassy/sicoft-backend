@@ -36,11 +36,11 @@ class TracelogController extends AbstractController
         return count($tracelogs) ? $tracelogs : [];
     }
 
-    // not to be exposed
+    // not to be exposed as api service
     public function create($ressource, $operation, $oldValue, $newValue, $user_email): void
     {
         $oldValue = Utils::serialize($oldValue);
-        # new value might not exist on delete
+        # new value might not exist when on delete
         if(!isset($newValue)) $newValue = Utils::serialize($newValue);
         $tracelog = new Tracelog();
         $tracelog->setDate(new \DateTime())->setNewvalue($newValue)->setOperation($operation)->setOldvalue($oldValue)->setRessource($ressource)->setUserEmail($user_email);
