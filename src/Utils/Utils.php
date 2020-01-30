@@ -9,12 +9,8 @@
 namespace App\Utils;
 
 use App\Entity\Tracelog;
-use Normalizer as GlobalNormalizer;
+use JMS\Serializer\SerializerBuilder as Serializer;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Serializer\Encoder\JsonEncoder;
-use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
-use Symfony\Component\Serializer\Serializer;
-use Symfony\Component\Serializer\Normalizer;
 
 /**
  * Description of Utils
@@ -37,20 +33,7 @@ class Utils
     {
         return json_decode($request->getContent());
     }
-    public static function serialize($object)
-    {
-        if ($object != null) {
-            $encoders = new JsonEncoder();
-            $normalizers = new ObjectNormalizer();
-            $normalizers->setCircularReferenceHandler(function ($object) {
-                return $object->getId(); // Change this to a valid method of your object
-            });
-
-            $serializer = new Serializer(array($normalizers), array($encoders));
-
-            return $serializer->serialize($object, 'json');
-        }
-    }
+    
     public static function create($em, $ressource, $operation, $oldValue, $newValue, $user_email): void
     {
         $tracelog = new Tracelog();
@@ -64,6 +47,12 @@ class Utils
 
         $em->persist($tracelog);
         $em->flush();
+    }
+
+    public static function serialize($object)
+    {
+        $serializer = Serializer::create()->build();
+        return $serializer->serialize($object, 'json');
     }
 
 }
