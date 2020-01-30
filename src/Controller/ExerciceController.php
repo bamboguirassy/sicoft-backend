@@ -65,8 +65,7 @@ class ExerciceController extends AbstractController
         $exercicePrecedant = $exercice->getExerciceSuivant();
         $exercice->setExerciceSuivant(NULL);
         $entityManager->persist($exercice);
-        $entityManager->flush();  
-
+        $entityManager->flush();
         if ($exercicePrecedant) {
             if ($exercicePrecedant->getExerciceSuivant()) {
                 throw $this->createAccessDeniedException("L'excercie précédant est incorrect");
@@ -74,7 +73,6 @@ class ExerciceController extends AbstractController
             $exercicePrecedant->setExerciceSuivant($exercice);
             $entityManager->flush();
         }
-        
         return $exercice;
     }
 
@@ -167,11 +165,10 @@ class ExerciceController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Exercice_DELETE")
      */
-    public function delete(Exercice $exercice, TracelogController $tracelog): Exercice    {
+    public function delete(Exercice $exercice): Exercice    {
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->remove($exercice);
         $entityManager->flush();
-        $tracelog->create('exercice', 'delete', $exercice, null, $this->getUser()->getEmail());
         return $exercice;
     }
     
