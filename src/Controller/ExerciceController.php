@@ -30,7 +30,7 @@ class ExerciceController extends AbstractController
             ->getRepository(Exercice::class)
             ->findAll();
 
-        return count($exercices)?$exercices:[];
+        return count($exercices) ? $exercices : [];
     }
 
     /**
@@ -38,7 +38,8 @@ class ExerciceController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Exercice_CREATE")
      */
-    public function create(Request $request): Exercice    {
+    public function create(Request $request): Exercice
+    {
         $exercice = new Exercice();
         $entityManager = $this->getDoctrine()->getManager();
         $form = $this->createForm(ExerciceType::class, $exercice);
@@ -54,18 +55,24 @@ class ExerciceController extends AbstractController
         }
 
         $oldExcerciceByCode = $entityManager->getRepository(Exercice::class)->findOneByCode($exercice->getCode());
-            if ($oldExcerciceByCode) {
-                throw $this->createAccessDeniedException('Le code existe dèjà');
-            }
+        if ($oldExcerciceByCode) {
+            throw $this->createAccessDeniedException('Le code existe dèjà');
+        }
         $oldExcerciceByLibelle = $entityManager->getRepository(Exercice::class)->findOneByLibelle($exercice->getLibelle());
-            if ($oldExcerciceByLibelle) {
-                throw $this->createAccessDeniedException('Le libelle existe dèjà');
-            }
+        if ($oldExcerciceByLibelle) {
+            throw $this->createAccessDeniedException('Le libelle existe dèjà');
+        }
+
+        $currentYear = $entityManager->getRepository(Exercice::class)
+            ->findBy(['encours' => true]);
+        if ($currentYear) {
+            throw $this->createAccessDeniedException("un exercice est déjà actif.");
+        }
 
         $exercicePrecedant = $exercice->getExerciceSuivant();
         $exercice->setExerciceSuivant(NULL);
         $entityManager->persist($exercice);
-        $entityManager->flush();  
+        $entityManager->flush();
 
         if ($exercicePrecedant) {
             if ($exercicePrecedant->getExerciceSuivant()) {
@@ -74,7 +81,8 @@ class ExerciceController extends AbstractController
             $exercicePrecedant->setExerciceSuivant($exercice);
             $entityManager->flush();
         }
-        
+
+
         return $exercice;
     }
 
@@ -83,20 +91,22 @@ class ExerciceController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Exercice_SHOW")
      */
-    public function show(Exercice $exercice): Exercice    {
+    public function show(Exercice $exercice): Exercice
+    {
         return $exercice;
     }
 
-    
+
     /**
      * @Rest\Put(path="/{id}/edit", name="exercice_edit",requirements = {"id"="\d+"})
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Exercice_EDIT")
      */
-    public function edit(Request $request, Exercice $exercice): Exercice    {
+    public function edit(Request $request, Exercice $exercice, $operation): Exercice
+    {
         $form = $this->createForm(ExerciceType::class, $exercice);
         $form->submit(Utils::serializeRequestContent($request));
-        
+
         $requestData = Utils::getObjectFromRequest($request);
         $datedebut = $requestData->dateDebut;
         $datefin = $requestData->dateFin;
@@ -105,9 +115,9 @@ class ExerciceController extends AbstractController
         if ($exercice->getDateDebut() > $exercice->getDateFin()) {
             throw $this->createAccessDeniedException("La date de début d'exercie est supérieure à la date de fin");
         }
-        $exerciceSuivant = $exercice->getExerciceSuivant(); 
-        if ($exerciceSuivant && $exerciceSuivant->getExerciceSuivant()) { 
-                throw $this->createAccessDeniedException("L'excercie précédant est incorrect");
+        $exerciceSuivant = $exercice->getExerciceSuivant();
+        if ($exerciceSuivant && $exerciceSuivant->getExerciceSuivant()) {
+            throw $this->createAccessDeniedException("L'excercie précédant est incorrect");
             //$exercicePrecedant->setExerciceSuivant($exercice);
         }
 
@@ -115,15 +125,16 @@ class ExerciceController extends AbstractController
 
         return $exercice;
     }
-    
+
     /**
      * @Rest\Put(path="/{id}/clone", name="exercice_clone",requirements = {"id"="\d+"})
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Exercice_CLONE")
      */
-    public function cloner(Request $request, Exercice $exercice):  Exercice {
-        $em=$this->getDoctrine()->getManager();
-        $exerciceNew=new Exercice();
+    public function cloner(Request $request, Exercice $exercice): Exercice
+    {
+        $em = $this->getDoctrine()->getManager();
+        $exerciceNew = new Exercice();
         $form = $this->createForm(ExerciceType::class, $exerciceNew);
         $form->submit(Utils::serializeRequestContent($request));
 
@@ -135,15 +146,15 @@ class ExerciceController extends AbstractController
         if ($exercice->getDateDebut() > $exercice->getDateFin()) {
             throw $this->createAccessDeniedException("La date de début d'exercie est supérieure à la date de fin");
         }
-        
+
         $odlCodeExcercice = $em->getRepository(Exercice::class)->findOneByCode($requestData->code);
-            if ($odlCodeExcercice) {
-                throw $this->createAccessDeniedException('Le code existe dèjà');
-            }
+        if ($odlCodeExcercice) {
+            throw $this->createAccessDeniedException('Le code existe dèjà');
+        }
         $odlLibelleExcercice = $em->getRepository(Exercice::class)->findOneByLibelle($requestData->libelle);
-            if ($odlLibelleExcercice) {
-                throw $this->createAccessDeniedException('Le libelle existe dèjà');
-            }
+        if ($odlLibelleExcercice) {
+            throw $this->createAccessDeniedException('Le libelle existe dèjà');
+        }
 
         $exercicePrecedant = $exercice->getExerciceSuivant();
         $exercice->setExerciceSuivant(NULL);
@@ -167,20 +178,22 @@ class ExerciceController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Exercice_DELETE")
      */
-    public function delete(Exercice $exercice): Exercice    {
+    public function delete(Exercice $exercice): Exercice
+    {
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->remove($exercice);
         $entityManager->flush();
 
         return $exercice;
     }
-    
+
     /**
      * @Rest\Post("/delete-selection/", name="exercice_selection_delete")
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Exercice_DELETE")
      */
-    public function deleteMultiple(Request $request): array {
+    public function deleteMultiple(Request $request): array
+    {
         $entityManager = $this->getDoctrine()->getManager();
         $exercices = Utils::getObjectFromRequest($request);
         if (!count($exercices)) {
@@ -194,4 +207,37 @@ class ExerciceController extends AbstractController
 
         return $exercices;
     }
+
+    /**
+     * @Rest\Post(Path="/create-enable", name="exercice_new_enable")
+     * @Rest\View(StatusCode=200)
+     * @IsGranted("ROLE_Exercice_CREATE")
+     */
+
+    public function createAndDisableExerciceExcept(Request $request)
+    {
+        $exercice = new Exercice();
+        $entityManager = $this->getDoctrine()->getManager();
+        $form = $this->createForm(ExerciceType::class, $exercice);
+        $form->submit(Utils::serializeRequestContent($request));
+
+        $requestData = Utils::getObjectFromRequest($request);
+        $datedebut = $requestData->dateDebut;
+        $datefin = $requestData->dateFin;
+        $exercice->setDateDebut(new \DateTime($datedebut));
+        $exercice->setDateFin(new \DateTime($datefin));
+
+        $entityManager->persist($exercice);
+        $entityManager->flush();
+
+
+        $this->getDoctrine()->getManager()
+            ->createQuery('UPDATE App\Entity\Exercice ex SET ex.encours=false WHERE ex!=:exercice')
+            ->setParameter('exercice', $exercice)
+            ->getResult();
+
+        return $exercice;
+    }
+
+
 }
