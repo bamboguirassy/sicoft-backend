@@ -49,6 +49,12 @@ class UserController extends AbstractController {
         if (count($searchedUserByEmail)) {
             throw $this->createAccessDeniedException("Cette adresse email est déja utilisée pour un autre compte...");
         }
+        //verification numéro de téléphone unique
+        $searchedUserBytelephone = $entityManager->getRepository(User::class)
+            ->findByTelephone($user->getTelephone());
+        if (count($searchedUserBytelephone)) {
+            throw $this->createAccessDeniedException("Cette numéro est déja utilisée pour un autre compte...");
+        }
         $user->setUsername($user->getEmail());
         $confirmationToken = md5(random_bytes(20));
         $user->setConfirmationToken($confirmationToken);
@@ -110,6 +116,12 @@ class UserController extends AbstractController {
                 ->findByEmail($userNew->getEmail());
         if (count($searchedUserByEmail)) {
             throw $this->createAccessDeniedException("Cette adresse email est déja utilisée pour un autre compte...");
+        }
+        //verification numéro de téléphone unique
+        $searchedUserBytelephone = $entityManager->getRepository(User::class)
+            ->findByTelephone($user->getTelephone());
+        if (count($searchedUserBytelephone)) {
+            throw $this->createAccessDeniedException("Cette numéro est déja utilisée pour un autre compte...");
         }
         $userNew->setUsername($userNew->getEmail());
         $plainPassword= md5(random_bytes(10));
