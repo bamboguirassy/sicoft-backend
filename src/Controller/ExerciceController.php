@@ -5,8 +5,10 @@ namespace App\Controller;
 use App\Entity\Exercice;
 use App\Form\ExerciceType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use App\Utils\Utils;
@@ -66,7 +68,7 @@ class ExerciceController extends AbstractController
         $currentYear = $entityManager->getRepository(Exercice::class)
             ->findBy(['encours' => true]);
         if ($currentYear) {
-            throw $this->createAccessDeniedException("un exercice est déjà actif.");
+            throw new HttpException(417, "un exercice est déjà actif.");
         }
 
         $exercicePrecedant = $exercice->getExerciceSuivant();
@@ -102,7 +104,7 @@ class ExerciceController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Exercice_EDIT")
      */
-    public function edit(Request $request, Exercice $exercice, $operation): Exercice
+    public function edit(Request $request, Exercice $exercice): Exercice
     {
         $form = $this->createForm(ExerciceType::class, $exercice);
         $form->submit(Utils::serializeRequestContent($request));
@@ -119,6 +121,13 @@ class ExerciceController extends AbstractController
         if ($exerciceSuivant && $exerciceSuivant->getExerciceSuivant()) {
             throw $this->createAccessDeniedException("L'excercie précédant est incorrect");
             //$exercicePrecedant->setExerciceSuivant($exercice);
+        }
+        $entityManager = $this->getDoctrine()
+            ->getManager();
+        $currentYear = $entityManager->getRepository(Exercice::class)
+            ->findBy(['encours' => true]);
+        if ($currentYear) {
+            throw new HttpException(417, "un exercice est déjà actif.");
         }
 
         $this->getDoctrine()->getManager()->flush();
@@ -155,6 +164,14 @@ class ExerciceController extends AbstractController
         if ($odlLibelleExcercice) {
             throw $this->createAccessDeniedException('Le libelle existe dèjà');
         }
+        $entityManager = $this->getDoctrine()
+            ->getManager();
+        $currentYear = $entityManager->getRepository(Exercice::class)
+            ->findBy(['encours' => true]);
+        if ($currentYear) {
+            throw new HttpException(417, "un exercice est déjà actif.");
+        }
+
 
         $exercicePrecedant = $exercice->getExerciceSuivant();
         $exercice->setExerciceSuivant(NULL);
@@ -237,6 +254,60 @@ class ExerciceController extends AbstractController
             ->getResult();
 
         return $exercice;
+    }
+
+    /**
+     * @Rest\Put(Path="/create-enable/{id}", name="exercice_new_enable_update", requirements={"id"="\d+"})
+     * @Rest\View(StatusCode=200)
+     * @IsGranted("ROLE_Exercice_EDIT")
+     */
+
+    public function updateAndDisableExerciceExcept(Request $request, Exercice $exercice) {
+        $form = $this->createForm(ExerciceType::class, $exercice);
+        $form->submit(Utils::serializeRequestContent($request));
+
+        $requestData = Utils::getObjectFromRequest($request);
+        $datedebut = $requestData->dateDebut;
+        $datefin = $requestData->dateFin;
+        $exercice->setDateDebut(new \DateTime($datedebut));
+        $exercice->setDateFin(new \DateTime($datefin));
+
+        $this->getDoctrine()->getManager()->flush();
+
+        $this->getDoctrine()->getManager()
+            ->createQuery('UPDATE App\Entity\Exercice ex SET ex.encours=false WHERE ex!=:exercice')
+            ->setParameter('exercice', $exercice)
+            ->getResult();
+
+        return $exercice;
+    }
+
+    /**
+     * @Rest\Put(path="/create-enable/{id}/clone", name="exercice_clone_enable",requirements = {"id"="\d+"})
+     * @Rest\View(StatusCode=200)
+     * @IsGranted("ROLE_Exercice_CLONE")
+     */
+    public function cloneAndDisableExerciceExcept(Request $request, Exercice $exercice) {
+        $em = $this->getDoctrine()->getManager();
+        $exerciceNew = new Exercice();
+        $form = $this->createForm(ExerciceType::class, $exerciceNew);
+        $form->submit(Utils::serializeRequestContent($request));
+
+        $requestData = Utils::getObjectFromRequest($request);
+        $datedebut = $requestData->dateDebut;
+        $datefin = $requestData->dateFin;
+        $exerciceNew->setDateDebut(new \DateTime($datedebut));
+        $exerciceNew->setDateFin(new \DateTime($datefin));
+
+        $em->persist($exerciceNew);
+        $em->flush();
+
+        $this->getDoctrine()->getManager()
+            ->createQuery('UPDATE App\Entity\Exercice ex SET ex.encours=false WHERE ex!=:exercice')
+            ->setParameter('exercice', $exerciceNew)
+            ->getResult();
+
+        return $exerciceNew;
     }
 
 
