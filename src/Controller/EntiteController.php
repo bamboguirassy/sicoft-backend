@@ -25,6 +25,7 @@ class EntiteController extends AbstractController
      */
     public function index(): array
     {
+
         $entites = $this->getDoctrine()
             ->getRepository(Entite::class)
             ->findAll();
