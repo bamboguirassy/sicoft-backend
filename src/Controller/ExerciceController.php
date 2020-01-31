@@ -73,8 +73,6 @@ class ExerciceController extends AbstractController
             $exercicePrecedant->setExerciceSuivant($exercice);
             $entityManager->flush();
         }
-        Utils::create($entityManager, 'exercice', 'create', null, $exercice, $this->getUser());
-        
         return $exercice;
     }
 
@@ -167,11 +165,10 @@ class ExerciceController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Exercice_DELETE")
      */
-    public function delete(Exercice $exercice, TracelogController $tracelog): Exercice    {
+    public function delete(Exercice $exercice): Exercice    {
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->remove($exercice);
         $entityManager->flush();
-        $tracelog->create('exercice', 'delete', $exercice, null, $this->getUser()->getEmail());
         return $exercice;
     }
     
