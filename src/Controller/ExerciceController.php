@@ -71,7 +71,6 @@ class ExerciceController extends AbstractController
             $exercicePrecedant->setExerciceSuivant($exercice);
             $entityManager->flush();
         }
-        Utils::create($entityManager, 'exercice', 'create', null, $exercice, $this->getUser());
 
         return $exercice;
     }
@@ -107,13 +106,12 @@ class ExerciceController extends AbstractController
             throw $this->createAccessDeniedException("La date de début d'exercie est supérieure à la date de fin");
         }
         $exerciceSuivant = $exercice->getExerciceSuivant();
-        if ($exerciceSuivant && $exerciceSuivant->getExerciceSuivant()) {
-            throw $this->createAccessDeniedException("L'excercie précédant est incorrect");
+        if ($exerciceSuivant != $exercice->getExerciceSuivant() && !$exerciceSuivant) {
+            throw $this->createAccessDeniedException("L'excercie suivant est incorrect");
             //$exercicePrecedant->setExerciceSuivant($exercice);
         }
 
         $entityManager->flush();
-        Utils::create($entityManager, 'exercice', 'update', $exerciceClone, $exercice, $this->getUser());
 
         return $exercice;
     }
