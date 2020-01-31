@@ -11,7 +11,6 @@ namespace App\Utils;
 use App\Entity\Tracelog;
 use JMS\Serializer\SerializerBuilder as Serializer;
 use Symfony\Component\HttpFoundation\Request;
-use Doctrine\ORM\EntityManager;
 
 /**
  * Description of Utils
