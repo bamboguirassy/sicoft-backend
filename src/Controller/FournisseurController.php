@@ -61,10 +61,16 @@ class FournisseurController extends AbstractController
         if ($searchedProviderByNinea) {
             throw $this->createAccessDeniedException("Un fournisseur avec ce même ninea existe déjà.");
         }
+        $searchedProviderByNom = $em->getRepository(Fournisseur::class)
+            ->findOneByNom($fournisseur->getNom());
+        if ($searchedProviderByNom) {
+            throw $this->createAccessDeniedException("Ce nom  existe déjà.");
+        }
 
         if (!preg_match('/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/', $fournisseur->getEmail())) {
             throw $this->createAccessDeniedException("Veuillez saisir une adresse e-mail valide.");
         }
+
 
         $entityManager->persist($fournisseur);
         $entityManager->flush();
@@ -96,10 +102,11 @@ class FournisseurController extends AbstractController
         $targetFournisseur = $this->getDoctrine()->getManager()
             ->createQuery(
                 'SELECT fournisseur FROM App\Entity\Fournisseur fournisseur
-                 WHERE (fournisseur.telephone=:tel OR fournisseur.ninea=:ninea OR fournisseur.email=:email) AND fournisseur!=:fournisseur
+                 WHERE (fournisseur.telephone=:tel OR fournisseur.ninea=:ninea OR fournisseur.email=:email OR  fournisseur.nom=:nom) AND fournisseur!=:fournisseur
             ')->setParameter('tel', $fournisseur->getTelephone())
             ->setParameter('ninea', $fournisseur->getNinea())
             ->setParameter('email', $fournisseur->getEmail())
+            ->setParameter('nom', $fournisseur->getNom())
             ->setParameter('fournisseur', $fournisseur)
             ->getResult();
         if($targetFournisseur) {
@@ -113,6 +120,9 @@ class FournisseurController extends AbstractController
 
             if($targetFournisseur[0]->getNinea() == $fournisseur->getNinea()) {
                 throw  $this->createAccessDeniedException("Ce ninea existe déjà.");
+            }
+            if($targetFournisseur[0]->getNom() == $fournisseur->getNom()) {
+                throw  $this->createAccessDeniedException("Ce nom existe déjà.");
             }
         }
 
@@ -160,6 +170,11 @@ class FournisseurController extends AbstractController
 
         if (!preg_match('/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/', $fournisseur->getEmail())) {
             throw $this->createAccessDeniedException("Veuillez saisir une adresse e-mail valide.");
+        }
+        $searchedProviderByNom = $em->getRepository(Fournisseur::class)
+            ->findOneByNom($fournisseurNew->getNom());
+        if ($searchedProviderByNom) {
+            throw $this->createAccessDeniedException("Ce nom  existe déjà.");
         }
 
         $em->persist($fournisseurNew);
