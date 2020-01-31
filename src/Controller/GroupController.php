@@ -150,11 +150,13 @@ class GroupController extends AbstractController {
                 new AccessModel('Secteur', 'Secteur'),
                 new AccessModel('Fournisseur', 'Fournisseur'),
                 new AccessModel('TypeSourceFinancement', 'Type source financement'),
-                new AccessModel('SourceFinancement', 'source financement'),
+                new AccessModel('SourceFinancement', 'Source financement'),
+                new AccessModel('ExerciceSourceFinancement', 'Exercice Source financement'),
                 new AccessModel('TypeClasse', 'Type Classe'),
                 new AccessModel('CategorieClasse', 'Catégorie Classe'),
                 new AccessModel('CompteDivisionnaire', 'Compte Divisonnaire'),
                 new AccessModel('SousClasse', 'Sous Classe'),
+                new AccessModel('RoleSurMarche', 'Access sur Role Marché'),
                     ]
             ),
             new AccessGroup("Gestion des Marchés", [
