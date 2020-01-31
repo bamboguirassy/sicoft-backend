@@ -156,6 +156,7 @@ class GroupController extends AbstractController {
                 new AccessModel('CategorieClasse', 'Catégorie Classe'),
                 new AccessModel('CompteDivisionnaire', 'Compte Divisonnaire'),
                 new AccessModel('SousClasse', 'Sous Classe'),
+                new AccessModel('RoleSurMarche', 'Access sur Role Marché'),
                     ]
             ),
             new AccessGroup("Gestion des Marchés", [
