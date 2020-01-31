@@ -65,7 +65,7 @@ class ExerciceController extends AbstractController
 
         $currentYear = $entityManager->getRepository(Exercice::class)
             ->findBy(['encours' => true]);
-        if ($currentYear) {
+        if ($currentYear && $exercice->getEncours()===true) {
             throw new HttpException(417, "un exercice est déjà actif.");
         }
 
@@ -122,7 +122,7 @@ class ExerciceController extends AbstractController
             ->getManager();
         $currentYear = $entityManager->getRepository(Exercice::class)
             ->findBy(['encours' => true]);
-        if ($currentYear) {
+        if ($currentYear && $exercice->getEncours() === true) {
             throw new HttpException(417, "un exercice est déjà actif.");
         }
 
@@ -164,7 +164,7 @@ class ExerciceController extends AbstractController
             ->getManager();
         $currentYear = $entityManager->getRepository(Exercice::class)
             ->findBy(['encours' => true]);
-        if ($currentYear) {
+        if ($currentYear && $exerciceNew->getEncours()===true) {
             throw new HttpException(417, "un exercice est déjà actif.");
         }
 
