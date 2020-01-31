@@ -124,8 +124,8 @@ class ExerciceController extends AbstractController
         }
         $entityManager = $this->getDoctrine()
             ->getManager();
-        $currentYear = $entityManager->getRepository(Exercice::class)
-            ->findBy(['encours' => true]);
+        $currentYear = $entityManager->createQuery('SELECT ex FROM App\Entity\Exercice ex WHERE ex.encours=true AND ex!=:exercice')
+        ->setParameter('exercice', $exercice)->getResult() ;
         if ($currentYear && $exercice->getEncours() === true) {
             throw new HttpException(417, "un exercice est déjà actif.");
         }
