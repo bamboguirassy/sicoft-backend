@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -87,6 +88,14 @@ class Secteur
     public function getDescription()
     {
         return $this->description;
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getFournisseurs(): ArrayCollection
+    {
+        return $this->fournisseurs;
     }
 
     public function setDescription($description): self
