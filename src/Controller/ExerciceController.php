@@ -102,9 +102,10 @@ class ExerciceController extends AbstractController
      */
     public function edit(Request $request, Exercice $exercice): Exercice
     {
+        $entityManager = $this->getDoctrine()->getManager();
         $form = $this->createForm(ExerciceType::class, $exercice);
         $form->submit(Utils::serializeRequestContent($request));
-
+        
         $requestData = Utils::getObjectFromRequest($request);
         $datedebut = $requestData->dateDebut;
         $datefin = $requestData->dateFin;
@@ -114,12 +115,14 @@ class ExerciceController extends AbstractController
             throw $this->createAccessDeniedException("La date de début d'exercie est supérieure à la date de fin");
         }
         $exerciceSuivant = $exercice->getExerciceSuivant();
+        if ($exerciceSuivant === $exercice){
+            throw $this->createAccessDeniedException("L'excercie courant ne peut pas être son propre suivant");
+        }
         if ($exerciceSuivant && $exerciceSuivant->getExerciceSuivant()) {
-            throw $this->createAccessDeniedException("L'excercie précédant est incorrect");
+            throw $this->createAccessDeniedException("L'excercie suivant est incorrect");
             //$exercicePrecedant->setExerciceSuivant($exercice);
         }
-        $entityManager = $this->getDoctrine()
-            ->getManager();
+        
         $currentYear = $entityManager->createQuery('SELECT ex FROM App\Entity\Exercice ex WHERE ex.encours=true AND ex!=:exercice')
         ->setParameter('exercice', $exercice)->getResult() ;
         if ($currentYear && $exercice->getEncours() === true) {
