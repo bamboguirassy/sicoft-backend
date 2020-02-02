@@ -90,12 +90,16 @@ class Secteur
         return $this->description;
     }
 
-    /**
-     * @return ArrayCollection
-     */
-    public function getFournisseurs(): ArrayCollection
+
+    public function getFournisseurs()
     {
         return $this->fournisseurs;
+    }
+
+
+    public function setFournisseurs($fournisseurs): self
+    {
+        $this->fournisseurs = $fournisseurs;
     }
 
     public function setDescription($description): self

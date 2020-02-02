@@ -75,8 +75,9 @@ class SecteurController extends AbstractController
         $targetSecteur = $this->getDoctrine()->getManager()
             ->createQuery(
                 'SELECT secteur FROM App\Entity\Secteur secteur
-                 WHERE (secteur.code=:code)
+                 WHERE (secteur.code=:code) AND secteur!=:secteur
             ')->setParameter('code', $secteur->getCode())
+            ->setParameter('secteur', $secteur)
             ->getResult();
         if($targetSecteur) {
             if ($targetSecteur[0]->getCode() == $secteur->getCode()) {

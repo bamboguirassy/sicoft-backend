@@ -4,17 +4,15 @@ namespace App\Controller;
 
 use App\Entity\Exercice;
 use App\Form\ExerciceType;
+use App\Utils\Utils;
+use FOS\RestBundle\Controller\Annotations as Rest;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Annotation\Route;
-use FOS\RestBundle\Controller\Annotations as Rest;
-use App\Utils\Utils;
-use FOS\RestBundle\Decoder\JsonDecoder;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Symfony\Component\Validator\Constraints\Length;
 
 /**
  * @Route("/api/exercice")
@@ -72,7 +70,7 @@ class ExerciceController extends AbstractController
         }
 
         $exercicePrecedant = $exercice->getExerciceSuivant();
-        $exercice->setExerciceSuivant(NULL);
+        $exercice->setExerciceSuivant(null);
         $entityManager->persist($exercice);
         $entityManager->flush();
 
@@ -83,7 +81,6 @@ class ExerciceController extends AbstractController
             $exercicePrecedant->setExerciceSuivant($exercice);
             $entityManager->flush();
         }
-
 
         return $exercice;
     }
@@ -98,7 +95,6 @@ class ExerciceController extends AbstractController
         return $exercice;
     }
 
-
     /**
      * @Rest\Put(path="/{id}/edit", name="exercice_edit",requirements = {"id"="\d+"})
      * @Rest\View(StatusCode=200)
@@ -106,9 +102,10 @@ class ExerciceController extends AbstractController
      */
     public function edit(Request $request, Exercice $exercice): Exercice
     {
+        $entityManager = $this->getDoctrine()->getManager();
         $form = $this->createForm(ExerciceType::class, $exercice);
         $form->submit(Utils::serializeRequestContent($request));
-
+        
         $requestData = Utils::getObjectFromRequest($request);
         $datedebut = $requestData->dateDebut;
         $datefin = $requestData->dateFin;
@@ -118,19 +115,21 @@ class ExerciceController extends AbstractController
             throw $this->createAccessDeniedException("La date de début d'exercie est supérieure à la date de fin");
         }
         $exerciceSuivant = $exercice->getExerciceSuivant();
+        if ($exerciceSuivant === $exercice){
+            throw $this->createAccessDeniedException("L'excercie courant ne peut pas être son propre suivant");
+        }
         if ($exerciceSuivant && $exerciceSuivant->getExerciceSuivant()) {
-            throw $this->createAccessDeniedException("L'excercie précédant est incorrect");
+            throw $this->createAccessDeniedException("L'excercie suivant est incorrect");
             //$exercicePrecedant->setExerciceSuivant($exercice);
         }
-        $entityManager = $this->getDoctrine()
-            ->getManager();
+        
         $currentYear = $entityManager->createQuery('SELECT ex FROM App\Entity\Exercice ex WHERE ex.encours=true AND ex!=:exercice')
         ->setParameter('exercice', $exercice)->getResult() ;
         if ($currentYear && $exercice->getEncours() === true) {
             throw new HttpException(417, "un exercice est déjà actif.");
         }
 
-        $this->getDoctrine()->getManager()->flush();
+        $entityManager->flush();
 
         return $exercice;
     }
@@ -174,7 +173,7 @@ class ExerciceController extends AbstractController
 
 
         $exercicePrecedant = $exercice->getExerciceSuivant();
-        $exercice->setExerciceSuivant(NULL);
+        $exercice->setExerciceSuivant(null);
 
         $em->persist($exerciceNew);
 
