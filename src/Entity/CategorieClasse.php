@@ -24,7 +24,7 @@ class CategorieClasse
     /**
      * @var string
      *
-     * @ORM\Column(name="code", type="string", length=45, nullable=false)
+     * @ORM\Column(name="code", type="string", length=255, nullable=false)
      */
     private $code;
 

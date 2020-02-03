@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\SousClasse;
+use App\Entity\Classe;
 use App\Form\SousClasseType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -11,6 +12,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use App\Utils\Utils;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * @Route("/api/sousClasse")
@@ -40,8 +42,11 @@ class SousClasseController extends AbstractController
         $sousClasse = new SousClasse();
         $form = $this->createForm(SousClasseType::class, $sousClasse);
         $form->submit(Utils::serializeRequestContent($request));
-
         $entityManager = $this->getDoctrine()->getManager();
+           // check if numero and libelle already exist
+        $this->checkNumeroAndLibelle($sousClasse, $entityManager);
+        $this->checkClasse($sousClasse);
+       
         $entityManager->persist($sousClasse);
         $entityManager->flush();
 
@@ -63,15 +68,17 @@ class SousClasseController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_SousClasse_EDIT")
      */
-    public function edit(Request $request, SousClasse $sousClasse): SousClasse    {
+    public function edit(Request $request, SousClasse $sousClasse, EntityManagerInterface $em): SousClasse    {
         $form = $this->createForm(SousClasseType::class, $sousClasse);
         $form->submit(Utils::serializeRequestContent($request));
+        $this->checkEditcSousclasseNumeroAndLibelle($sousClasse, $em);
+        $this->checkClasse($sousClasse);
+        
 
-        $this->getDoctrine()->getManager()->flush();
+       $em->flush();
 
         return $sousClasse;
     }
-    
     /**
      * @Rest\Put(path="/{id}/clone", name="sous_classe_clone",requirements = {"id"="\d+"})
      * @Rest\View(StatusCode=200)
@@ -82,6 +89,9 @@ class SousClasseController extends AbstractController
         $sousClasseNew=new SousClasse();
         $form = $this->createForm(SousClasseType::class, $sousClasseNew);
         $form->submit(Utils::serializeRequestContent($request));
+        ////
+        $this->checkNumeroAndLibelle($sousClasseNew ,$em);
+        $this->checkClasse($sousClasseNew);
         $em->persist($sousClasseNew);
 
         $em->flush();
@@ -120,5 +130,47 @@ class SousClasseController extends AbstractController
         $entityManager->flush();
 
         return $sousClasses;
+    }
+    
+    /////////////////////////////Les Testes////////////////////////////////////
+    
+    public function checkNumeroAndLibelle(SousClasse $sousclasse, EntityManagerInterface $em) {
+        $searchedsSousclasseByNumero = $em->getRepository(SousClasse::class)->findByNumero($sousclasse->getNumero());
+        if (count($searchedsSousclasseByNumero)) {
+            throw $this->createAccessDeniedException("Une sous classe avec le même numéro existe déjà, merci de changer de numéro...");
+        }
+        // check if libelle alredy exit
+        $searchedSousclasseByLibelle = $em->getRepository(SousClasse::class)->findByLibelle($sousclasse->getLibelle());
+        if (count($searchedSousclasseByLibelle)) {
+            throw $this->createAccessDeniedException("Une sous classe avec le même libellé existe déjà, merci de changer de libellé...");
+        }
+    }
+    public function checkClasse(SousClasse $sousclasse){
+        $recoverClasse = $this->getDoctrine()->getManager()
+                ->createQuery(
+                        'SELECT sousclasse From App\Entity\SousClasse sousclasse
+                            WHERE (sousclasse.classe=:classe)
+                              ')-> setParameter('classe',$sousclasse->getClasse())
+                               ->getResult();
+                         if($recoverClasse){
+                             if(count($recoverClasse)!=0){
+                                  throw $this->createAccessDeniedException("Une sous classe  avec la même classe existe déjà.");
+                             }
+                         }
+        
+    }
+    public function checkEditcSousclasseNumeroAndLibelle(SousClasse $sousclasse, EntityManagerInterface $em) {
+        $searchedSousclasseByCode = $em->createQuery("select c from App\Entity\SousClasse c where c != :sousclasse and c.numero = :num")
+                ->setParameter('sousclasse', $sousclasse)->setParameter('num', $sousclasse->getNumero())->getResult();
+        if (count($searchedSousclasseByCode)) {
+            throw $this->createAccessDeniedException("Une sous classe avec le même numéro existe déjà, merci de changer de numéro...");
+        }
+
+        // check if libelle already exist
+        $searchedSousclasseByLibelle = $em->createQuery("select c from App\Entity\SousClasse c where c != :sousclasse and c.libelle = :lib")
+                ->setParameter('sousclasse',$sousclasse)->setParameter('lib', $sousclasse->getLibelle())->getResult();
+        if (count($searchedSousclasseByLibelle)) {
+            throw $this->createAccessDeniedException("Une sous classe avec le même libellé existe déjà, merci de changer de libellé...");
+        }
     }
 }

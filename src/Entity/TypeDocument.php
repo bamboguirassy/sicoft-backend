@@ -24,14 +24,14 @@ class TypeDocument
     /**
      * @var string
      *
-     * @ORM\Column(name="libelle", type="string", length=255, nullable=false)
+     * @ORM\Column(name="libelle", type="string", length=100, nullable=false)
      */
     private $libelle;
 
     /**
      * @var string|null
      *
-     * @ORM\Column(name="description", type="string", length=45, nullable=true)
+     * @ORM\Column(name="description", type="string", length=255, nullable=true)
      */
     private $description;
 
