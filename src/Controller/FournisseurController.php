@@ -61,7 +61,7 @@ class FournisseurController extends AbstractController
         if ($searchedProviderByNinea) {
             throw $this->createAccessDeniedException("Un fournisseur avec ce même ninea existe déjà.");
         }
-        $searchedProviderByNom = $em->getRepository(Fournisseur::class)
+        $searchedProviderByNom = $entityManager->getRepository(Fournisseur::class)
             ->findOneByNom($fournisseur->getNom());
         if ($searchedProviderByNom) {
             throw $this->createAccessDeniedException("Ce nom  existe déjà.");
