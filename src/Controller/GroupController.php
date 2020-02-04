@@ -136,32 +136,40 @@ class GroupController extends AbstractController {
      */
     public function getAccessGroups(): array {
         $accessGroups = [
-            new AccessGroup("Paramètrage", [
-                new AccessModel('User', "Utilisateur"),
+            new AccessGroup("Configuration Globale", [
                 new AccessModel('Group', "Groupe d'utilisateur"),
-                new AccessModel('Entite', 'Entités'),
-                new AccessModel('TypeEntite', 'Type Entité'),
+                new AccessModel('User', "Utilisateur"),
                 new AccessModel('Exercice', 'Exercice'),
-                new AccessModel('Classe', 'Classe'),
-                new AccessModel('Compte', 'Compte'),
+                new AccessModel('TypeEntite', 'Type Entité'),
+                new AccessModel('Entite', 'Entités'),
                 new AccessModel('TypeDocument', 'Type Document'),
-                new AccessModel('TypePassation', 'Type Passation'),
-                new AccessModel('EtatMarche', 'Etat Marché'),
-                new AccessModel('Secteur', 'Secteur'),
-                new AccessModel('Fournisseur', 'Fournisseur'),
-                new AccessModel('TypeSourceFinancement', 'Type source financement'),
-                new AccessModel('SourceFinancement', 'source financement'),
-                new AccessModel('TypeClasse', 'Type Classe'),
-                new AccessModel('CategorieClasse', 'Catégorie Classe'),
-                new AccessModel('CompteDivisionnaire', 'Compte Divisonnaire'),
-                new AccessModel('SousClasse', 'Sous Classe'),
                     ]
             ),
+            new AccessGroup("Paramètrage Budget", [
+                new AccessModel('CategorieClasse', 'Catégorie Classe'),
+                new AccessModel('TypeClasse', 'Type Classe'),
+                new AccessModel('Classe', 'Classe'),
+                new AccessModel('SousClasse', 'Sous Classe'),
+                new AccessModel('CompteDivisionnaire', 'Compte Divisonnaire'),
+                new AccessModel('Compte', 'Compte'),
+                new AccessModel('TypeSourceFinancement', 'Type source financement'),
+                new AccessModel('SourceFinancement', 'Source financement'),
+                    ]),
+            new AccessGroup("Paramètrage Marché", [
+                new AccessModel('Secteur', 'Secteur'),
+                new AccessModel('TypePassation', 'Type Passation'),
+                new AccessModel('EtatMarche', 'Etat Marché'),
+                new AccessModel('RoleSurMarche', 'Access sur Role Marché'),
+                    ]),
             new AccessGroup("Gestion des Marchés", [
-                new AccessModel('Budget', 'Budget'),
                 new AccessModel('Marche', 'Marché'),
                 new AccessModel('Mandat', 'Mandat'),
-            ])
+                new AccessModel('Fournisseur', 'Fournisseur'),
+                    ]),
+            new AccessGroup("Gestion Budget", [
+                new AccessModel('Budget', 'Budget'),
+                new AccessModel('ExerciceSourceFinancement', 'Exercice Source financement'),
+                    ])
         ];
         return $accessGroups;
     }

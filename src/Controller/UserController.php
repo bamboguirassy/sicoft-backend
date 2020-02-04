@@ -100,6 +100,24 @@ class UserController extends AbstractController {
 
         return $user;
     }
+     /**
+     * @Rest\Put(path="/password_update", name="password_update")
+     * @Rest\View(StatusCode=200)
+     * @IsGranted("ROLE_User_EDIT")
+     */
+    public function updatePassword(Request $request, \Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface $passwordEncoder){
+        $em = $this->getDoctrine()->getManager();
+        $requestData = utils::getObjectFromRequest($request);
+        $verification = password_verify($requestData->currentPassword, $this->getUser()->getPassword());
+        if (!$verification){
+            throw $this->createAccessDeniedException("Votre mot de passe actuel est incorrect");
+        }
+        if ($requestData->newPassword != $requestData->confirmPassword){
+            throw $this->createAccessDeniedException("Le nouveau mot de passe saisi ne correcpond pas au mot de passe de confirmation");
+        }
+        $this->getUser()->setPassword($passwordEncoder->encodePassword($this->getUser(), $requestData->newPassword));
+        $em->flush();
+    }
 
     /**
      * @Rest\Put(path="/{id}/clone", name="user_clone",requirements = {"id"="\d+"})

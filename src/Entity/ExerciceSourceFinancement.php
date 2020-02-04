@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * ExerciceSourceFinancement
  *
- * @ORM\Table(name="exercice_source_financement", indexes={@ORM\Index(name="fk_exercice_source_financement_exercice1_idx", columns={"exercice_id"}), @ORM\Index(name="fk_exercice_source_financement_source_financement1_idx", columns={"source_financement_id"})})
+ * @ORM\Table(name="exercice_source_financement", uniqueConstraints={@ORM\UniqueConstraint(name="entite_exercice_sf_unique", columns={"entite", "exercice", "source_financement"})}, indexes={@ORM\Index(name="fk_entite", columns={"entite"}), @ORM\Index(name="fk_exercice_source_financement_exercice1_idx", columns={"exercice"}), @ORM\Index(name="fk_exercice_source_financement_source_financement1_idx", columns={"source_financement"})})
  * @ORM\Entity
  */
 class ExerciceSourceFinancement
@@ -29,11 +29,21 @@ class ExerciceSourceFinancement
     private $montant;
 
     /**
+     * @var \Entite
+     *
+     * @ORM\ManyToOne(targetEntity="Entite")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="entite", referencedColumnName="id")
+     * })
+     */
+    private $entite;
+
+    /**
      * @var \Exercice
      *
      * @ORM\ManyToOne(targetEntity="Exercice")
      * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="exercice_id", referencedColumnName="id")
+     *   @ORM\JoinColumn(name="exercice", referencedColumnName="id")
      * })
      */
     private $exercice;
@@ -43,7 +53,7 @@ class ExerciceSourceFinancement
      *
      * @ORM\ManyToOne(targetEntity="SourceFinancement")
      * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="source_financement_id", referencedColumnName="id")
+     *   @ORM\JoinColumn(name="source_financement", referencedColumnName="id")
      * })
      */
     private $sourceFinancement;
@@ -61,6 +71,18 @@ class ExerciceSourceFinancement
     public function setMontant(string $montant): self
     {
         $this->montant = $montant;
+
+        return $this;
+    }
+
+    public function getEntite(): ?Entite
+    {
+        return $this->entite;
+    }
+
+    public function setEntite(?Entite $entite): self
+    {
+        $this->entite = $entite;
 
         return $this;
     }
