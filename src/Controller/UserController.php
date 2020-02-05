@@ -205,11 +205,12 @@ class UserController extends AbstractController {
         $targetUser = $this->getDoctrine()->getManager()
                 ->createQuery(
                 'SELECT user FROM App\Entity\User user
-                 WHERE (user.prenom=:prenom OR user.nom=:nom OR user.telephone=:telephone OR user.fonction=:fonction) AND user!=:user
+                 WHERE (user.prenom=:prenom OR user.nom=:nom OR user.email=:email OR user.telephone=:telephone OR user.fonction=:fonction) AND user!=:user
             ')->setParameter('prenom', $user->getPrenom())
             ->setParameter('nom', $user->getNom())
              ->setParameter('telephone', $user->getTelephone())
                 ->setParameter('fonction', $user->getFonction())
+                 ->setParameter('email', $user->getEmail())
                 ->setParameter('user', $user)
             ->getResult();
          if ($targetUser) {
