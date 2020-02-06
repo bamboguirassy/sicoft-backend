@@ -16,6 +16,7 @@ class ExerciceSourceFinancementType extends AbstractType
             ->add('entite')
             ->add('exercice')
             ->add('sourceFinancement')
+            ->add('entite')
         ;
     }
 
