@@ -30,7 +30,7 @@ class EntiteController extends AbstractController
         foreach($groupes as $groupe){
             if ($groupe->getCode() == 'SA') {
                 $entites = $this->getDoctrine()->getRepository(Entite::class)->findAll();
-            } else {
+           } else {
                 $entites = $this->getUser()->getEntites();
             }
         }

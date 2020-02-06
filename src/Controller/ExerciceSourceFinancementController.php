@@ -71,6 +71,20 @@ class ExerciceSourceFinancementController extends AbstractController
 
         return $exerciceSourceFinancement;
     }
+    /**
+     * @Rest\Get(path="/exercice/{id}/entite/{entite}", name="source_financement_exercice_entite",requirements = {"entite"="\d+"})
+     * @Rest\View(StatusCode=200)
+     * @IsGranted("ROLE_ExerciceSourceFinancement_EDIT")
+     */
+    public function findSourceFinancementByExerciceAndEntite(\App\Entity\Exercice $exercice, $entite) {
+        $em = $this->getDoctrine()->getManager();
+        $tab_exerciceSourceFinancement = $em->createQuery('SELECT sf FROM App\Entity\SourceFinancement sf, App\Entity\ExerciceSourceFinancement esf 
+        WHERE esf.exercice=?1 and esf.entite=?2')
+        ->setParameter(1, $exercice)
+        ->setParameter(2, $entite)
+        ->getResult();
+        return $tab_exerciceSourceFinancement;
+    }
     
     /**
      * @Rest\Put(path="/{id}/clone", name="exercice_source_financement_clone",requirements = {"id"="\d+"})
