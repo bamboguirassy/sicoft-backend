@@ -25,11 +25,15 @@ class EntiteController extends AbstractController
      */
     public function index(): array
     {
-        $entites = $this->getDoctrine()
-            ->getRepository(Entite::class)
-            ->findAll();
-      
-
+        $entites = [];
+        $groupes = $this->getUser()->getGroups();
+        foreach($groupes as $groupe){
+            if ($groupe->getCode() == 'SA') {
+                $entites = $this->getDoctrine()->getRepository(Entite::class)->findAll();
+           } else {
+                $entites = $this->getUser()->getEntites();
+            }
+        }
         return count($entites)?$entites:[];
     }
 
