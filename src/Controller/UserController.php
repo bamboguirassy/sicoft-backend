@@ -193,4 +193,37 @@ class UserController extends AbstractController {
 
         return $users;
     }
+    /**
+     * @Rest\Put(path="/{id}/edit_profil", name="edit_profil",requirements = {"id"="\d+"})
+     * @Rest\View(StatusCode=200)
+     * @IsGranted("ROLE_User_EDIT")
+     */
+    public function editProfil(Request $request, User $user) : User{
+         $form = $this->createForm(UserType::class, $user);
+        $form->submit(Utils::serializeRequestContent($request));
+        
+        $targetUser = $this->getDoctrine()->getManager()
+                ->createQuery(
+                'SELECT user FROM App\Entity\User user
+                 WHERE (user.prenom=:prenom OR user.nom=:nom OR user.email=:email OR user.telephone=:telephone OR user.fonction=:fonction) AND user!=:user
+            ')->setParameter('prenom', $user->getPrenom())
+            ->setParameter('nom', $user->getNom())
+             ->setParameter('telephone', $user->getTelephone())
+                ->setParameter('fonction', $user->getFonction())
+                 ->setParameter('email', $user->getEmail())
+                ->setParameter('user', $user)
+            ->getResult();
+         if ($targetUser) {
+            if ($targetUser[0]->getTelephone() == $user->getTelephone()) {
+                throw $this->createAccessDeniedException("Ce numéro de telephone existe déjà.");
+            }
+        }
+                
+
+        $this->getDoctrine()->getManager()->flush();
+
+        return $user;
+        
+    }
+
 }
