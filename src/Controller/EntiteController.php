@@ -23,7 +23,7 @@ class EntiteController extends AbstractController {
      * @Rest\View(StatusCode = 200)
      * @IsGranted("ROLE_Entite_INDEX")
      */
-    public function index(): array {
+    public function index() {
         $entites = [];
         $groupes = $this->getUser()->getGroups();
         foreach ($groupes as $groupe) {
