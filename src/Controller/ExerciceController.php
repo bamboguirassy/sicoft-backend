@@ -207,7 +207,7 @@ class ExerciceController extends AbstractController
             ->getResult();
         if($targetExercice) {
             if ($targetExercice[0]->getExerciceSuivant() == $exercice) {
-                throw $this->createAccessDeniedException("Cet exercice est le suivant de l'exercice: " .$targetExercice[0]->getLibelle(). " . Suppression avortée.");
+                throw new HttpException(417, "Cet exercice est le suivant d'un autre.");
             }
         }
 
@@ -239,7 +239,7 @@ class ExerciceController extends AbstractController
                 ->getResult();
             if($targetExercice) {
                 if ($targetExercice[0]->getExerciceSuivant() == $exercice) {
-                    throw $this->createAccessDeniedException("L'exercice ". $exercice->getLibelle(). " est le suivant d'un autre exercice. Suppression avortée.");
+                    throw new HttpException(417, "Cet exercice est le suivant d'un autre.");
                 }
             }
             $entityManager->remove($exercice);
