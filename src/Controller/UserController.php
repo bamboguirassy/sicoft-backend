@@ -213,7 +213,7 @@ class UserController extends AbstractController {
                  ->setParameter('email', $user->getEmail())
                 ->setParameter('user', $user)
             ->getResult();
-         if ($targetUser) {
+         if (count($targetUser)) {
             if ($targetUser[0]->getTelephone() == $user->getTelephone()) {
                 throw $this->createAccessDeniedException("Ce numéro de telephone existe déjà.");
             }
