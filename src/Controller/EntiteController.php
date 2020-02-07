@@ -24,15 +24,14 @@ class EntiteController extends AbstractController {
      * @IsGranted("ROLE_Entite_INDEX")
      */
     public function index() {
-        $entites = [];
         $groupes = $this->getUser()->getGroups();
         foreach ($groupes as $groupe) {
             if ($groupe->getCode() == 'SA') {
                 $entites = $this->getDoctrine()->getRepository(Entite::class)->findAll();
                 return count($entites) ? $entites : [];
             }
-            $entites = $this->getUser()->getEntites();
         }
+        $entites = $this->getUser()->getEntites();
         return count($entites) ? $entites : [];
     }
 
