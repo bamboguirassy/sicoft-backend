@@ -45,7 +45,6 @@ class SousClasseController extends AbstractController
         $entityManager = $this->getDoctrine()->getManager();
            // check if numero and libelle already exist
         $this->checkNumeroAndLibelle($sousClasse, $entityManager);
-        $this->checkClasse($sousClasse);
        
         $entityManager->persist($sousClasse);
         $entityManager->flush();
@@ -72,7 +71,6 @@ class SousClasseController extends AbstractController
         $form = $this->createForm(SousClasseType::class, $sousClasse);
         $form->submit(Utils::serializeRequestContent($request));
         $this->checkEditcSousclasseNumeroAndLibelle($sousClasse, $em);
-        $this->checkClasse($sousClasse);
         
 
        $em->flush();
@@ -91,7 +89,6 @@ class SousClasseController extends AbstractController
         $form->submit(Utils::serializeRequestContent($request));
         ////
         $this->checkNumeroAndLibelle($sousClasseNew ,$em);
-        $this->checkClasse($sousClasseNew);
         $em->persist($sousClasseNew);
 
         $em->flush();
@@ -145,7 +142,7 @@ class SousClasseController extends AbstractController
             throw $this->createAccessDeniedException("Une sous classe avec le même libellé existe déjà, merci de changer de libellé...");
         }
     }
-    public function checkClasse(SousClasse $sousclasse){
+    /*public function checkClasse(SousClasse $sousclasse){
         $recoverClasse = $this->getDoctrine()->getManager()
                 ->createQuery(
                         'SELECT sousclasse From App\Entity\SousClasse sousclasse
@@ -158,7 +155,7 @@ class SousClasseController extends AbstractController
                              }
                          }
         
-    }
+    }*/
     public function checkEditcSousclasseNumeroAndLibelle(SousClasse $sousclasse, EntityManagerInterface $em) {
         $searchedSousclasseByCode = $em->createQuery("select c from App\Entity\SousClasse c where c != :sousclasse and c.numero = :num")
                 ->setParameter('sousclasse', $sousclasse)->setParameter('num', $sousclasse->getNumero())->getResult();

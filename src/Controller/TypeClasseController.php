@@ -141,6 +141,19 @@ class TypeClasseController extends AbstractController
      */
     public function delete(TypeClasse $typeClasse): TypeClasse    {
         $entityManager = $this->getDoctrine()->getManager();
+
+        $targetClasse = $this->getDoctrine()->getManager()
+            ->createQuery(
+                'SELECT classe FROM App\Entity\Classe classe
+                 WHERE (classe.typeClasse=:typeClasse) 
+            ')->setParameter('typeClasse', $typeClasse)
+            ->getResult();
+        if($targetClasse) {
+            if ($targetClasse[0]->getTypeClasse() == $typeClasse) {
+                throw $this->createAccessDeniedException("Une classe est de ce type existe déjà. Suppression avortée.");
+            }
+        }
+
         $entityManager->remove($typeClasse);
         $entityManager->flush();
 
@@ -160,6 +173,17 @@ class TypeClasseController extends AbstractController
         }
         foreach ($typeClasses as $typeClasse) {
             $typeClasse = $entityManager->getRepository(TypeClasse::class)->find($typeClasse->id);
+            $targetClasse = $this->getDoctrine()->getManager()
+                ->createQuery(
+                    'SELECT classe FROM App\Entity\Classe classe
+                 WHERE (classe.typeClasse=:typeClasse) 
+            ')->setParameter('typeClasse', $typeClasse)
+                ->getResult();
+            if($targetClasse) {
+                if ($targetClasse[0]->getTypeClasse() == $typeClasse) {
+                    throw $this->createAccessDeniedException("Une classe avec ce(s) type(s) existe déjà. Suppression avortée.");
+                }
+            }
             $entityManager->remove($typeClasse);
         }
         $entityManager->flush();

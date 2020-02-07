@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Exercice;
+use App\Entity\ExerciceSourceFinancement;
 use App\Form\ExerciceType;
 use App\Utils\Utils;
 use FOS\RestBundle\Controller\Annotations as Rest;
