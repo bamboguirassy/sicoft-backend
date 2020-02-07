@@ -16,25 +16,24 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 /**
  * @Route("/api/entite")
  */
-class EntiteController extends AbstractController
-{
+class EntiteController extends AbstractController {
+
     /**
      * @Rest\Get(path="/", name="entite_index")
      * @Rest\View(StatusCode = 200)
      * @IsGranted("ROLE_Entite_INDEX")
      */
-    public function index(): array
-    {
+    public function index() {
         $entites = [];
         $groupes = $this->getUser()->getGroups();
-        foreach($groupes as $groupe){
+        foreach ($groupes as $groupe) {
             if ($groupe->getCode() == 'SA') {
                 $entites = $this->getDoctrine()->getRepository(Entite::class)->findAll();
-           } else {
-                $entites = $this->getUser()->getEntites();
+                return count($entites) ? $entites : [];
             }
+            $entites = $this->getUser()->getEntites();
         }
-        return count($entites)?$entites:[];
+        return count($entites) ? $entites : [];
     }
 
     /**
@@ -42,8 +41,7 @@ class EntiteController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Entite_CREATE")
      */
-    public function create(Request $request, Manager $manager): Entite
-    {
+    public function create(Request $request, Manager $manager): Entite {
         $entite = new Entite();
         $form = $this->createForm(EntiteType::class, $entite);
         $form->submit(Utils::serializeRequestContent($request));
@@ -59,8 +57,7 @@ class EntiteController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Entite_SHOW")
      */
-    public function show(Entite $entite)
-    {
+    public function show(Entite $entite) {
         return $entite;
     }
 
@@ -69,8 +66,7 @@ class EntiteController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Entite_EDIT")
      */
-    public function edit(Request $request, Entite $entite, Manager $manager): Entite
-    {
+    public function edit(Request $request, Entite $entite, Manager $manager): Entite {
         $oldEntity = clone($entite);
         $form = $this->createForm(EntiteType::class, $entite);
         $form->submit(Utils::serializeRequestContent($request));
@@ -85,8 +81,7 @@ class EntiteController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Entite_CLONE")
      */
-    public function cloner(Request $request, Entite $entite, Manager $manager): Entite
-    {
+    public function cloner(Request $request, Entite $entite, Manager $manager): Entite {
         $em = $this->getDoctrine()->getManager();
         $entiteNew = new Entite();
         $form = $this->createForm(EntiteType::class, $entiteNew);
@@ -104,8 +99,7 @@ class EntiteController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Entite_DELETE")
      */
-    public function delete(Entite $entite): Entite
-    {
+    public function delete(Entite $entite): Entite {
         $deletedEntity = clone($entite);
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->remove($entite);
@@ -119,8 +113,7 @@ class EntiteController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Entite_DELETE")
      */
-    public function deleteMultiple(Request $request): array
-    {
+    public function deleteMultiple(Request $request): array {
         $entityManager = $this->getDoctrine()->getManager();
         $entites = Utils::getObjectFromRequest($request);
         if (!count($entites)) {
@@ -140,18 +133,16 @@ class EntiteController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Entite_SHOW")
      */
-    public function findSousEntites(Entite $entite, Manager $manager)
-    {
+    public function findSousEntites(Entite $entite, Manager $manager) {
         $sousEntites = $manager->createQuery('select e from App\Entity\Entite e where e.entiteParent = :parent')
-            ->setParameter('parent', $entite->getId())->getResult();
+                        ->setParameter('parent', $entite->getId())->getResult();
 
         return $sousEntites;
     }
 
     ///////////////////////////////// Tests /////////////////////////////////
 
-    public function checkEditCodeAndNom(Entite $entite, Manager $manager)
-    {
+    public function checkEditCodeAndNom(Entite $entite, Manager $manager) {
         // check if nom already exist
         $searchedEntiteByCode = $manager->createQuery("select e from App\Entity\Entite e where e != :entite and e.code = :code")->setParameter('entite', $entite)->setParameter('code', $entite->getCode())->getResult();
         if (count($searchedEntiteByCode)) {
@@ -165,8 +156,7 @@ class EntiteController extends AbstractController
         }
     }
 
-    public function checkCodeAndNom(Entite $entite, Manager $manager)
-    {
+    public function checkCodeAndNom(Entite $entite, Manager $manager) {
         // check if code already exit
         $searchedEntiteByCode = $manager->getRepository(Entite::class)->findByCode($entite->getCode());
         if (count($searchedEntiteByCode)) {
@@ -178,4 +168,5 @@ class EntiteController extends AbstractController
             throw $this->createAccessDeniedException("Une entité avec le même nom existe déjà, merci de changer de nom...");
         }
     }
+
 }
