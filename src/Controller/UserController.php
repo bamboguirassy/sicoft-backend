@@ -100,6 +100,24 @@ class UserController extends AbstractController {
 
         return $user;
     }
+     /**
+     * @Rest\Put(path="/password_update", name="password_update")
+     * @Rest\View(StatusCode=200)
+     * @IsGranted("ROLE_User_EDIT")
+     */
+    public function updatePassword(Request $request, \Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface $passwordEncoder){
+        $em = $this->getDoctrine()->getManager();
+        $requestData = utils::getObjectFromRequest($request);
+        $verification = password_verify($requestData->currentPassword, $this->getUser()->getPassword());
+        if (!$verification){
+            throw $this->createAccessDeniedException("Votre mot de passe actuel est incorrect");
+        }
+        if ($requestData->newPassword != $requestData->confirmPassword){
+            throw $this->createAccessDeniedException("Le nouveau mot de passe saisi ne correcpond pas au mot de passe de confirmation");
+        }
+        $this->getUser()->setPassword($passwordEncoder->encodePassword($this->getUser(), $requestData->newPassword));
+        $em->flush();
+    }
 
     /**
      * @Rest\Put(path="/{id}/clone", name="user_clone",requirements = {"id"="\d+"})
@@ -175,4 +193,37 @@ class UserController extends AbstractController {
 
         return $users;
     }
+    /**
+     * @Rest\Put(path="/{id}/edit_profil", name="edit_profil",requirements = {"id"="\d+"})
+     * @Rest\View(StatusCode=200)
+     * @IsGranted("ROLE_User_EDIT")
+     */
+    public function editProfil(Request $request, User $user) : User{
+         $form = $this->createForm(UserType::class, $user);
+        $form->submit(Utils::serializeRequestContent($request));
+        
+        $targetUser = $this->getDoctrine()->getManager()
+                ->createQuery(
+                'SELECT user FROM App\Entity\User user
+                 WHERE (user.prenom=:prenom OR user.nom=:nom OR user.email=:email OR user.telephone=:telephone OR user.fonction=:fonction) AND user!=:user
+            ')->setParameter('prenom', $user->getPrenom())
+            ->setParameter('nom', $user->getNom())
+             ->setParameter('telephone', $user->getTelephone())
+                ->setParameter('fonction', $user->getFonction())
+                 ->setParameter('email', $user->getEmail())
+                ->setParameter('user', $user)
+            ->getResult();
+         if ($targetUser) {
+            if ($targetUser[0]->getTelephone() == $user->getTelephone()) {
+                throw $this->createAccessDeniedException("Ce numéro de telephone existe déjà.");
+            }
+        }
+                
+
+        $this->getDoctrine()->getManager()->flush();
+
+        return $user;
+        
+    }
+
 }
