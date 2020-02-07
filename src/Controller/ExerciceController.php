@@ -149,9 +149,9 @@ class ExerciceController extends AbstractController
         $requestData = Utils::getObjectFromRequest($request);
         $datedebut = $requestData->dateDebut;
         $datefin = $requestData->dateFin;
-        $exercice->setDateDebut(new \DateTime($datedebut));
-        $exercice->setDateFin(new \DateTime($datefin));
-        if ($exercice->getDateDebut() > $exercice->getDateFin()) {
+        $exerciceNew->setDateDebut(new \DateTime($datedebut));
+        $exerciceNew->setDateFin(new \DateTime($datefin));
+        if ($exerciceNew->getDateDebut() > $exerciceNew->getDateFin()) {
             throw $this->createAccessDeniedException("La date de début d'exercie est supérieure à la date de fin");
         }
 
