@@ -198,6 +198,19 @@ class ExerciceController extends AbstractController
     public function delete(Exercice $exercice): Exercice
     {
         $entityManager = $this->getDoctrine()->getManager();
+
+        $targetExercice = $this->getDoctrine()->getManager()
+            ->createQuery(
+                'SELECT exercice FROM App\Entity\Exercice exercice
+                 WHERE (exercice.exerciceSuivant=:exerciceSuivant) 
+            ')->setParameter('exerciceSuivant', $exercice)
+            ->getResult();
+        if($targetExercice) {
+            if ($targetExercice[0]->getExerciceSuivant() == $exercice) {
+                throw new HttpException(417, "Cet exercice est le suivant d'un autre.");
+            }
+        }
+
         $entityManager->remove($exercice);
         $entityManager->flush();
 
@@ -218,6 +231,17 @@ class ExerciceController extends AbstractController
         }
         foreach ($exercices as $exercice) {
             $exercice = $entityManager->getRepository(Exercice::class)->find($exercice->id);
+            $targetExercice = $this->getDoctrine()->getManager()
+                ->createQuery(
+                    'SELECT exercice FROM App\Entity\Exercice exercice
+                 WHERE (exercice.exerciceSuivant=:exerciceSuivant) 
+            ')->setParameter('exerciceSuivant', $exercice)
+                ->getResult();
+            if($targetExercice) {
+                if ($targetExercice[0]->getExerciceSuivant() == $exercice) {
+                    throw new HttpException(417, "Cet exercice est le suivant d'un autre.");
+                }
+            }
             $entityManager->remove($exercice);
         }
         $entityManager->flush();
