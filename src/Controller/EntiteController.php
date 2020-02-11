@@ -23,15 +23,33 @@ class EntiteController extends AbstractController
      * @Rest\View(StatusCode = 200)
      * @IsGranted("ROLE_Entite_INDEX")
      */
-    public function index(): array
+    public function index()
     {
+        $teste =false;
+        foreach ($this->getUser()->getGroups() as $group) {
 
-        $entites = $this->getDoctrine()
-            ->getRepository(Entite::class)
-            ->findAll();
+            if ($group->getCode() =="SA")
+            {
+              $teste= true;
+            }
+        }
+        if ($teste) {
+
+            return  $this->getDoctrine()
+                ->getRepository(Entite::class)
+                ->findAll();
+
+        }
+        else{
+            var_dump("amoufi ");
+
+            //ù $entites = $this->getUser()->getEntites();
+            return $this->getUser()->getEntites();
+        }
+
       
 
-        return count($entites)?$entites:[];
+
     }
 
     /**

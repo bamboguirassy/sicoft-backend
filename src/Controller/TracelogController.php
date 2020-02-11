@@ -10,7 +10,9 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 use Doctrine\ORM\EntityManagerInterface as Manager;
 use Symfony\Component\Routing\Annotation\Route;
 
-/**@Route("/api/tracelog")*/
+/**
+ * @Route("/api/tracelog")
+ */
 class TracelogController extends AbstractController
 {
     /**
