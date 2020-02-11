@@ -15,6 +15,7 @@ class SecteurType extends AbstractType
             ->add('code')
             ->add('libelle')
             ->add('description')
+            ->add('fournisseurs')
         ;
     }
 

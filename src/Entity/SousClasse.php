@@ -43,14 +43,12 @@ class SousClasse
     private $description;
 
     /**
-     * @var \Classe
-     *
-     * @ORM\ManyToOne(targetEntity="Classe")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="classe", referencedColumnName="id")
-     * })
+     * @ORM\ManyToOne(targetEntity="App\Entity\Classe", inversedBy="sousClasses")
+     * @ORM\JoinColumn(nullable=false,name="classe")
      */
     private $classe;
+
+    
 
     public function getId(): ?int
     {
@@ -104,6 +102,18 @@ class SousClasse
 
         return $this;
     }
+
+    /*public function getClasse(): ?Classe
+    {
+        return $this->classe;
+    }
+
+    public function setClasse(?Classe $classe): self
+    {
+        $this->classe = $classe;
+
+        return $this;
+    }*/
 
 
 }
