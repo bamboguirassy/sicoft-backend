@@ -103,6 +103,7 @@ class ExerciceController extends AbstractController
      */
     public function edit(Request $request, Exercice $exercice): Exercice
     {
+
         $entityManager = $this->getDoctrine()->getManager();
         $form = $this->createForm(ExerciceType::class, $exercice);
         $form->submit(Utils::serializeRequestContent($request));
@@ -112,6 +113,12 @@ class ExerciceController extends AbstractController
         $datefin = $requestData->dateFin;
         $exercice->setDateDebut(new \DateTime($datedebut));
         $exercice->setDateFin(new \DateTime($datefin));
+
+        $searchedProviderByCode = $entityManager->getRepository(Exercice::class)
+            ->findByCode($exercice->getCode());
+        if ($searchedProviderByCode) {
+            throw $this->createAccessDeniedException("Un exercice avec cet meme code existe déjà.");
+        }
         if ($exercice->getDateDebut() > $exercice->getDateFin()) {
             throw $this->createAccessDeniedException("La date de début d'exercie est supérieure à la date de fin");
         }
