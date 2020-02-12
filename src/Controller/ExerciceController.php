@@ -35,6 +35,24 @@ class ExerciceController extends AbstractController
     }
 
     /**
+     * @Rest\Get(path="/precedent/{id}", name="exercice_precedent", requirements = {"id"="\d+"})
+     * @Rest\View(StatusCode = 200)
+     * @IsGranted("ROLE_Exercice_SHOW")
+     */
+    public function findExercicePrecedent(Exercice $exercice){
+        $targetExercicePrecedent = $this->getDoctrine()->getManager()
+            ->createQuery(
+                'SELECT exercice FROM App\Entity\Exercice exercice
+                 WHERE (exercice.exerciceSuivant=:exercice) 
+            ')->setParameter('exercice', $exercice)
+            ->getSingleResult();
+        if(!$targetExercicePrecedent) {
+            throw new HttpException(404, "Cet exercice n'a pas de suivant.");
+        }
+        return $targetExercicePrecedent;
+    }
+
+    /**
      * @Rest\Post(Path="/create", name="exercice_new")
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Exercice_CREATE")
