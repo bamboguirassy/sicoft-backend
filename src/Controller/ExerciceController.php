@@ -112,6 +112,26 @@ class ExerciceController extends AbstractController
         $datefin = $requestData->dateFin;
         $exercice->setDateDebut(new \DateTime($datedebut));
         $exercice->setDateFin(new \DateTime($datefin));
+
+        $targetExercice = $this->getDoctrine()->getManager()
+            ->createQuery(
+                'SELECT ex FROM App\Entity\Exercice ex
+                 WHERE (ex.code=:code OR ex.libelle=:label) AND ex!=:exercice
+            ')->setParameter('code', $exercice->getCode())
+            ->setParameter('label', $exercice->getLibelle())
+            ->setParameter('exercice', $exercice)
+            ->getResult();
+
+        if($targetExercice) {
+            if ($targetExercice[0]->getCode() == $exercice->getCode()) {
+                throw $this->createAccessDeniedException("Ce code existe déja.");
+            }
+
+            if($targetExercice[0]->getLibelle() == $exercice->getLibelle()) {
+                throw  $this->createAccessDeniedException("Ce libelle existe déjà.");
+            }
+        }
+
         if ($exercice->getDateDebut() > $exercice->getDateFin()) {
             throw $this->createAccessDeniedException("La date de début d'exercie est supérieure à la date de fin");
         }

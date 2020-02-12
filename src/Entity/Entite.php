@@ -21,10 +21,10 @@ class Entite
      */
     private $id;
     
- /**
+    /**
      * @ORM\ManyToMany(targetEntity="App\Entity\User")
      * @ORM\JoinTable(name="user_entite",
-     *      joinColumns={@ORM\JoinColumn(name="entity", referencedColumnName="id")},
+     *      joinColumns={@ORM\JoinColumn(name="entite", referencedColumnName="id")},
      *      inverseJoinColumns={@ORM\JoinColumn(name="user", referencedColumnName="id")}
      * )
      */
