@@ -4,14 +4,13 @@ namespace App\Controller;
 
 use App\Entity\Entite;
 use App\Form\EntiteType;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface as Manager;
+use FOS\RestBundle\Controller\Annotations as Rest;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use FOS\RestBundle\Controller\Annotations as Rest;
-use App\Utils\Utils;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
 /**
  * @Route("/api/entite")
@@ -25,16 +24,23 @@ class EntiteController extends AbstractController
      */
     public function index(): array
     {
-        $entites = [];
-        $groupes = $this->getUser()->getGroups();
-        foreach($groupes as $groupe){
-            if ($groupe->getCode() == 'SA') {
-                $entites = $this->getDoctrine()->getRepository(Entite::class)->findAll();
-           } else {
-                $entites = $this->getUser()->getEntites();
-            }
+        $em = $this->getDoctrine()->getManager();
+        $groups = $em->createQuery('SELECT gr FROM App\Entity\Group gr WHERE gr.code=?1')
+            ->setParameter(1, 'SA')
+            ->getResult();
+        /*$groupes = $this->getUser()->getGroups();
+        foreach ($groupes as $groupe) {
+        if ($groupe->getCode() == 'SA') {
+        $entites = $this->getDoctrine()->getRepository(Entite::class)->findAll();
+        } else {
+        $entites = $this->getUser()->getEntites();
+        }*/
+        if (count($groups) > 0) {
+            $entites = $this->getDoctrine()->getRepository(Entite::class)->findAll();
+        } else {
+            $entites = $this->getUser()->getEntites();
         }
-        return count($entites)?$entites:[];
+        return count($entites) ? $entites : [];
     }
 
     /**
@@ -71,7 +77,7 @@ class EntiteController extends AbstractController
      */
     public function edit(Request $request, Entite $entite, Manager $manager): Entite
     {
-        $oldEntity = clone($entite);
+        $oldEntity = clone ($entite);
         $form = $this->createForm(EntiteType::class, $entite);
         $form->submit(Utils::serializeRequestContent($request));
         $this->checkEditCodeAndNom($entite, $manager);
@@ -106,7 +112,7 @@ class EntiteController extends AbstractController
      */
     public function delete(Entite $entite): Entite
     {
-        $deletedEntity = clone($entite);
+        $deletedEntity = clone ($entite);
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->remove($entite);
         $entityManager->flush();
