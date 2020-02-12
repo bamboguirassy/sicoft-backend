@@ -150,7 +150,7 @@ class TypeClasseController extends AbstractController
             ->getResult();
         if($targetClasse) {
             if ($targetClasse[0]->getTypeClasse() == $typeClasse) {
-                throw $this->createAccessDeniedException("Une classe est de ce type existe déjà. Suppression avortée.");
+                throw $this->createAccessDeniedException("La classe: ".$targetClasse[0]->getLibelle()." est de ce type. Suppression avortée.");
             }
         }
 
@@ -181,7 +181,7 @@ class TypeClasseController extends AbstractController
                 ->getResult();
             if($targetClasse) {
                 if ($targetClasse[0]->getTypeClasse() == $typeClasse) {
-                    throw $this->createAccessDeniedException("Une classe avec ce(s) type(s) existe déjà. Suppression avortée.");
+                    throw $this->createAccessDeniedException("Une classe avec le type ".$typeClasse->getNom()." existe déjà. Suppression avortée.");
                 }
             }
             $entityManager->remove($typeClasse);
