@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\CompteDivisionnaire;
+use App\Entity\SousClasse;
 use App\Form\CompteDivisionnaireType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -120,5 +121,19 @@ class CompteDivisionnaireController extends AbstractController
         $entityManager->flush();
 
         return $compteDivisionnaires;
+    }
+
+    /**
+     * @Rest\Get(path="/{id}/sous-classe", name="sous_classe")
+     * @Rest\View(StatusCode = 200)
+     * @IsGranted("ROLE_CompteDivisionnaire_INDEX")
+     */
+    public function findBySousClasse (SousClasse $sousClasse)
+    {
+        $sousClasses = $this->getDoctrine()
+            ->getRepository(CompteDivisionnaire::class)
+            ->findBySousClasse($sousClasse);
+
+        return count($sousClasses)?$sousClasses:[];
     }
 }

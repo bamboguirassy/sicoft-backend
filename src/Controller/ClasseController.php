@@ -157,22 +157,5 @@ class ClasseController extends AbstractController {
         }
     }
 
-    // l’enlèvement de l'unicité sur catégorie et type classe lors du crud de classe
-/**
-    public function checkCategorieAndType(Classe $classe){
-        $targetClasse = $this->getDoctrine()->getManager()
-            ->createQuery(
-                'SELECT classe FROM App\Entity\Classe classe
-                 WHERE (classe.categorieClasse=:categorie AND classe.typeClasse=:type) 
-            ')->setParameter('categorie', $classe->getCategorieClasse())
-            ->setParameter('type', $classe->getTypeClasse())
-            ->getResult();
 
-        if($targetClasse){
-            if(count($targetClasse)!=0){
-                throw $this->createAccessDeniedException("Une classe avec les mêmes catégorie et type existent déjà.");
-            }
-        }
-    }
- **/
 }

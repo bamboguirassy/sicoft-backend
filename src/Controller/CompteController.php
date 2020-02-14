@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Compte;
+use App\Entity\CompteDivisionnaire;
 use App\Form\CompteType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -120,4 +121,20 @@ class CompteController extends AbstractController
 
         return $comptes;
     }
+
+    /**
+     * @Rest\Get(path="/{id}/compte-divisionnaire", name="compte_divisionnaire")
+     * @Rest\View(StatusCode = 200)
+     * @IsGranted("ROLE_Compte_INDEX")
+     */
+
+    public function findByCompteDivisionnaire (CompteDivisionnaire $compteDivisionnaire)
+    {
+        $comptes = $this->getDoctrine()
+            ->getRepository(Compte::class)
+            ->findByCompteDivisionnaire($compteDivisionnaire);
+
+        return count($comptes)?$comptes:[];
+    }
+
 }
