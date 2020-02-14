@@ -44,7 +44,6 @@ class ClasseController extends AbstractController {
 
         // check if numero and libelle already exist
         $this->checkNumeroAndLibelle($classe, $entityManager);
-        $this->checkCategorieAndType($classe);
 
         $entityManager->persist($classe);
         $entityManager->flush();
@@ -72,7 +71,6 @@ class ClasseController extends AbstractController {
 
         // check if numero and libelle already exist
         $this->checkEditClasseNumeroAndLibelle($classe, $em);
-        $this->checkCategorieAndType($classe);
 
         $em->flush();
 
@@ -91,7 +89,6 @@ class ClasseController extends AbstractController {
         $form->submit(Utils::serializeRequestContent($request));
         // check if numero already exist
         $this->checkNumeroAndLibelle($classeNew, $em);
-        $this->checkCategorieAndType($classeNew);
         $em->persist($classeNew);
 
         $em->flush();
@@ -160,6 +157,8 @@ class ClasseController extends AbstractController {
         }
     }
 
+    // l’enlèvement de l'unicité sur catégorie et type classe lors du crud de classe
+/**
     public function checkCategorieAndType(Classe $classe){
         $targetClasse = $this->getDoctrine()->getManager()
             ->createQuery(
@@ -175,5 +174,5 @@ class ClasseController extends AbstractController {
             }
         }
     }
-
+ **/
 }
