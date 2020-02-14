@@ -1,8 +1,10 @@
 <?php
 
 namespace App\Entity;
-
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+
 
 /**
  * Entite
@@ -20,7 +22,19 @@ class Entite
      * @ORM\GeneratedValue(strategy="IDENTITY")
      */
     private $id;
-
+    
+    /**
+     * @ORM\ManyToMany(targetEntity="App\Entity\User")
+     * @ORM\JoinTable(name="user_entite",
+     *      joinColumns={@ORM\JoinColumn(name="entite", referencedColumnName="id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="user", referencedColumnName="id")}
+     * )
+     */
+    protected $users;
+    
+    public function __construct() {
+        $this->users = new ArrayCollection();
+    }
     /**
      * @var string
      *
@@ -125,6 +139,14 @@ class Entite
         $this->typeEntite = $typeEntite;
 
         return $this;
+    }
+    /**
+     * @return Collection|User[]
+     */
+   
+    public function getUsers(): Collection
+    {
+        return $this->users;
     }
 
 

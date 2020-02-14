@@ -136,10 +136,10 @@ class UserController extends AbstractController {
             throw $this->createAccessDeniedException("Cette adresse email est déja utilisée pour un autre compte...");
         }
         //verification numéro de téléphone unique
-        $searchedUserBytelephone = $entityManager->getRepository(User::class)
-            ->findByTelephone($user->getTelephone());
-        if (count($searchedUserBytelephone)) {
-            throw $this->createAccessDeniedException("Cette numéro est déja utilisée pour un autre compte...");
+        $searchedProviderByTelephone = $entityManager->getRepository(User::class)
+            ->findOneByTelephone($userNew->getTelephone());
+        if ($searchedProviderByTelephone) {
+            throw $this->createAccessDeniedException("Un utilisateur avec ce même numéro existe déjà.");
         }
         $userNew->setUsername($userNew->getEmail());
         $plainPassword= md5(random_bytes(10));
@@ -213,7 +213,7 @@ class UserController extends AbstractController {
                  ->setParameter('email', $user->getEmail())
                 ->setParameter('user', $user)
             ->getResult();
-         if ($targetUser) {
+         if (count($targetUser)) {
             if ($targetUser[0]->getTelephone() == $user->getTelephone()) {
                 throw $this->createAccessDeniedException("Ce numéro de telephone existe déjà.");
             }
