@@ -107,7 +107,6 @@ class ExerciceController extends AbstractController
         $entityManager = $this->getDoctrine()->getManager();
         $form = $this->createForm(ExerciceType::class, $exercice);
         $form->submit(Utils::serializeRequestContent($request));
-       // $this->checkExrcice($exercice, $entityManager);
           $targetCode = $this->getDoctrine()->getManager()
                 ->createQuery(
                 'SELECT exercice FROM App\Entity\Exercice exercice
@@ -138,13 +137,7 @@ class ExerciceController extends AbstractController
         $datefin = $requestData->dateFin;
         $exercice->setDateDebut(new \DateTime($datedebut));
         $exercice->setDateFin(new \DateTime($datefin));
-        
-
-       /* $searchedProviderByLibelle = $entityManager->getRepository(Exercice::class)
-            ->findByLibelle($exercice->getLibelle());
-        if ( $searchedProviderByLibelle) {
-            throw $this->createAccessDeniedException("Un exercice avec cet meme Libelle existe déjà.");
-        }*/
+       
         if ($exercice->getDateDebut() > $exercice->getDateFin()) {
             throw $this->createAccessDeniedException("La date de début d'exercie est supérieure à la date de fin");
         }
