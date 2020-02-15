@@ -208,4 +208,20 @@ class SousClasseController extends AbstractController
             throw $this->createAccessDeniedException("Une sous classe avec le même libellé existe déjà, merci de changer de libellé...");
         }
     }
+
+    /**
+     * @Rest\Get(path="/{id}/classe", name="classe")
+     * @Rest\View(StatusCode = 200)
+     * @IsGranted("ROLE_SousClasse_INDEX")
+     */
+
+    public function findByClasse( Classe $classe)
+    {
+        $sousClasses = $this->getDoctrine()
+            ->getRepository(SousClasse::class)
+            ->findByClasse($classe);
+
+        return count($sousClasses)?$sousClasses:[];
+    }
 }
+

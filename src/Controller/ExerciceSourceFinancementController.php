@@ -90,17 +90,18 @@ class ExerciceSourceFinancementController extends AbstractController
         return $exerciceSourceFinancement;
     }
     /**
-     * @Rest\Get(path="/exercice/{id}", name="source_financement_disponible")
+     * @Rest\Get(path="/sourceFinancement/exercice/{id}/entite/{entite}", name="source_financement_disponible",requirements = {"entite"="\d+"})
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_ExerciceSourceFinancement_EDIT")
      */
-    public function findSourceFinancementDisponible(\App\Entity\Exercice $exercice) {
+    public function findSourceFinancementDisponible(\App\Entity\Exercice $exercice, $entite) {
         $em = $this->getDoctrine()->getManager();
-        $tab_exerciceSourceFinancement[] = [];
+        //$tab_exerciceSourceFinancement[] = [];
         $sourceFinancements = $em->createQuery('SELECT sf FROM App\Entity\SourceFinancement sf 
         WHERE NOT EXISTS (SELECT esf FROM App\Entity\ExerciceSourceFinancement esf
-        WHERE sf.id = esf.sourceFinancement and esf.exercice=?1)')
+        WHERE esf.exercice=?1 and esf.entite=?2 and esf.sourceFinancement = sf)')
         ->setParameter(1, $exercice)
+        ->setParameter(2, $entite)
         ->getResult();
         //$tab_exerciceSourceFinancement = ['sourceFin' => $sourceFinancements, 'exerciceSourceFin' => $exerciceSourceFinancements];
         return $sourceFinancements;
