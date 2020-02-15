@@ -119,50 +119,43 @@ class ExerciceController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Exercice_EDIT")
      */
-    public function edit(Request $request, Exercice $exercice): Exercice
+    public function edit(Request $request, Exercice $exercice ): Exercice
     {
 
         $entityManager = $this->getDoctrine()->getManager();
         $form = $this->createForm(ExerciceType::class, $exercice);
         $form->submit(Utils::serializeRequestContent($request));
+          $targetCode = $this->getDoctrine()->getManager()
+                ->createQuery(
+                'SELECT exercice FROM App\Entity\Exercice exercice
+                 WHERE (exercice.code=:code ) AND exercice!=:exercice
+            ')->setParameter('code', $exercice->getCode())
+                ->setParameter('exercice', $exercice)
+            ->getResult();
+         if (count($targetCode)) {
+            if ($targetCode[0]->getCode() == $exercice->getCode()) {
+                throw $this->createAccessDeniedException(" Un exercice avec le meme le code  existe déjà.");
+            }
+        }
+        $targetLibelle = $this->getDoctrine()->getManager()
+                ->createQuery(
+                'SELECT exercice FROM App\Entity\Exercice exercice
+                 WHERE (exercice.libelle=:libelle ) AND exercice!=:exercice
+            ')->setParameter('libelle', $exercice->getLibelle())
+                ->setParameter('exercice', $exercice)
+            ->getResult();
+         if (count($targetLibelle )) {
+            if ($targetLibelle [0]->getLibelle() == $exercice->getLibelle()) {
+                throw $this->createAccessDeniedException("Un exercice avec le meme libelle   existe déjà.");
+            }
+        }
 
         $requestData = Utils::getObjectFromRequest($request);
         $datedebut = $requestData->dateDebut;
         $datefin = $requestData->dateFin;
         $exercice->setDateDebut(new \DateTime($datedebut));
         $exercice->setDateFin(new \DateTime($datefin));
-
-        $targetExercice = $this->getDoctrine()->getManager()
-            ->createQuery(
-                'SELECT ex FROM App\Entity\Exercice ex
-                 WHERE (ex.code=:code OR ex.libelle=:label) AND ex!=:exercice
-            ')->setParameter('code', $exercice->getCode())
-            ->setParameter('label', $exercice->getLibelle())
-            ->setParameter('exercice', $exercice)
-            ->getResult();
-
-        if($targetExercice) {
-            if ($targetExercice[0]->getCode() == $exercice->getCode()) {
-                throw $this->createAccessDeniedException("Ce code existe déja.");
-            }
-
-            if($targetExercice[0]->getLibelle() == $exercice->getLibelle()) {
-                throw  $this->createAccessDeniedException("Ce libelle existe déjà.");
-            }
-        }
-
-        $searchedProviderByCode = $entityManager->getRepository(Exercice::class)
-            ->findByCode($exercice->getCode());
-        if ($searchedProviderByCode) {
-            throw $this->createAccessDeniedException("Un exercice avec cet meme code existe déjà.");
-        }
-
-        $searchedProviderByLibelle = $entityManager->getRepository(Exercice::class)
-            ->findByLibelle($exercice->getLibelle());
-        if ($searchedProviderByCode) {
-            throw $this->createAccessDeniedException("Un exercice avec cet meme Libelle existe déjà.");
-        }
-        if ($exercice->getDateDebut() > $exercice->getDateFin()) {
+       if ($exercice->getDateDebut() > $exercice->getDateFin()) {
             throw $this->createAccessDeniedException("La date de début d'exercie est supérieure à la date de fin");
         }
         $exerciceSuivant = $exercice->getExerciceSuivant();
@@ -385,6 +378,13 @@ class ExerciceController extends AbstractController
 
         return $exerciceNew;
     }
+    
+   /* public function checkExrcice(Exercice $exercice, EntityManagerInterface $entityManager) {
+        $searched = $entityManager->getRepository(Exercice::class)->findByCode($exercice->getCode());
+        if (count($searched)) {
+            throw $this->createAccessDeniedException("Une  avec le même code existe déjà, merci de changer de numéro...");
+        } }*/
+
 
 
 }

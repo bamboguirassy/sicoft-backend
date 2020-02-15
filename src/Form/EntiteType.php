@@ -17,7 +17,7 @@ class EntiteType extends AbstractType
             ->add('etat')
             ->add('entiteParent')
             ->add('typeEntite')
-            ->add('users')    
+            ->add('users')
         ;
     }
 
