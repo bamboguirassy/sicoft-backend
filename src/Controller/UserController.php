@@ -14,11 +14,19 @@ use Symfony\Component\Routing\Annotation\Route;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use App\Utils\Utils;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 /**
  * @Route("/api/user")
  */
 class UserController extends AbstractController {
+    private $params;
+
+    public function __construct(ParameterBagInterface $params)
+    {
+        $this->params = $params;
+    }
 
     /**
      * @Rest\Get(path="/", name="user_index")
@@ -217,11 +225,8 @@ class UserController extends AbstractController {
             if ($targetUser[0]->getTelephone() == $user->getTelephone()) {
                 throw $this->createAccessDeniedException("Ce numéro de telephone existe déjà.");
             }
-        }
-                
-
+        }      
         $this->getDoctrine()->getManager()->flush();
-
         return $user;
         
     }
