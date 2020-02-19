@@ -38,7 +38,7 @@ class CompteDivisionnaire
     /**
      * @var string|null
      *
-     * @ORM\Column(name="description", type="text", length=0, nullable=true)
+     * @ORM\Column(name="description", type="text", length=100, nullable=true)
      */
     private $description;
 

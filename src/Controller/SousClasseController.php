@@ -215,7 +215,7 @@ class SousClasseController extends AbstractController
      * @IsGranted("ROLE_SousClasse_INDEX")
      */
 
-    public function findByClasse( Classe $classe)
+    public function findByClasse(Classe $classe)
     {
         $sousClasses = $this->getDoctrine()
             ->getRepository(SousClasse::class)
