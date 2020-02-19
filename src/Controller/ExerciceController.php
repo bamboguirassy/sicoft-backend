@@ -18,29 +18,29 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * @Route("/api/exercice")
  */
-class ExerciceController extends AbstractController
-{
+class ExerciceController extends AbstractController {
+
     /**
      * @Rest\Get(path="/", name="exercice_index")
      * @Rest\View(StatusCode = 200)
      * @IsGranted("ROLE_Exercice_INDEX")
      */
-    public function index(): array
-    {
-        $exercices = $this->getDoctrine()
-            ->getRepository(Exercice::class)
-            ->findAll();
+    public function index(): array {
+       /* $repository = $this->getDoctrine()->getRepository(Exercice::class);*/
+         $exercices = $this->getDoctrine()
+          ->getRepository(Exercice::class)
+                 ->findBy ([],['id' => 'desc']);
 
-        return count($exercices) ? $exercices : [];
+          return count($exercices) ? $exercices : [];
     }
+ 
 
     /**
      * @Rest\Post(Path="/create", name="exercice_new")
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Exercice_CREATE")
      */
-    public function create(Request $request): Exercice
-    {
+    public function create(Request $request): Exercice {
         $exercice = new Exercice();
         $entityManager = $this->getDoctrine()->getManager();
         $form = $this->createForm(ExerciceType::class, $exercice);
@@ -65,7 +65,7 @@ class ExerciceController extends AbstractController
         }
 
         $currentYear = $entityManager->getRepository(Exercice::class)
-            ->findBy(['encours' => true]);
+                ->findBy(['encours' => true]);
         if ($currentYear && $exercice->getEncours() === true) {
             throw new HttpException(417, "un exercice est déjà actif.");
         }
@@ -91,8 +91,7 @@ class ExerciceController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Exercice_SHOW")
      */
-    public function show(Exercice $exercice): Exercice
-    {
+    public function show(Exercice $exercice): Exercice {
         return $exercice;
     }
 
@@ -101,32 +100,31 @@ class ExerciceController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Exercice_EDIT")
      */
-    public function edit(Request $request, Exercice $exercice ): Exercice
-    {
+    public function edit(Request $request, Exercice $exercice): Exercice {
 
         $entityManager = $this->getDoctrine()->getManager();
         $form = $this->createForm(ExerciceType::class, $exercice);
         $form->submit(Utils::serializeRequestContent($request));
-          $targetCode = $this->getDoctrine()->getManager()
+        $targetCode = $this->getDoctrine()->getManager()
                 ->createQuery(
-                'SELECT exercice FROM App\Entity\Exercice exercice
+                        'SELECT exercice FROM App\Entity\Exercice exercice
                  WHERE (exercice.code=:code ) AND exercice!=:exercice
             ')->setParameter('code', $exercice->getCode())
                 ->setParameter('exercice', $exercice)
-            ->getResult();
-         if (count($targetCode)) {
+                ->getResult();
+        if (count($targetCode)) {
             if ($targetCode[0]->getCode() == $exercice->getCode()) {
                 throw $this->createAccessDeniedException(" Un exercice avec le meme le code  existe déjà.");
             }
         }
         $targetLibelle = $this->getDoctrine()->getManager()
                 ->createQuery(
-                'SELECT exercice FROM App\Entity\Exercice exercice
+                        'SELECT exercice FROM App\Entity\Exercice exercice
                  WHERE (exercice.libelle=:libelle ) AND exercice!=:exercice
             ')->setParameter('libelle', $exercice->getLibelle())
                 ->setParameter('exercice', $exercice)
-            ->getResult();
-         if (count($targetLibelle )) {
+                ->getResult();
+        if (count($targetLibelle)) {
             if ($targetLibelle [0]->getLibelle() == $exercice->getLibelle()) {
                 throw $this->createAccessDeniedException("Un exercice avec le meme libelle   existe déjà.");
             }
@@ -137,7 +135,7 @@ class ExerciceController extends AbstractController
         $datefin = $requestData->dateFin;
         $exercice->setDateDebut(new \DateTime($datedebut));
         $exercice->setDateFin(new \DateTime($datefin));
-       
+
         if ($exercice->getDateDebut() > $exercice->getDateFin()) {
             throw $this->createAccessDeniedException("La date de début d'exercie est supérieure à la date de fin");
         }
@@ -151,7 +149,7 @@ class ExerciceController extends AbstractController
         }
 
         $currentYear = $entityManager->createQuery('SELECT ex FROM App\Entity\Exercice ex WHERE ex.encours=true AND ex!=:exercice')
-            ->setParameter('exercice', $exercice)->getResult();
+                        ->setParameter('exercice', $exercice)->getResult();
         if ($currentYear && $exercice->getEncours() === true) {
             throw new HttpException(417, "un exercice est déjà actif.");
         }
@@ -166,8 +164,7 @@ class ExerciceController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Exercice_CLONE")
      */
-    public function cloner(Request $request, Exercice $exercice): Exercice
-    {
+    public function cloner(Request $request, Exercice $exercice): Exercice {
         $em = $this->getDoctrine()->getManager();
         $exerciceNew = new Exercice();
         $form = $this->createForm(ExerciceType::class, $exerciceNew);
@@ -191,9 +188,9 @@ class ExerciceController extends AbstractController
             throw $this->createAccessDeniedException('Le libelle existe dèjà');
         }
         $entityManager = $this->getDoctrine()
-            ->getManager();
+                ->getManager();
         $currentYear = $entityManager->getRepository(Exercice::class)
-            ->findBy(['encours' => true]);
+                ->findBy(['encours' => true]);
         if ($currentYear && $exerciceNew->getEncours() === true) {
             throw new HttpException(417, "un exercice est déjà actif.");
         }
@@ -221,16 +218,15 @@ class ExerciceController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Exercice_DELETE")
      */
-    public function delete(Exercice $exercice): Exercice
-    {
+    public function delete(Exercice $exercice): Exercice {
         $entityManager = $this->getDoctrine()->getManager();
 
         $targetExercice = $this->getDoctrine()->getManager()
-            ->createQuery(
-                'SELECT exercice FROM App\Entity\Exercice exercice
+                ->createQuery(
+                        'SELECT exercice FROM App\Entity\Exercice exercice
                  WHERE (exercice.exerciceSuivant=:exerciceSuivant) 
             ')->setParameter('exerciceSuivant', $exercice)
-            ->getResult();
+                ->getResult();
         if ($targetExercice) {
             if ($targetExercice[0]->getExerciceSuivant() == $exercice) {
                 throw new HttpException(417, "Cet exercice est le suivant d'un autre.");
@@ -248,8 +244,7 @@ class ExerciceController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Exercice_DELETE")
      */
-    public function deleteMultiple(Request $request): array
-    {
+    public function deleteMultiple(Request $request): array {
         $entityManager = $this->getDoctrine()->getManager();
         $exercices = Utils::getObjectFromRequest($request);
         if (!count($exercices)) {
@@ -258,11 +253,11 @@ class ExerciceController extends AbstractController
         foreach ($exercices as $exercice) {
             $exercice = $entityManager->getRepository(Exercice::class)->find($exercice->id);
             $targetExercice = $this->getDoctrine()->getManager()
-                ->createQuery(
-                    'SELECT exercice FROM App\Entity\Exercice exercice
+                    ->createQuery(
+                            'SELECT exercice FROM App\Entity\Exercice exercice
                  WHERE (exercice.exerciceSuivant=:exerciceSuivant) 
             ')->setParameter('exerciceSuivant', $exercice)
-                ->getResult();
+                    ->getResult();
             if ($targetExercice) {
                 if ($targetExercice[0]->getExerciceSuivant() == $exercice) {
                     throw new HttpException(417, "Cet exercice est le suivant d'un autre.");
@@ -280,9 +275,7 @@ class ExerciceController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Exercice_CREATE")
      */
-
-    public function createAndDisableExerciceExcept(Request $request)
-    {
+    public function createAndDisableExerciceExcept(Request $request) {
         $exercice = new Exercice();
         $entityManager = $this->getDoctrine()->getManager();
         $form = $this->createForm(ExerciceType::class, $exercice);
@@ -299,9 +292,9 @@ class ExerciceController extends AbstractController
 
 
         $this->getDoctrine()->getManager()
-            ->createQuery('UPDATE App\Entity\Exercice ex SET ex.encours=false WHERE ex!=:exercice')
-            ->setParameter('exercice', $exercice)
-            ->getResult();
+                ->createQuery('UPDATE App\Entity\Exercice ex SET ex.encours=false WHERE ex!=:exercice')
+                ->setParameter('exercice', $exercice)
+                ->getResult();
 
         return $exercice;
     }
@@ -311,9 +304,7 @@ class ExerciceController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Exercice_EDIT")
      */
-
-    public function updateAndDisableExerciceExcept(Request $request, Exercice $exercice)
-    {
+    public function updateAndDisableExerciceExcept(Request $request, Exercice $exercice) {
         $form = $this->createForm(ExerciceType::class, $exercice);
         $form->submit(Utils::serializeRequestContent($request));
 
@@ -326,9 +317,9 @@ class ExerciceController extends AbstractController
         $this->getDoctrine()->getManager()->flush();
 
         $this->getDoctrine()->getManager()
-            ->createQuery('UPDATE App\Entity\Exercice ex SET ex.encours=false WHERE ex!=:exercice')
-            ->setParameter('exercice', $exercice)
-            ->getResult();
+                ->createQuery('UPDATE App\Entity\Exercice ex SET ex.encours=false WHERE ex!=:exercice')
+                ->setParameter('exercice', $exercice)
+                ->getResult();
 
         return $exercice;
     }
@@ -338,8 +329,7 @@ class ExerciceController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Exercice_CLONE")
      */
-    public function cloneAndDisableExerciceExcept(Request $request, Exercice $exercice)
-    {
+    public function cloneAndDisableExerciceExcept(Request $request, Exercice $exercice) {
         $em = $this->getDoctrine()->getManager();
         $exerciceNew = new Exercice();
         $form = $this->createForm(ExerciceType::class, $exerciceNew);
@@ -355,19 +345,16 @@ class ExerciceController extends AbstractController
         $em->flush();
 
         $this->getDoctrine()->getManager()
-            ->createQuery('UPDATE App\Entity\Exercice ex SET ex.encours=false WHERE ex!=:exercice')
-            ->setParameter('exercice', $exerciceNew)
-            ->getResult();
+                ->createQuery('UPDATE App\Entity\Exercice ex SET ex.encours=false WHERE ex!=:exercice')
+                ->setParameter('exercice', $exerciceNew)
+                ->getResult();
 
         return $exerciceNew;
     }
-    
-   /* public function checkExrcice(Exercice $exercice, EntityManagerInterface $entityManager) {
-        $searched = $entityManager->getRepository(Exercice::class)->findByCode($exercice->getCode());
-        if (count($searched)) {
-            throw $this->createAccessDeniedException("Une  avec le même code existe déjà, merci de changer de numéro...");
-        } }*/
 
-
-
+    /* public function checkExrcice(Exercice $exercice, EntityManagerInterface $entityManager) {
+      $searched = $entityManager->getRepository(Exercice::class)->findByCode($exercice->getCode());
+      if (count($searched)) {
+      throw $this->createAccessDeniedException("Une  avec le même code existe déjà, merci de changer de numéro...");
+      } } */
 }
