@@ -5,12 +5,11 @@ namespace App\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * EtatMarche
  *
- * @ORM\Table(name="etat_marche", uniqueConstraints={@ORM\UniqueConstraint(name="code_etat_UNIQUE", columns={"code"})}, indexes={@ORM\Index(name="fk_etat_marche_etat_marche1_idx", columns={"etat_suivant"})})
+ * @ORM\Table(name="etat_marche", uniqueConstraints={@ORM\UniqueConstraint(name="code_etat_UNIQUE", columns={"code"})}, indexes={@ORM\Index(name="fk_etat_marche_etat_marche1_idx", columns={"etat_suivant"}), @ORM\Index(name="type_passation", columns={"type_passation"})})
  * @ORM\Entity
  */
 class EtatMarche
@@ -46,7 +45,17 @@ class EtatMarche
     private $description;
 
     /**
-     * @var EtatMarche
+     * @var \TypePassation
+     *
+     * @ORM\ManyToOne(targetEntity="TypePassation")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="type_passation", referencedColumnName="id")
+     * })
+     */
+    private $typePassation;
+
+    /**
+     * @var \EtatMarche
      *
      * @ORM\ManyToOne(targetEntity="EtatMarche")
      * @ORM\JoinColumns({
@@ -54,7 +63,7 @@ class EtatMarche
      * })
      */
     private $etatSuivant;
-    
+
     /**
      * @ORM\ManyToMany(targetEntity="App\Entity\User")
      * @ORM\JoinTable(name="role_sur_marche",
@@ -63,17 +72,21 @@ class EtatMarche
      * )
      */
     protected $users;
-    
-    public function __construct() {
-        $this->users = new ArrayCollection();
+
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->user = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
-    public function getId()
+    public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getCode()
+    public function getCode(): ?string
     {
         return $this->code;
     }
@@ -85,36 +98,48 @@ class EtatMarche
         return $this;
     }
 
-    public function getLibelle()
+    public function getLibelle(): ?string
     {
         return $this->libelle;
     }
 
-    public function setLibelle(string $liebelle): self
+    public function setLibelle(string $libelle): self
     {
-        $this->libelle = $liebelle;
+        $this->libelle = $libelle;
 
         return $this;
     }
 
-    public function getDescription()
+    public function getDescription(): ?string
     {
         return $this->description;
     }
 
-    public function setDescription($description): self
+    public function setDescription(?string $description): self
     {
         $this->description = $description;
 
         return $this;
     }
 
-    public function getEtatSuivant()
+    public function getTypePassation(): ?TypePassation
+    {
+        return $this->typePassation;
+    }
+
+    public function setTypePassation(?TypePassation $typePassation): self
+    {
+        $this->typePassation = $typePassation;
+
+        return $this;
+    }
+
+    public function getEtatSuivant(): ?self
     {
         return $this->etatSuivant;
     }
 
-    public function setEtatSuivant($etatSuivant): self
+    public function setEtatSuivant(?self $etatSuivant): self
     {
         $this->etatSuivant = $etatSuivant;
 
@@ -122,12 +147,29 @@ class EtatMarche
     }
 
     /**
-     * @return Collection|User[]
+     * @return Collection|FosUser[]
      */
-    public function getUsers(): Collection
+    public function getUser(): Collection
     {
-        return $this->users;
+        return $this->user;
     }
 
+    public function addUser(FosUser $user): self
+    {
+        if (!$this->user->contains($user)) {
+            $this->user[] = $user;
+        }
+
+        return $this;
+    }
+
+    public function removeUser(FosUser $user): self
+    {
+        if ($this->user->contains($user)) {
+            $this->user->removeElement($user);
+        }
+
+        return $this;
+    }
 
 }

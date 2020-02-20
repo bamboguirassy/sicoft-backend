@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\EtatMarche;
+use App\Entity\TypePassation;
 use App\Entity\User;
 use App\Form\EtatMarcheType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -31,6 +32,21 @@ class EtatMarcheController extends AbstractController
 
         return count($etatMarches) ? $etatMarches : [];
     }
+
+    /**
+     * @Rest\Get(path="/etatMarche_by_typePassaton/{id}", name="etat_marche_by_typePassation")
+     * @Rest\View(StatusCode = 200)
+     * @IsGranted("ROLE_EtatMarche_INDEX")
+     */
+
+     public function getEtatMarcheByTypePassation(TypePassation $typePassation){
+         $em = $this->getDoctrine()->getManager();
+         $etatMarches = $em->createQuery('SELECT em FROM App\Entity\EtatMarche em  WHERE em.typePassation=?1')
+         ->setParameter(1, $typePassation)
+         ->getResult();
+         return count($etatMarches) ? $etatMarches : [];
+
+     }
 
     /**
      * @Rest\Post(Path="/create", name="etat_marche_new")

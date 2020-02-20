@@ -12,6 +12,7 @@ use App\Entity\Tracelog;
 use Doctrine\Common\Persistence\ObjectManager;
 use JMS\Serializer\SerializerBuilder as Serializer;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
 /**
  * Description of Utils
@@ -20,7 +21,6 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class Utils
 {
-
     static $senderName = 'SICOFT - Université de Thiès';
     static $senderEmail = 'noreply@univ-thies.sn';
     static $siteUrl = 'http://localhost:4200';
@@ -51,4 +51,5 @@ class Utils
         $manager->persist($tracelog);
         $manager->flush();
     }
+    
 }
