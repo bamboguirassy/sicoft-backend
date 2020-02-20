@@ -16,6 +16,8 @@ use App\Utils\Utils;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
+use Symfony\Component\HttpFoundation\IpUtils;
 
 /**
  * @Route("/api/user")
@@ -229,6 +231,44 @@ class UserController extends AbstractController {
         $this->getDoctrine()->getManager()->flush();
         return $user;
         
+    }
+    /**
+     * @Rest\Put(path="/change_image_profil", name="changeImage",requirements = {"id"="\d+"})
+     * @Rest\View(StatusCode=200)
+     * @IsGranted("ROLE_User_EDIT")
+     */
+    public function uploadFileProfil(Request $request) {
+    /** @var Symfony\Component\HttpFoundation\File\UploadedFile $file */
+        $fileSystem = new \Symfony\Component\Filesystem\Filesystem();
+        $em = $this->getDoctrine()->getManager();
+        $path = $this->params->get('photo_files_directory').'/'.$this->getUser()->getPhotoUrl();
+       
+        try {
+            if ($fileSystem->exists($path)) {
+                $fileSystem->remove($path);
+            }
+        } catch (IOExceptionInterface $exception) {
+            echo "An error occurred while deleting the file at".$exception->getPath();
+        }
+        //manage new file upload
+        $file = NULL;
+        if ($request->files->get('file')) {
+            $file = $request->files->get('file');
+        }
+
+        if (!$file){
+            throw $this->createAccessDeniedException('Aucun fichier trouvé');
+        }
+        if ($file) {
+            $fileName = $this->getUser()->getPassword() . '.' . $file->guessExtension();
+            // moves the file to the directory where brochures are stored
+            $file->move(
+                    $this->params->get('photo_files_directory'), $fileName
+            );
+            $this->getUser()->setPhotoUrl($fileName);
+            $em->flush();
+        }
+        return $file;
     }
 
 }
