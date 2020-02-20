@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -51,6 +53,16 @@ class CompteDivisionnaire
      * })
      */
     private $sousClasse;
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Compte", mappedBy="compteDivisionnaire")
+     */
+    private $comptes;
+
+    public function __construct()
+    {
+        $this->comptes = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -104,6 +116,38 @@ class CompteDivisionnaire
 
         return $this;
     }
+
+    /**
+     * @return Collection|SousClasse[]
+     */
+    public function getComptes(): Collection
+    {
+        return $this->comptes;
+    }
+
+    public function addCompte(Compte $compte): self
+    {
+        if (!$this->comptes->contains($compte)) {
+            $this->comptes[] = $compte;
+            $compte->setCompteDivisionnaire($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCompte(Compte $compte): self
+    {
+        if ($this->comptes->contains($compte)) {
+            $this->comptes->removeElement($compte);
+            // set the owning side to null (unless already changed)
+            if ($compte->getCompteDivisionnaire() === $this) {
+                $compte->setCompteDivisionnaire(null);
+            }
+        }
+
+        return $this;
+    }
+
 
 
 }
