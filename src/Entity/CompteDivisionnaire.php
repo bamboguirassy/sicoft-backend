@@ -118,7 +118,7 @@ class CompteDivisionnaire
     }
 
     /**
-     * @return Collection|SousClasse[]
+     * @return Collection|Compte[]
      */
     public function getComptes(): Collection
     {

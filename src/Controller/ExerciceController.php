@@ -113,22 +113,6 @@ class ExerciceController extends AbstractController {
         return $exercice;
     }
     
-    /**
-     * @Rest\Get(path="/{id}/precedent/", name="exercice_precedent",requirements = {"id"="\d+"})
-     * @Rest\View(StatusCode=200)
-     * @IsGranted("ROLE_Exercice_SHOW")
-     */
-    public function findExercicePrecedent(Exercice $exercice): Exercice {
-         $exercicePrecedents=$this->getDoctrine()->getManager()
-                ->createQuery('select e from App\Entity\Exercice e '
-                        . 'where e.exerciceSuivant=?1')
-                ->setParameter(1,$exercice)
-                 ->getResult();
-         if(count($exercicePrecedents)){
-             return $exercicePrecedents[0];
-         }
-         throw $this->createNotFoundException();
-    }
 
     /**
      * @Rest\Put(path="/{id}/edit", name="exercice_edit",requirements = {"id"="\d+"})

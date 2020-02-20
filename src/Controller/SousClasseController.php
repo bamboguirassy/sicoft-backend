@@ -2,12 +2,14 @@
 
 namespace App\Controller;
 
+use App\Entity\CompteDivisionnaire;
 use App\Entity\SousClasse;
 use App\Entity\Classe;
 use App\Form\SousClasseType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use App\Utils\Utils;
@@ -136,6 +138,9 @@ class SousClasseController extends AbstractController
      */
     public function delete(SousClasse $sousClasse): SousClasse
     {
+        if(count($sousClasse->getCompteDivisionnaire())){
+            throw new HttpException(417, "Impossible de supprimer la sous classe");
+        }
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->remove($sousClasse);
         $entityManager->flush();
@@ -162,6 +167,29 @@ class SousClasseController extends AbstractController
         $entityManager->flush();
 
         return $sousClasses;
+    }
+
+    /**
+     * @Rest\Delete("/{id}/confirm", name="sous_classe_delete_after_confimation",requirements = {"id"="\d+"})
+     * @Rest\View(StatusCode=204)
+     * @IsGranted("ROLE_SousClasse_DELETE")
+     */
+    public function deleteAfterConfirmation(SousClasse $sousClasse): SousClasse
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+
+        $divisionalAccounts = $entityManager->getRepository(CompteDivisionnaire::class)
+            ->findBySousClasse($sousClasse);
+
+        foreach ($divisionalAccounts as $divisionalAccount) {
+            $divisionalAccount->setSousClasse(null);
+            $entityManager->flush();
+            $entityManager->remove($divisionalAccount);
+        }
+        $entityManager->remove($sousClasse);
+        $entityManager->flush();
+
+        return $sousClasse;
     }
 
     /////////////////////////////Les Testes////////////////////////////////////

@@ -8,6 +8,7 @@ use App\Form\CompteDivisionnaireType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use App\Utils\Utils;
@@ -70,7 +71,7 @@ class CompteDivisionnaireController extends AbstractController
 
             $searchedDivisionalAccount = $em->getRepository(CompteDivisionnaire::class)
                 ->findOneBy(['numero' => $divisionalAccount->getNumero()]);
-            if($searchedDivisionalAccount) {
+            if ($searchedDivisionalAccount) {
                 throw $this->createAccessDeniedException("Ce code est déjà celui d'un compte divisionnaire.");
             }
 
@@ -135,7 +136,33 @@ class CompteDivisionnaireController extends AbstractController
      */
     public function delete(CompteDivisionnaire $compteDivisionnaire): CompteDivisionnaire
     {
+        if (count($compteDivisionnaire->getComptes())) {
+            throw new HttpException(417, "Impossible de supprimer le compte divisionnaire");
+        }
+
         $entityManager = $this->getDoctrine()->getManager();
+        $entityManager->remove($compteDivisionnaire);
+        $entityManager->flush();
+
+        return $compteDivisionnaire;
+    }
+
+    /**
+     * @Rest\Delete("/{id}/confirm", name="compte_divisionnaire_after_confirmation_delete",requirements = {"id"="\d+"})
+     * @Rest\View(StatusCode=204)
+     * @IsGranted("ROLE_CompteDivisionnaire_DELETE")
+     */
+    public function deleteAfterConfirmation(CompteDivisionnaire $compteDivisionnaire): CompteDivisionnaire
+    {
+        $comptes = $compteDivisionnaire->getComptes();
+        $entityManager = $this->getDoctrine()->getManager();
+
+
+        foreach ($comptes as $compte) {
+            $compte->setCompteDivisionnaire(null);
+            $entityManager->flush();
+            $entityManager->remove($compte);
+        }
         $entityManager->remove($compteDivisionnaire);
         $entityManager->flush();
 
