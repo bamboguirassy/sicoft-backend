@@ -17,6 +17,7 @@ class EtatMarcheType extends AbstractType
             ->add('description')
             ->add('etatSuivant')
             ->add('users')
+            ->add('typePassation')
         ;
     }
 
