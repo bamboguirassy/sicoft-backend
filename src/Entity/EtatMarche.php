@@ -122,7 +122,7 @@ class EtatMarche
         return $this;
     }
 
-    public function getTypePassation(): ?TypePassation
+    public function getTypePassation()
     {
         return $this->typePassation;
     }
@@ -134,7 +134,7 @@ class EtatMarche
         return $this;
     }
 
-    public function getEtatSuivant(): ?self
+    public function getEtatSuivant()
     {
         return $this->etatSuivant;
     }
@@ -154,7 +154,7 @@ class EtatMarche
         return $this->user;
     }
 
-    public function addUser(FosUser $user): self
+    public function addUser(User $user): self
     {
         if (!$this->user->contains($user)) {
             $this->user[] = $user;
@@ -163,7 +163,7 @@ class EtatMarche
         return $this;
     }
 
-    public function removeUser(FosUser $user): self
+    public function removeUser(User $user): self
     {
         if ($this->user->contains($user)) {
             $this->user->removeElement($user);
