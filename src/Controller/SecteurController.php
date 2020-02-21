@@ -147,4 +147,18 @@ class SecteurController extends AbstractController
 
         return $secteurs;
     }
+     /**
+     * @Rest\Get(path="/secteurs_fournisseur", name="secteurs_fournisseur")
+     * @Rest\View(StatusCode=200)
+     * @IsGranted("ROLE_Fournisseur_INDEX")
+     */
+    public function findWithAtLeastOneFournisseur()
+    { 
+        $em = $this->getDoctrine()->getManager();
+        $secteur = $em->createQuery('select s from App\Entity\Secteur s where s.fournisseurs => 1')
+                ->getResult();
+
+        return $secteur;
+    }
+     
 }
