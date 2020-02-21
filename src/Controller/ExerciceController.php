@@ -36,6 +36,24 @@ class ExerciceController extends AbstractController {
  
 
     /**
+     * @Rest\Get(path="/precedent/{id}", name="exercice_precedent", requirements = {"id"="\d+"})
+     * @Rest\View(StatusCode = 200)
+     * @IsGranted("ROLE_Exercice_SHOW")
+     */
+    public function findExercicePrecedent(Exercice $exercice){
+        $targetExercicePrecedent = $this->getDoctrine()->getManager()
+            ->createQuery(
+                'SELECT exercice FROM App\Entity\Exercice exercice
+                 WHERE (exercice.exerciceSuivant=:exercice) 
+            ')->setParameter('exercice', $exercice)
+            ->getSingleResult();
+        if(!$targetExercicePrecedent) {
+            throw new HttpException(404, "Cet exercice n'a pas de suivant.");
+        }
+        return $targetExercicePrecedent;
+    }
+
+    /**
      * @Rest\Post(Path="/create", name="exercice_new")
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Exercice_CREATE")
@@ -95,22 +113,6 @@ class ExerciceController extends AbstractController {
         return $exercice;
     }
     
-    /**
-     * @Rest\Get(path="/{id}/precedent/", name="exercice_precedent",requirements = {"id"="\d+"})
-     * @Rest\View(StatusCode=200)
-     * @IsGranted("ROLE_Exercice_SHOW")
-     */
-    public function findExercicePrecedent(Exercice $exercice): Exercice {
-         $exercicePrecedents=$this->getDoctrine()->getManager()
-                ->createQuery('select e from App\Entity\Exercice e '
-                        . 'where e.exerciceSuivant=?1')
-                ->setParameter(1,$exercice)
-                 ->getResult();
-         if(count($exercicePrecedents)){
-             return $exercicePrecedents[0];
-         }
-         throw $this->createNotFoundException();
-    }
 
     /**
      * @Rest\Put(path="/{id}/edit", name="exercice_edit",requirements = {"id"="\d+"})
@@ -190,9 +192,9 @@ class ExerciceController extends AbstractController {
         $requestData = Utils::getObjectFromRequest($request);
         $datedebut = $requestData->dateDebut;
         $datefin = $requestData->dateFin;
-        $exercice->setDateDebut(new \DateTime($datedebut));
-        $exercice->setDateFin(new \DateTime($datefin));
-        if ($exercice->getDateDebut() > $exercice->getDateFin()) {
+        $exerciceNew->setDateDebut(new \DateTime($datedebut));
+        $exerciceNew->setDateFin(new \DateTime($datefin));
+        if ($exerciceNew->getDateDebut() > $exerciceNew->getDateFin()) {
             throw $this->createAccessDeniedException("La date de début d'exercie est supérieure à la date de fin");
         }
 
