@@ -78,7 +78,7 @@ class EtatMarche
      */
     public function __construct()
     {
-        $this->user = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->users = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     public function getId(): ?int
@@ -149,12 +149,12 @@ class EtatMarche
     /**
      * @return Collection|FosUser[]
      */
-    public function getUser(): Collection
+    public function getUsers(): Collection
     {
-        return $this->user;
+        return $this->users;
     }
-
-    public function addUser(User $user): self
+/*
+    public function addUser(FosUser $user): self
     {
         if (!$this->user->contains($user)) {
             $this->user[] = $user;
@@ -163,13 +163,14 @@ class EtatMarche
         return $this;
     }
 
-    public function removeUser(User $user): self
+    public function removeUser(FosUser $user): self
     {
         if ($this->user->contains($user)) {
             $this->user->removeElement($user);
         }
 
         return $this;
-    }
+    }*/
+
 
 }
