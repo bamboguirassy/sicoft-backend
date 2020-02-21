@@ -147,30 +147,12 @@ class EtatMarche
     }
 
     /**
-     * @return Collection|FosUser[]
+     * @return Collection|User[]
      */
     public function getUsers(): Collection
     {
         return $this->users;
     }
-/*
-    public function addUser(FosUser $user): self
-    {
-        if (!$this->user->contains($user)) {
-            $this->user[] = $user;
-        }
-
-        return $this;
-    }
-
-    public function removeUser(FosUser $user): self
-    {
-        if ($this->user->contains($user)) {
-            $this->user->removeElement($user);
-        }
-
-        return $this;
-    }*/
 
 
 }
