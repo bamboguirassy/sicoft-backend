@@ -78,7 +78,7 @@ class EtatMarche
      */
     public function __construct()
     {
-        $this->user = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->users = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     public function getId(): ?int
@@ -122,7 +122,7 @@ class EtatMarche
         return $this;
     }
 
-    public function getTypePassation(): ?TypePassation
+    public function getTypePassation()
     {
         return $this->typePassation;
     }
@@ -134,7 +134,7 @@ class EtatMarche
         return $this;
     }
 
-    public function getEtatSuivant(): ?self
+    public function getEtatSuivant()
     {
         return $this->etatSuivant;
     }
@@ -149,11 +149,11 @@ class EtatMarche
     /**
      * @return Collection|FosUser[]
      */
-    public function getUser(): Collection
+    public function getUsers(): Collection
     {
-        return $this->user;
+        return $this->users;
     }
-
+/*
     public function addUser(FosUser $user): self
     {
         if (!$this->user->contains($user)) {
@@ -170,6 +170,7 @@ class EtatMarche
         }
 
         return $this;
-    }
+    }*/
+
 
 }
