@@ -122,29 +122,6 @@ class ClasseController extends AbstractController
     }
 
     /**
-     * @Rest\Delete("/{id}/confirm", name="classe_delete_after_confirmation",requirements = {"id"="\d+"})
-     * @Rest\View(StatusCode=204)
-     * @IsGranted("ROLE_Classe_DELETE")
-     */
-    public function deleteAfterConfirmation(Classe $classe): Classe
-    {
-        $em = $this->getDoctrine()->getManager();
-        $subClasses = $em->getRepository(SousClasse::class)
-            ->findByClasse($classe);
-        if(count($subClasses)) {
-            foreach ($subClasses as $subClass) {
-                $subClass->setClasse(null);
-                $em->flush();
-                $em->remove($subClass);
-            }
-        }
-
-        $em->remove($classe);
-        $em->flush();
-        return $classe;
-    }
-
-    /**
      * @Rest\Post("/delete-selection/", name="classe_selection_delete")
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Classe_DELETE")

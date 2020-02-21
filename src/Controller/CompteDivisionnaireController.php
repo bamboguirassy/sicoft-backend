@@ -148,28 +148,6 @@ class CompteDivisionnaireController extends AbstractController
     }
 
     /**
-     * @Rest\Delete("/{id}/confirm", name="compte_divisionnaire_after_confirmation_delete",requirements = {"id"="\d+"})
-     * @Rest\View(StatusCode=204)
-     * @IsGranted("ROLE_CompteDivisionnaire_DELETE")
-     */
-    public function deleteAfterConfirmation(CompteDivisionnaire $compteDivisionnaire): CompteDivisionnaire
-    {
-        $comptes = $compteDivisionnaire->getComptes();
-        $entityManager = $this->getDoctrine()->getManager();
-
-
-        foreach ($comptes as $compte) {
-            $compte->setCompteDivisionnaire(null);
-            $entityManager->flush();
-            $entityManager->remove($compte);
-        }
-        $entityManager->remove($compteDivisionnaire);
-        $entityManager->flush();
-
-        return $compteDivisionnaire;
-    }
-
-    /**
      * @Rest\Post("/delete-selection/", name="compte_divisionnaire_selection_delete")
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_CompteDivisionnaire_DELETE")

@@ -169,29 +169,6 @@ class SousClasseController extends AbstractController
         return $sousClasses;
     }
 
-    /**
-     * @Rest\Delete("/{id}/confirm", name="sous_classe_delete_after_confimation",requirements = {"id"="\d+"})
-     * @Rest\View(StatusCode=204)
-     * @IsGranted("ROLE_SousClasse_DELETE")
-     */
-    public function deleteAfterConfirmation(SousClasse $sousClasse): SousClasse
-    {
-        $entityManager = $this->getDoctrine()->getManager();
-
-        $divisionalAccounts = $entityManager->getRepository(CompteDivisionnaire::class)
-            ->findBySousClasse($sousClasse);
-
-        foreach ($divisionalAccounts as $divisionalAccount) {
-            $divisionalAccount->setSousClasse(null);
-            $entityManager->flush();
-            $entityManager->remove($divisionalAccount);
-        }
-        $entityManager->remove($sousClasse);
-        $entityManager->flush();
-
-        return $sousClasse;
-    }
-
     /////////////////////////////Les Testes////////////////////////////////////
 
     public function checkNumeroAndLibelle(SousClasse $sousclasse, EntityManagerInterface $em)
