@@ -31,7 +31,7 @@ class Compte
     /**
      * @var string
      *
-     * @ORM\Column(name="libelle", type="string", length=45, nullable=false)
+     * @ORM\Column(name="libelle", type="string", length=100, nullable=false)
      */
     private $libelle;
 
