@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -31,7 +33,7 @@ class SousClasse
     /**
      * @var string
      *
-     * @ORM\Column(name="libelle", type="string", length=45, nullable=false)
+     * @ORM\Column(name="libelle", type="string", length=100, nullable=false)
      */
     private $libelle;
 
@@ -48,7 +50,15 @@ class SousClasse
      */
     private $classe;
 
-    
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\CompteDivisionnaire", mappedBy="sousClasse")
+     */
+    private $compteDivisionnaires;
+
+    public function __construct()
+    {
+        $this->compteDivisionnaires = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -99,6 +109,37 @@ class SousClasse
     public function setClasse(?Classe $classe): self
     {
         $this->classe = $classe;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|CompteDivisionnaire[]
+     */
+    public function getCompteDivisionnaire(): Collection
+    {
+        return $this->compteDivisionnaires;
+    }
+
+    public function addCompteDivisionnaire(CompteDivisionnaire $compteDivisionnaire): self
+    {
+        if (!$this->compteDivisionnaires->contains($compteDivisionnaire)) {
+            $this->compteDivisionnaires[] = $compteDivisionnaire;
+            $compteDivisionnaire->setSousClasse($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCompteDivisionnaire(CompteDivisionnaire $compteDivisionnaire): self
+    {
+        if ($this->compteDivisionnaires->contains($compteDivisionnaire)) {
+            $this->compteDivisionnaires->removeElement($compteDivisionnaire);
+            // set the owning side to null (unless already changed)
+            if ($compteDivisionnaire->getSousClasse() === $this) {
+                $compteDivisionnaire->setSousClasse(null);
+            }
+        }
 
         return $this;
     }

@@ -64,7 +64,6 @@ class ExerciceSourceFinancementController extends AbstractController
         }
         $em->flush();
         return $exerciceSourceFinancements;
-        
     }
 
     /**

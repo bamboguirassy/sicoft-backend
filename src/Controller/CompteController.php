@@ -50,6 +50,37 @@ class CompteController extends AbstractController
     }
 
     /**
+     * @Rest\Post(Path="/create-multiple", name="compte_multiple_new")
+     * @Rest\View(StatusCode=200)
+     * @IsGranted("ROLE_Compte_CREATE")
+     */
+    public function createMultiple(Request $request) {
+        $em = $this->getDoctrine()->getManager();
+        $accounts = Utils::serializeRequestContent($request);
+
+        $createdAccounts = [];
+        foreach ($accounts as $account) {
+            $retrievedAccount = new Compte();
+            $form = $this->createForm(CompteType::class, $retrievedAccount);
+            $form->submit($account);
+            $searchedAccountByNumero = $em->getRepository(Compte::class)
+                ->findOneByNumero($retrievedAccount->getNumero());
+            if($searchedAccountByNumero) {
+                throw $this->createAccessDeniedException("Ce code est déjà celui d'un compte");
+            }
+            $searchedAccountByLabel = $em->getRepository(Compte::class)
+                ->findOneByLibelle($retrievedAccount->getLibelle());
+            if($searchedAccountByLabel) {
+                throw $this->createAccessDeniedException("Ce libelle est déjà celui d'un compte");
+            }
+            $em->persist($retrievedAccount);
+            $createdAccounts[] = $retrievedAccount;
+        }
+        $em->flush();
+        return $createdAccounts;
+    }
+
+    /**
      * @Rest\Get(path="/{id}", name="compte_show",requirements = {"id"="\d+"})
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Compte_SHOW")
