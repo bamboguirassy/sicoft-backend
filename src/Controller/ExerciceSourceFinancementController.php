@@ -112,13 +112,20 @@ class ExerciceSourceFinancementController extends AbstractController
      * @IsGranted("ROLE_ExerciceSourceFinancement_EDIT")
      */
     public function findExerciceSourceFinancementByExerciceAndEntite(\App\Entity\Exercice $exercice, $entite) {
-        $em = $this->getDoctrine()->getManager();       
+        $em = $this->getDoctrine()->getManager();    
+        $tabParam[] = [];   
         $tabExerciceSourceFinancements = $em->createQuery('SELECT esf FROM App\Entity\ExerciceSourceFinancement esf 
         WHERE esf.exercice=?1 and esf.entite=?2')
         ->setParameter(1, $exercice)
         ->setParameter(2, $entite)
         ->getResult();
-        return $tabExerciceSourceFinancements;
+      $montantTotal = $em->createQuery('SELECT SUM(esf.montant) FROM App\Entity\ExerciceSourceFinancement esf 
+       WHERE esf.exercice=?1 and esf.entite=?2')
+       ->setParameter(1, $exercice)
+       ->setParameter(2, $entite)
+       ->getSingleScalarResult();
+       $tabParam = ['tabExerciceSourceFinancements' => $tabExerciceSourceFinancements, 'montantTotal' => intval($montantTotal)];
+       return $tabParam;
     }
     
     /**
