@@ -99,13 +99,14 @@ class SecteurController extends AbstractController {
 
         $form = $this->createForm(SecteurType::class, $secteurNew);
         $form->submit(Utils::serializeRequestContent($request));
-
-
-        $searchedSectorByCode = $em->getRepository(Secteur::class)
-                ->findOneByCode($secteur->getCode());
-        if ($searchedSectorByCode) {
-            throw $this->createAccessDeniedException("Un secteur avec ce code existe déjà.");
+        $searchedCodeSecteur = $em->getRepository(Secteur::class)
+                ->findOneByCode($secteurNew->getCode());
+        if ($searchedCodeSecteur) {
+            throw $this->createAccessDeniedException("Un secteur avec ce même code existe déjà.");
         }
+
+
+
 
         $em->persist($secteurNew);
         $em->flush();
