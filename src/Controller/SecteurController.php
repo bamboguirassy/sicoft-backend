@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-
 use App\Entity\Secteur;
 use App\Form\SecteurType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -16,20 +15,19 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 /**
  * @Route("/api/secteur")
  */
-class SecteurController extends AbstractController
-{
+class SecteurController extends AbstractController {
+
     /**
      * @Rest\Get(path="/", name="secteur_index")
      * @Rest\View(StatusCode = 200)
      * @IsGranted("ROLE_Secteur_INDEX")
      */
-    public function index(): array
-    {
+    public function index(): array {
         $secteurs = $this->getDoctrine()
-            ->getRepository(Secteur::class)
-            ->findAll();
+                ->getRepository(Secteur::class)
+                ->findAll();
 
-        return count($secteurs)?$secteurs:[];
+        return count($secteurs) ? $secteurs : [];
     }
 
     /**
@@ -37,7 +35,7 @@ class SecteurController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Secteur_CREATE")
      */
-    public function create(Request $request): Secteur    {
+    public function create(Request $request): Secteur {
         $secteur = new Secteur();
         $form = $this->createForm(SecteurType::class, $secteur);
         $form->submit(Utils::serializeRequestContent($request));
@@ -45,7 +43,7 @@ class SecteurController extends AbstractController
         $entityManager = $this->getDoctrine()->getManager();
 
         $searchedSectorByCode = $entityManager->getRepository(Secteur::class)
-            ->findOneByCode($secteur->getCode());
+                ->findOneByCode($secteur->getCode());
         if ($searchedSectorByCode) {
             throw $this->createAccessDeniedException("Un secteur avec ce code existe déjà.");
         }
@@ -60,26 +58,27 @@ class SecteurController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Secteur_SHOW")
      */
-    public function show(Secteur $secteur): Secteur    {
+    public function show(Secteur $secteur): Secteur {
         return $secteur;
     }
+
     /**
      * @Rest\Put(path="/{id}/edit", name="secteur_edit",requirements = {"id"="\d+"})
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Secteur_EDIT")
      */
-    public function edit(Request $request, Secteur $secteur): Secteur    {
+    public function edit(Request $request, Secteur $secteur): Secteur {
         $form = $this->createForm(SecteurType::class, $secteur);
         $form->submit(Utils::serializeRequestContent($request));
 
         $targetSecteur = $this->getDoctrine()->getManager()
-            ->createQuery(
-                'SELECT secteur FROM App\Entity\Secteur secteur
+                ->createQuery(
+                        'SELECT secteur FROM App\Entity\Secteur secteur
                  WHERE (secteur.code=:code) AND secteur!=:secteur
             ')->setParameter('code', $secteur->getCode())
-            ->setParameter('secteur', $secteur)
-            ->getResult();
-        if($targetSecteur) {
+                ->setParameter('secteur', $secteur)
+                ->getResult();
+        if ($targetSecteur) {
             if ($targetSecteur[0]->getCode() == $secteur->getCode()) {
                 throw $this->createAccessDeniedException("Ce code existe déjà.");
             }
@@ -88,25 +87,26 @@ class SecteurController extends AbstractController
         $this->getDoctrine()->getManager()->flush();
         return $secteur;
     }
-    
+
     /**
      * @Rest\Put(path="/{id}/clone", name="secteur_clone",requirements = {"id"="\d+"})
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Secteur_CLONE")
      */
-    public function cloner(Request $request, Secteur $secteur):  Secteur {
-        $em=$this->getDoctrine()->getManager();
-        $secteurNew=new Secteur();
+    public function cloner(Request $request, Secteur $secteur): Secteur {
+        $em = $this->getDoctrine()->getManager();
+        $secteurNew = new Secteur();
 
         $form = $this->createForm(SecteurType::class, $secteurNew);
         $form->submit(Utils::serializeRequestContent($request));
-
-
-        $searchedSectorByCode = $em->getRepository(Secteur::class)
-            ->findOneByCode($secteur->getCode());
-        if ($searchedSectorByCode) {
-            throw $this->createAccessDeniedException("Un secteur avec ce code existe déjà.");
+        $searchedCodeSecteur = $em->getRepository(Secteur::class)
+                ->findOneByCode($secteurNew->getCode());
+        if ($searchedCodeSecteur) {
+            throw $this->createAccessDeniedException("Un secteur avec ce même code existe déjà.");
         }
+
+
+
 
         $em->persist($secteurNew);
         $em->flush();
@@ -119,7 +119,7 @@ class SecteurController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Secteur_DELETE")
      */
-    public function delete(Secteur $secteur): Secteur    {
+    public function delete(Secteur $secteur): Secteur {
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->remove($secteur);
         $entityManager->flush();
@@ -127,7 +127,6 @@ class SecteurController extends AbstractController
         return $secteur;
     }
 
-    
     /**
      * @Rest\Post("/delete-selection/", name="secteur_selection_delete")
      * @Rest\View(StatusCode=200)
@@ -147,18 +146,20 @@ class SecteurController extends AbstractController
 
         return $secteurs;
     }
-     /**
-     * @Rest\Get(path="/secteurs_fournisseur", name="secteurs_fournisseur")
+
+    /**
+     * @Rest\Get(path="/secteurs-fournisseur", name="secteurs_fournisseur")
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Fournisseur_INDEX")
      */
-    public function findWithAtLeastOneFournisseur()
-    { 
+    public function findWithAtLeastOneFournisseur(): array {
         $em = $this->getDoctrine()->getManager();
-        $secteur = $em->createQuery('select s from App\Entity\Secteur s where s.fournisseurs => 1')
+        $secteurs = $em->createQuery('SELECT s from App\Entity\Secteur s where '
+                        . '(select count(sf) from App\Entity\FournisseurSecteur sf '
+                        . 'where sf.secteur=s)>0')
                 ->getResult();
 
-        return $secteur;
+        return $secteurs;
     }
-     
+
 }
