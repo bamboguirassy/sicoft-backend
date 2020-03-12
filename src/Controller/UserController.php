@@ -17,7 +17,6 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
-use Symfony\Component\HttpFoundation\IpUtils;
 
 /**
  * @Route("/api/user")
@@ -238,8 +237,7 @@ class UserController extends AbstractController {
      * @IsGranted("ROLE_User_EDIT")
      */
     public function uploadFileProfil(Request $request) {
-       
-    /** @var Symfony\Component\HttpFoundation\File\UploadedFile $file */
+        
        $fileSystem = new \Symfony\Component\Filesystem\Filesystem();
         $em = $this->getDoctrine()->getManager();
         $path = $this->params->get('photo_files_directory').'/'.$this->getUser()->getPhotoUrl();
@@ -252,16 +250,15 @@ class UserController extends AbstractController {
             echo "An error occurred while deleting the file at".$exception->getPath();
         }
         //manage new file upload
-     
+        /** @var UploadedFile $file */
         $file = NULL;
-
-            $file =  $request->files->get('photoUrl');
-
+            $file = $request->files->get('image');
+            
         if (!$file){
             throw $this->createAccessDeniedException('Aucun fichier trouvé');
         }
         if ($file) {
-            $fileName = $this->getUser()->getPassword() . '.' . $file->guessExtension();
+            $fileName = $this->getUser()->getPassword().'.'.$file->guessExtension();
             // moves the file to the directory where brochures are stored
             $file->move(
                     $this->params->get('photo_files_directory'), $fileName
