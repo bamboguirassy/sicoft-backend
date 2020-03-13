@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * ExerciceSourceFinancement
  *
- * @ORM\Table(name="exercice_source_financement", uniqueConstraints={@ORM\UniqueConstraint(name="entite_exercice_sf_unique", columns={"entite", "exercice", "source_financement"})}, indexes={@ORM\Index(name="fk_entite", columns={"entite"}), @ORM\Index(name="fk_exercice_source_financement_exercice1_idx", columns={"exercice"}), @ORM\Index(name="fk_exercice_source_financement_source_financement1_idx", columns={"source_financement"})})
+ * @ORM\Table(name="exercice_source_financement", indexes={@ORM\Index(name="budget", columns={"budget"}), @ORM\Index(name="fk_exercice_source_financement_source_financement1_idx", columns={"source_financement"})})
  * @ORM\Entity
  */
 class ExerciceSourceFinancement
@@ -29,24 +29,14 @@ class ExerciceSourceFinancement
     private $montant;
 
     /**
-     * @var \Entite
+     * @var \Budget
      *
-     * @ORM\ManyToOne(targetEntity="Entite")
+     * @ORM\ManyToOne(targetEntity="Budget")
      * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="entite", referencedColumnName="id")
+     *   @ORM\JoinColumn(name="budget", referencedColumnName="id")
      * })
      */
-    private $entite;
-
-    /**
-     * @var \Exercice
-     *
-     * @ORM\ManyToOne(targetEntity="Exercice")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="exercice", referencedColumnName="id")
-     * })
-     */
-    private $exercice;
+    private $budget;
 
     /**
      * @var \SourceFinancement
@@ -75,26 +65,14 @@ class ExerciceSourceFinancement
         return $this;
     }
 
-    public function getEntite(): ?Entite
+    public function getBudget(): ?Budget
     {
-        return $this->entite;
+        return $this->budget;
     }
 
-    public function setEntite(?Entite $entite): self
+    public function setBudget(?Budget $budget): self
     {
-        $this->entite = $entite;
-
-        return $this;
-    }
-
-    public function getExercice(): ?Exercice
-    {
-        return $this->exercice;
-    }
-
-    public function setExercice(?Exercice $exercice): self
-    {
-        $this->exercice = $exercice;
+        $this->budget = $budget;
 
         return $this;
     }

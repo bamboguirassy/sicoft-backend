@@ -90,39 +90,35 @@ class ExerciceSourceFinancementController extends AbstractController
         return $exerciceSourceFinancement;
     }
     /**
-     * @Rest\Get(path="/sourceFinancement/exercice/{id}/entite/{entite}", name="source_financement_disponible",requirements = {"entite"="\d+"})
+     * @Rest\Get(path="/sourceFinancement/budget/{id}", name="source_financement_disponible",requirements = {"entite"="\d+"})
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_ExerciceSourceFinancement_EDIT")
      */
-    public function findSourceFinancementDisponible(\App\Entity\Exercice $exercice, $entite) {
+    public function findSourceFinancementDisponible(\App\Entity\Budget $budget) {
         $em = $this->getDoctrine()->getManager();
         //$tab_exerciceSourceFinancement[] = [];
         $sourceFinancements = $em->createQuery('SELECT sf FROM App\Entity\SourceFinancement sf 
         WHERE NOT EXISTS (SELECT esf FROM App\Entity\ExerciceSourceFinancement esf
-        WHERE esf.exercice=?1 and esf.entite=?2 and esf.sourceFinancement = sf)')
-        ->setParameter(1, $exercice)
-        ->setParameter(2, $entite)
+        WHERE esf.budget=?1 and esf.sourceFinancement = sf)')
+        ->setParameter(1, $budget)
         ->getResult();
-        //$tab_exerciceSourceFinancement = ['sourceFin' => $sourceFinancements, 'exerciceSourceFin' => $exerciceSourceFinancements];
         return $sourceFinancements;
     }
     /**
-     * @Rest\Get(path="/exercice/{id}/entite/{entite}", name="exercice_source_financement",requirements = {"entite"="\d+"})
+     * @Rest\Get(path="/budget/{id}", name="exercice_source_financement",requirements = {"id"="\d+"})
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_ExerciceSourceFinancement_EDIT")
      */
-    public function findExerciceSourceFinancementByExerciceAndEntite(\App\Entity\Exercice $exercice, $entite) {
+    public function findExerciceSourceFinancementByBudget(\App\Entity\Budget $budget) {
         $em = $this->getDoctrine()->getManager();    
         $tabParam[] = [];   
         $tabExerciceSourceFinancements = $em->createQuery('SELECT esf FROM App\Entity\ExerciceSourceFinancement esf 
-        WHERE esf.exercice=?1 and esf.entite=?2')
-        ->setParameter(1, $exercice)
-        ->setParameter(2, $entite)
+        WHERE esf.budget=?1')
+        ->setParameter(1, $budget)
         ->getResult();
       $montantTotal = $em->createQuery('SELECT SUM(esf.montant) FROM App\Entity\ExerciceSourceFinancement esf 
-       WHERE esf.exercice=?1 and esf.entite=?2')
-       ->setParameter(1, $exercice)
-       ->setParameter(2, $entite)
+       WHERE esf.budget=?1')
+       ->setParameter(1, $budget)
        ->getSingleScalarResult();
        $tabParam = ['tabExerciceSourceFinancements' => $tabExerciceSourceFinancements, 'montantTotal' => intval($montantTotal)];
        return $tabParam;

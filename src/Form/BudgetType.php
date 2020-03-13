@@ -2,28 +2,27 @@
 
 namespace App\Form;
 
-use App\Entity\ExerciceSourceFinancement;
+use App\Entity\Budget;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class ExerciceSourceFinancementType extends AbstractType
+class BudgetType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('montant')
-            //->add('entite')
-            //->add('exercice')
-            ->add('sourceFinancement')
-            ->add('budget')
+            ->add('libelle')
+            ->add('verrouille')
+            ->add('entite')
+            ->add('exercice')
         ;
     }
 
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'data_class' => ExerciceSourceFinancement::class,
+            'data_class' => Budget::class,
         ]);
     }
 }
