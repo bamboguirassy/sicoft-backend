@@ -28,19 +28,20 @@ class EntiteController extends AbstractController
         $groups = $em->createQuery('SELECT gr FROM App\Entity\Group gr WHERE gr.code=?1')
             ->setParameter(1, 'SA')
             ->getResult();
-        /*$groupes = $this->getUser()->getGroups();
+        $groupes = $this->getUser()->getGroups();
         foreach ($groupes as $groupe) {
         if ($groupe->getCode() == 'SA') {
         $entites = $this->getDoctrine()->getRepository(Entite::class)->findAll();
         } else {
         $entites = $this->getUser()->getEntites();
-        }*/
+        }
         if (count($groups) > 0) {
             $entites = $this->getDoctrine()->getRepository(Entite::class)->findAll();
         } else {
             $entites = $this->getUser()->getEntites();
         }
         return count($entites) ? $entites : [];
+        }
     }
 
     /**
