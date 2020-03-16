@@ -10,6 +10,7 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -78,7 +79,7 @@ class EntiteController extends AbstractController
      */
     public function edit(Request $request, Entite $entite, Manager $manager): Entite
     {
-        $oldEntity = clone ($entite);
+        $oldEntity = clone($entite);
         $form = $this->createForm(EntiteType::class, $entite);
         $form->submit(Utils::serializeRequestContent($request));
         $this->checkEditCodeAndNom($entite, $manager);
@@ -113,8 +114,16 @@ class EntiteController extends AbstractController
      */
     public function delete(Entite $entite): Entite
     {
-        $deletedEntity = clone ($entite);
+        $deletedEntity = clone($entite);
         $entityManager = $this->getDoctrine()->getManager();
+        $childs = $this->getDoctrine()->getManager()
+            ->createQuery('SELECT e FROM App\Entity\Entite e WHERE e.entiteParent=:entite')
+        ->setParameter('entite', $entite)->getResult();
+
+
+        if (count($childs)) {
+            throw new HttpException(417,"Suppression Impossible. L'Entite n'est pas autonome");
+        }
         $entityManager->remove($entite);
         $entityManager->flush();
         Utils::createTracelog($entityManager, 'entite', 'delete', $deletedEntity, null, $this->getUser()->getEmail());
