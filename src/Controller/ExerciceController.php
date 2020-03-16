@@ -53,6 +53,19 @@ class ExerciceController extends AbstractController {
         return $targetExercicePrecedent;
     }
 
+     /**
+     * @Rest\Get(path="/exerciceEncours", name="exercice_encours", requirements = {"id"="\d+"})
+     * @Rest\View(StatusCode = 200)
+     * @IsGranted("ROLE_Exercice_EDIT")
+     */
+    public function findExerciceEncours() {
+        $em = $this->getDoctrine()->getManager();
+        $exerciceEncours = $em->createQuery('SELECT ex FROM App\Entity\Exercice ex WHERE ex.encours=?1')
+        ->setParameter(1, 1)
+        ->getResult();
+        return count($exerciceEncours) ? $exerciceEncours: [];
+    }
+
     /**
      * @Rest\Post(Path="/create", name="exercice_new")
      * @Rest\View(StatusCode=200)
