@@ -106,8 +106,19 @@ class BudgetController extends AbstractController
      * @IsGranted("ROLE_Budget_EDIT")
      */
     public function edit(Request $request, Budget $budget): Budget    {
+        $entityManager = $this->getDoctrine()->getManager();
         $form = $this->createForm(BudgetType::class, $budget);
         $form->submit(Utils::serializeRequestContent($request));
+
+        $existBudget = $entityManager->createQuery('SELECT bgt FROM App\Entity\Budget bgt
+        WHERE bgt.exercice=?1 and bgt.entite=?2 and bgt!=?3')
+        ->setParameter(1, $budget->getExercice())
+        ->setParameter(2, $budget->getEntite())
+        ->setParameter(3, $budget)
+        ->getResult();
+        if(count($existBudget) > 0){
+            throw $this->createNotFoundException("Cet exercice est dèjà rattaché à une entité!");
+        }
         
         $this->getDoctrine()->getManager()->flush();
 
