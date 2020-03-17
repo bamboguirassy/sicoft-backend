@@ -33,11 +33,11 @@ class BudgetController extends AbstractController
     }
 
     /**
-     * @Rest\Get(path="/exercice/{id}", name="budget_by_exercice")
+     * @Rest\Get(path="/accessEntity", name="budget_by_access_entity")
      * @Rest\View(StatusCode = 200)
      * @IsGranted("ROLE_Budget_INDEX")
      */
-    public function findBudgetByExercice(Exercice $exercice) {
+    public function findBudgetByAndAccessEntity() {
         $em = $this->getDoctrine()->getManager();
         $budgetsByEntites = [];
         $groupes = $this->getUser()->getGroups();
@@ -46,16 +46,13 @@ class BudgetController extends AbstractController
             $budgetsByEntites = $em->createQuery('SELECT bgt FROM App\Entity\Budget bgt')
             ->getResult();
             return count($budgetsByEntites)?$budgetsByEntites:[];
-        //$entites = $this->getDoctrine()->getRepository(Entite::class)->findAll();
-        } else {
-            $entites = $this->getUser()->getEntites();
+            } 
         }
-        }
+        $entites = $this->getUser()->getEntites();
       
         foreach($entites as $entite){
             $tabBudgets = $em->createQuery('SELECT bgt FROM App\Entity\Budget bgt WHERE bgt.entite=?1')
             ->setParameter(1, $entite->getId())
-            //->setParameter(2, $exercice->getId())
             ->getResult();
             $budgetsByEntites = array_merge($budgetsByEntites, $tabBudgets);
         }
