@@ -50,10 +50,6 @@ class SousClasse
      */
     private $classe;
 
-    /**
-     * @ORM\OneToMany(targetEntity="App\Entity\CompteDivisionnaire", mappedBy="sousClasse")
-     */
-    private $compteDivisionnaires;
 
     public function __construct()
     {
@@ -109,37 +105,6 @@ class SousClasse
     public function setClasse(?Classe $classe): self
     {
         $this->classe = $classe;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection|CompteDivisionnaire[]
-     */
-    public function getCompteDivisionnaire(): Collection
-    {
-        return $this->compteDivisionnaires;
-    }
-
-    public function addCompteDivisionnaire(CompteDivisionnaire $compteDivisionnaire): self
-    {
-        if (!$this->compteDivisionnaires->contains($compteDivisionnaire)) {
-            $this->compteDivisionnaires[] = $compteDivisionnaire;
-            $compteDivisionnaire->setSousClasse($this);
-        }
-
-        return $this;
-    }
-
-    public function removeCompteDivisionnaire(CompteDivisionnaire $compteDivisionnaire): self
-    {
-        if ($this->compteDivisionnaires->contains($compteDivisionnaire)) {
-            $this->compteDivisionnaires->removeElement($compteDivisionnaire);
-            // set the owning side to null (unless already changed)
-            if ($compteDivisionnaire->getSousClasse() === $this) {
-                $compteDivisionnaire->setSousClasse(null);
-            }
-        }
 
         return $this;
     }

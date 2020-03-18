@@ -111,7 +111,10 @@ class ClasseController extends AbstractController
      */
     public function delete(Classe $classe): Classe
     {
-        if (count($classe->getSousClasses())) {
+        $associatedSousClasse = $this->getDoctrine()->getRepository(SousClasse::class)
+            ->findByClasse($classe);
+
+        if (count($associatedSousClasse)) {
             throw new HttpException(417, "Impossible de supprimer la classe n'est pas indépendante.");
         }
         $entityManager = $this->getDoctrine()->getManager();

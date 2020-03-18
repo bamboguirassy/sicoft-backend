@@ -138,7 +138,10 @@ class SousClasseController extends AbstractController
      */
     public function delete(SousClasse $sousClasse): SousClasse
     {
-        if(count($sousClasse->getCompteDivisionnaire())){
+        $associatedDivisionalAccount = $this->getDoctrine()->getManager()
+            ->getRepository(CompteDivisionnaire::class)
+            ->findBySousClasse($sousClasse);
+        if(count($associatedDivisionalAccount)){
             throw new HttpException(417, "Impossible de supprimer la sous classe");
         }
         $entityManager = $this->getDoctrine()->getManager();
