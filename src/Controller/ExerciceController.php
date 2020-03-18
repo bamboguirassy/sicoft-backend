@@ -54,7 +54,7 @@ class ExerciceController extends AbstractController {
     }
 
      /**
-     * @Rest\Get(path="/exerciceEncours", name="exercice_encours", requirements = {"id"="\d+"})
+     * @Rest\Get(path="/encours", name="exercice_encours")
      * @Rest\View(StatusCode = 200)
      * @IsGranted("ROLE_Exercice_EDIT")
      */

@@ -33,11 +33,11 @@ class BudgetController extends AbstractController
     }
 
     /**
-     * @Rest\Get(path="/accessEntity", name="budget_by_access_entity")
+     * @Rest\Get(path="/entite/access", name="budget_by_entite_access")
      * @Rest\View(StatusCode = 200)
      * @IsGranted("ROLE_Budget_INDEX")
      */
-    public function findBudgetByAndAccessEntity() {
+    public function findBudgetByEntiteAccess() {
         $em = $this->getDoctrine()->getManager();
         $budgetsByEntites = [];
         $groupes = $this->getUser()->getGroups();
