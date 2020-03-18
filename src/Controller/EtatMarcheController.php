@@ -34,7 +34,7 @@ class EtatMarcheController extends AbstractController
     }
 
     /**
-     * @Rest\Get(path="/etatMarche_by_typePassaton/{id}", name="etat_marche_by_typePassation")
+     * @Rest\Get(path="/{id}/typePassaton", name="etat_marche_by_typePassation", requirements = {"id"="\d+"})
      * @Rest\View(StatusCode = 200)
      * @IsGranted("ROLE_EtatMarche_INDEX")
      */
