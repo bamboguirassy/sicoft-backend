@@ -43,7 +43,8 @@ class BudgetController extends AbstractController
         $groupes = $this->getUser()->getGroups();
         foreach ($groupes as $groupe) {
         if ($groupe->getCode() == 'SA') {
-            $budgetsByEntites = $em->createQuery('SELECT bgt FROM App\Entity\Budget bgt')
+            $budgetsByEntites = $em->createQuery('SELECT bgt FROM App\Entity\Budget bgt WHERE bgt.exercice=?1')
+            ->setParameter(1, $exercice->getId())
             ->getResult();
             return count($budgetsByEntites)?$budgetsByEntites:[];
             } 
