@@ -17,6 +17,7 @@ class ClasseType extends AbstractType
             ->add('description')
             ->add('categorieClasse')
             ->add('typeClasse')
+            ->add('sousClasses')
         ;
     }
 

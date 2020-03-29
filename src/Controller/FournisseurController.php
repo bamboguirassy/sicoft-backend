@@ -64,7 +64,7 @@ class FournisseurController extends AbstractController
         $searchedProviderByNom = $entityManager->getRepository(Fournisseur::class)
             ->findOneByNom($fournisseur->getNom());
         if ($searchedProviderByNom) {
-            throw $this->createAccessDeniedException("Ce nom  existe déjà.");
+            throw $this->createAccessDeniedException("Ce nom est déjà celui d'un fournisseur.");
         }
 
         if (!preg_match('/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/', $fournisseur->getEmail())) {
@@ -122,7 +122,7 @@ class FournisseurController extends AbstractController
                 throw  $this->createAccessDeniedException("Ce ninea existe déjà.");
             }
             if($targetFournisseur[0]->getNom() == $fournisseur->getNom()) {
-                throw  $this->createAccessDeniedException("Ce nom existe déjà.");
+                throw  $this->createAccessDeniedException("Ce nom est déjà pris par un fournisseur.");
             }
         }
 
@@ -162,19 +162,13 @@ class FournisseurController extends AbstractController
             throw $this->createAccessDeniedException("Un fournisseur avec ce même ninea existe déjà.");
         }
 
-        $searchedProviderByTelContact = $em->getRepository(Fournisseur::class)
-            ->findOneByTelephoneContact($fournisseurNew->getTelephoneContact());
-        if ($searchedProviderByTelContact) {
-            throw $this->createAccessDeniedException("Ce numéro de contact existe déjà.");
-        }
-
         if (!preg_match('/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/', $fournisseur->getEmail())) {
             throw $this->createAccessDeniedException("Veuillez saisir une adresse e-mail valide.");
         }
         $searchedProviderByNom = $em->getRepository(Fournisseur::class)
             ->findOneByNom($fournisseurNew->getNom());
         if ($searchedProviderByNom) {
-            throw $this->createAccessDeniedException("Ce nom  existe déjà.");
+            throw $this->createAccessDeniedException("Ce nom est déjà pris par un fournisseur.");
         }
 
         $em->persist($fournisseurNew);
@@ -218,4 +212,6 @@ class FournisseurController extends AbstractController
 
         return $fournisseurs;
     }
+    
+
 }

@@ -4,14 +4,14 @@ namespace App\Controller;
 
 use App\Entity\Entite;
 use App\Form\EntiteType;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface as Manager;
+use FOS\RestBundle\Controller\Annotations as Rest;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Annotation\Route;
-use FOS\RestBundle\Controller\Annotations as Rest;
-use App\Utils\Utils;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
 /**
  * @Route("/api/entite")
@@ -23,14 +23,17 @@ class EntiteController extends AbstractController
      * @Rest\View(StatusCode = 200)
      * @IsGranted("ROLE_Entite_INDEX")
      */
-    public function index(): array
+    public function index()
     {
-        $entites = $this->getDoctrine()
-            ->getRepository(Entite::class)
-            ->findAll();
-      
-
-        return count($entites)?$entites:[];
+        $groupes = $this->getUser()->getGroups();
+        foreach ($groupes as $groupe) {
+        if ($groupe->getCode() == 'SA') {
+            $entites = $this->getDoctrine()->getRepository(Entite::class)->findAll();
+            return count($entites) ? $entites : [];
+            }
+        }
+        $entites = $this->getUser()->getEntites();
+        return count($entites) ? $entites : [];
     }
 
     /**
@@ -104,6 +107,14 @@ class EntiteController extends AbstractController
     {
         $deletedEntity = clone($entite);
         $entityManager = $this->getDoctrine()->getManager();
+        $childs = $this->getDoctrine()->getManager()
+            ->createQuery('SELECT e FROM App\Entity\Entite e WHERE e.entiteParent=:entite')
+        ->setParameter('entite', $entite)->getResult();
+
+
+        if (count($childs)) {
+            throw new HttpException(417,"Suppression Impossible. L'Entite n'est pas autonome");
+        }
         $entityManager->remove($entite);
         $entityManager->flush();
         Utils::createTracelog($entityManager, 'entite', 'delete', $deletedEntity, null, $this->getUser()->getEmail());

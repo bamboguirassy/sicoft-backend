@@ -2,12 +2,14 @@
 
 namespace App\Controller;
 
+use App\Entity\CompteDivisionnaire;
 use App\Entity\SousClasse;
 use App\Entity\Classe;
 use App\Form\SousClasseType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use App\Utils\Utils;
@@ -30,7 +32,7 @@ class SousClasseController extends AbstractController
             ->getRepository(SousClasse::class)
             ->findAll();
 
-        return count($sousClasses)?$sousClasses:[];
+        return count($sousClasses) ? $sousClasses : [];
     }
 
     /**
@@ -38,15 +40,15 @@ class SousClasseController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_SousClasse_CREATE")
      */
-    public function create(Request $request): SousClasse    {
+    public function create(Request $request): SousClasse
+    {
         $sousClasse = new SousClasse();
         $form = $this->createForm(SousClasseType::class, $sousClasse);
         $form->submit(Utils::serializeRequestContent($request));
         $entityManager = $this->getDoctrine()->getManager();
-           // check if numero and libelle already exist
+        // check if numero and libelle already exist
         $this->checkNumeroAndLibelle($sousClasse, $entityManager);
-        $this->checkClasse($sousClasse);
-       
+
         $entityManager->persist($sousClasse);
         $entityManager->flush();
 
@@ -54,44 +56,74 @@ class SousClasseController extends AbstractController
     }
 
     /**
+     * @Rest\Post(path="/create-multiple", name="create_multiple_subclass")
+     * @Rest\View(statusCode=201)
+     * @IsGranted("ROLE_SousClasse_CREATE")
+     */
+    public function createMultiple(Request $request)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $subClasses = Utils::serializeRequestContent($request);
+
+        $createdItems = [];
+        foreach ($subClasses as $currentSubClass) {
+            $subClass = new SousClasse();
+            $form = $this->createForm(SousClasseType::class, $subClass);
+            $form->submit($currentSubClass);
+            $searchedSubClass = $em->getRepository(SousClasse::class)
+                ->findOneBy(['numero' => $subClass->getNumero()]);
+            if($searchedSubClass) {
+                throw $this->createAccessDeniedException('Ce code est déjà celui d\'une sous classe.');
+            }
+            $em->persist($subClass);
+            $createdItems[] = $subClass;
+        }
+
+        $em->flush();
+        return $createdItems;
+    }
+
+    /**
      * @Rest\Get(path="/{id}", name="sous_classe_show",requirements = {"id"="\d+"})
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_SousClasse_SHOW")
      */
-    public function show(SousClasse $sousClasse): SousClasse    {
+    public function show(SousClasse $sousClasse): SousClasse
+    {
         return $sousClasse;
     }
 
-    
+
     /**
      * @Rest\Put(path="/{id}/edit", name="sous_classe_edit",requirements = {"id"="\d+"})
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_SousClasse_EDIT")
      */
-    public function edit(Request $request, SousClasse $sousClasse, EntityManagerInterface $em): SousClasse    {
+    public function edit(Request $request, SousClasse $sousClasse, EntityManagerInterface $em): SousClasse
+    {
         $form = $this->createForm(SousClasseType::class, $sousClasse);
         $form->submit(Utils::serializeRequestContent($request));
         $this->checkEditcSousclasseNumeroAndLibelle($sousClasse, $em);
-        $this->checkClasse($sousClasse);
-        
 
-       $em->flush();
+
+        $em->flush();
 
         return $sousClasse;
     }
+
     /**
      * @Rest\Put(path="/{id}/clone", name="sous_classe_clone",requirements = {"id"="\d+"})
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_SousClasse_CLONE")
      */
-    public function cloner(Request $request, SousClasse $sousClasse):  SousClasse {
-        $em=$this->getDoctrine()->getManager();
-        $sousClasseNew=new SousClasse();
+    public function cloner(Request $request, SousClasse $sousClasse): SousClasse
+    {
+        $em = $this->getDoctrine()->getManager();
+        $sousClasseNew = new SousClasse();
         $form = $this->createForm(SousClasseType::class, $sousClasseNew);
         $form->submit(Utils::serializeRequestContent($request));
         ////
-        $this->checkNumeroAndLibelle($sousClasseNew ,$em);
-        $this->checkClasse($sousClasseNew);
+        $this->checkNumeroAndLibelle($sousClasseNew, $em);
         $em->persist($sousClasseNew);
 
         $em->flush();
@@ -104,20 +136,25 @@ class SousClasseController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_SousClasse_DELETE")
      */
-    public function delete(SousClasse $sousClasse): SousClasse    {
+    public function delete(SousClasse $sousClasse): SousClasse
+    {
+        if(count($sousClasse->getCompteDivisionnaire())){
+            throw new HttpException(417, "Impossible de supprimer la sous classe");
+        }
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->remove($sousClasse);
         $entityManager->flush();
 
         return $sousClasse;
     }
-    
+
     /**
      * @Rest\Post("/delete-selection/", name="sous_classe_selection_delete")
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_SousClasse_DELETE")
      */
-    public function deleteMultiple(Request $request): array {
+    public function deleteMultiple(Request $request): array
+    {
         $entityManager = $this->getDoctrine()->getManager();
         $sousClasses = Utils::getObjectFromRequest($request);
         if (!count($sousClasses)) {
@@ -131,10 +168,11 @@ class SousClasseController extends AbstractController
 
         return $sousClasses;
     }
-    
+
     /////////////////////////////Les Testes////////////////////////////////////
-    
-    public function checkNumeroAndLibelle(SousClasse $sousclasse, EntityManagerInterface $em) {
+
+    public function checkNumeroAndLibelle(SousClasse $sousclasse, EntityManagerInterface $em)
+    {
         $searchedsSousclasseByNumero = $em->getRepository(SousClasse::class)->findByNumero($sousclasse->getNumero());
         if (count($searchedsSousclasseByNumero)) {
             throw $this->createAccessDeniedException("Une sous classe avec le même numéro existe déjà, merci de changer de numéro...");
@@ -145,7 +183,8 @@ class SousClasseController extends AbstractController
             throw $this->createAccessDeniedException("Une sous classe avec le même libellé existe déjà, merci de changer de libellé...");
         }
     }
-    public function checkClasse(SousClasse $sousclasse){
+
+    /*public function checkClasse(SousClasse $sousclasse){
         $recoverClasse = $this->getDoctrine()->getManager()
                 ->createQuery(
                         'SELECT sousclasse From App\Entity\SousClasse sousclasse
@@ -158,19 +197,36 @@ class SousClasseController extends AbstractController
                              }
                          }
         
-    }
-    public function checkEditcSousclasseNumeroAndLibelle(SousClasse $sousclasse, EntityManagerInterface $em) {
+    }*/
+    public function checkEditcSousclasseNumeroAndLibelle(SousClasse $sousclasse, EntityManagerInterface $em)
+    {
         $searchedSousclasseByCode = $em->createQuery("select c from App\Entity\SousClasse c where c != :sousclasse and c.numero = :num")
-                ->setParameter('sousclasse', $sousclasse)->setParameter('num', $sousclasse->getNumero())->getResult();
+            ->setParameter('sousclasse', $sousclasse)->setParameter('num', $sousclasse->getNumero())->getResult();
         if (count($searchedSousclasseByCode)) {
             throw $this->createAccessDeniedException("Une sous classe avec le même numéro existe déjà, merci de changer de numéro...");
         }
 
         // check if libelle already exist
         $searchedSousclasseByLibelle = $em->createQuery("select c from App\Entity\SousClasse c where c != :sousclasse and c.libelle = :lib")
-                ->setParameter('sousclasse',$sousclasse)->setParameter('lib', $sousclasse->getLibelle())->getResult();
+            ->setParameter('sousclasse', $sousclasse)->setParameter('lib', $sousclasse->getLibelle())->getResult();
         if (count($searchedSousclasseByLibelle)) {
             throw $this->createAccessDeniedException("Une sous classe avec le même libellé existe déjà, merci de changer de libellé...");
         }
     }
+
+    /**
+     * @Rest\Get(path="/{id}/classe", name="classe")
+     * @Rest\View(StatusCode = 200)
+     * @IsGranted("ROLE_SousClasse_INDEX")
+     */
+
+    public function findByClasse(Classe $classe)
+    {
+        $sousClasses = $this->getDoctrine()
+            ->getRepository(SousClasse::class)
+            ->findByClasse($classe);
+
+        return count($sousClasses)?$sousClasses:[];
+    }
 }
+

@@ -13,9 +13,10 @@ class ExerciceSourceFinancementType extends AbstractType
     {
         $builder
             ->add('montant')
-            ->add('entite')
-            ->add('exercice')
+            //->add('entite')
+            //->add('exercice')
             ->add('sourceFinancement')
+            ->add('budget')
         ;
     }
 

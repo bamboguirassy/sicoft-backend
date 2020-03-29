@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Compte;
+use App\Entity\CompteDivisionnaire;
 use App\Form\CompteType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -46,6 +47,37 @@ class CompteController extends AbstractController
         $entityManager->flush();
 
         return $compte;
+    }
+
+    /**
+     * @Rest\Post(Path="/create-multiple", name="compte_multiple_new")
+     * @Rest\View(StatusCode=200)
+     * @IsGranted("ROLE_Compte_CREATE")
+     */
+    public function createMultiple(Request $request) {
+        $em = $this->getDoctrine()->getManager();
+        $accounts = Utils::serializeRequestContent($request);
+
+        $createdAccounts = [];
+        foreach ($accounts as $account) {
+            $retrievedAccount = new Compte();
+            $form = $this->createForm(CompteType::class, $retrievedAccount);
+            $form->submit($account);
+            $searchedAccountByNumero = $em->getRepository(Compte::class)
+                ->findOneByNumero($retrievedAccount->getNumero());
+            if($searchedAccountByNumero) {
+                throw $this->createAccessDeniedException("Ce code est déjà celui d'un compte");
+            }
+            $searchedAccountByLabel = $em->getRepository(Compte::class)
+                ->findOneByLibelle($retrievedAccount->getLibelle());
+            if($searchedAccountByLabel) {
+                throw $this->createAccessDeniedException("Ce libelle est déjà celui d'un compte");
+            }
+            $em->persist($retrievedAccount);
+            $createdAccounts[] = $retrievedAccount;
+        }
+        $em->flush();
+        return $createdAccounts;
     }
 
     /**
@@ -120,4 +152,20 @@ class CompteController extends AbstractController
 
         return $comptes;
     }
+
+    /**
+     * @Rest\Get(path="/{id}/compte-divisionnaire", name="compte_divisionnaire")
+     * @Rest\View(StatusCode = 200)
+     * @IsGranted("ROLE_Compte_INDEX")
+     */
+
+    public function findByCompteDivisionnaire (CompteDivisionnaire $compteDivisionnaire)
+    {
+        $comptes = $this->getDoctrine()
+            ->getRepository(Compte::class)
+            ->findByCompteDivisionnaire($compteDivisionnaire);
+
+        return count($comptes)?$comptes:[];
+    }
+
 }

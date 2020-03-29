@@ -2,29 +2,27 @@
 
 namespace App\Form;
 
-use App\Entity\EtatMarche;
+use App\Entity\Budget;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class EtatMarcheType extends AbstractType
+class BudgetType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('code')
             ->add('libelle')
-            ->add('description')
-            ->add('etatSuivant')
-            ->add('users')
-            ->add('typePassation')
+            ->add('verrouille')
+            ->add('entite')
+            ->add('exercice')
         ;
     }
 
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'data_class' => EtatMarche::class,
+            'data_class' => Budget::class,
         ]);
     }
 }

@@ -3,10 +3,12 @@
 namespace App\Controller;
 
 use App\Entity\Classe;
+use App\Entity\SousClasse;
 use App\Form\ClasseType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use App\Utils\Utils;
@@ -16,14 +18,16 @@ use Doctrine\ORM\EntityManagerInterface;
 /**
  * @Route("/api/classe")
  */
-class ClasseController extends AbstractController {
+class ClasseController extends AbstractController
+{
 
     /**
      * @Rest\Get(path="/", name="classe_index")
      * @Rest\View(StatusCode = 200)
      * @IsGranted("ROLE_Classe_INDEX")
      */
-    public function index(): array {
+    public function index(): array
+    {
         $classes = $this->getDoctrine()
             ->getRepository(Classe::class)
             ->findAll();
@@ -36,7 +40,8 @@ class ClasseController extends AbstractController {
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Classe_CREATE")
      */
-    public function create(Request $request): Classe {
+    public function create(Request $request): Classe
+    {
         $classe = new Classe();
         $form = $this->createForm(ClasseType::class, $classe);
         $form->submit(Utils::serializeRequestContent($request));
@@ -44,7 +49,6 @@ class ClasseController extends AbstractController {
 
         // check if numero and libelle already exist
         $this->checkNumeroAndLibelle($classe, $entityManager);
-        $this->checkCategorieAndType($classe);
 
         $entityManager->persist($classe);
         $entityManager->flush();
@@ -57,7 +61,8 @@ class ClasseController extends AbstractController {
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Classe_SHOW")
      */
-    public function show(Classe $classe): Classe {
+    public function show(Classe $classe): Classe
+    {
         return $classe;
     }
 
@@ -66,13 +71,13 @@ class ClasseController extends AbstractController {
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Classe_EDIT")
      */
-    public function edit(Request $request, Classe $classe, EntityManagerInterface $em) {
+    public function edit(Request $request, Classe $classe, EntityManagerInterface $em)
+    {
         $form = $this->createForm(ClasseType::class, $classe);
         $form->submit(Utils::serializeRequestContent($request));
 
         // check if numero and libelle already exist
         $this->checkEditClasseNumeroAndLibelle($classe, $em);
-        $this->checkCategorieAndType($classe);
 
         $em->flush();
 
@@ -84,14 +89,14 @@ class ClasseController extends AbstractController {
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Classe_CLONE")
      */
-    public function cloner(Request $request, Classe $classe): Classe {
+    public function cloner(Request $request, Classe $classe): Classe
+    {
         $em = $this->getDoctrine()->getManager();
         $classeNew = new Classe();
         $form = $this->createForm(ClasseType::class, $classeNew);
         $form->submit(Utils::serializeRequestContent($request));
         // check if numero already exist
         $this->checkNumeroAndLibelle($classeNew, $em);
-        $this->checkCategorieAndType($classeNew);
         $em->persist($classeNew);
 
         $em->flush();
@@ -104,7 +109,11 @@ class ClasseController extends AbstractController {
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Classe_DELETE")
      */
-    public function delete(Classe $classe): Classe {
+    public function delete(Classe $classe): Classe
+    {
+        if (count($classe->getSousClasses())) {
+            throw new HttpException(417, "Impossible de supprimer la classe n'est pas indépendante.");
+        }
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->remove($classe);
         $entityManager->flush();
@@ -117,7 +126,8 @@ class ClasseController extends AbstractController {
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Classe_DELETE")
      */
-    public function deleteMultiple(Request $request): array {
+    public function deleteMultiple(Request $request): array
+    {
         $entityManager = $this->getDoctrine()->getManager();
         $classes = Utils::getObjectFromRequest($request);
         if (!count($classes)) {
@@ -134,7 +144,8 @@ class ClasseController extends AbstractController {
 
     //////////////////////////////////////// Tests /////////////////////////////////////////////
 
-    public function checkEditClasseNumeroAndLibelle(Classe $classe, EntityManagerInterface $em) {
+    public function checkEditClasseNumeroAndLibelle(Classe $classe, EntityManagerInterface $em)
+    {
         $searchedClasseByCode = $em->createQuery("select c from App\Entity\Classe c where c != :classe and c.numero = :num")->setParameter('classe', $classe)->setParameter('num', $classe->getNumero())->getResult();
         if (count($searchedClasseByCode)) {
             throw $this->createAccessDeniedException("Une classe avec le même numéro existe déjà, merci de changer de numéro...");
@@ -148,7 +159,8 @@ class ClasseController extends AbstractController {
     }
 
 
-    public function checkNumeroAndLibelle(Classe $classe, EntityManagerInterface $em) {
+    public function checkNumeroAndLibelle(Classe $classe, EntityManagerInterface $em)
+    {
         $searchedClasseByNumero = $em->getRepository(Classe::class)->findByNumero($classe->getNumero());
         if (count($searchedClasseByNumero)) {
             throw $this->createAccessDeniedException("Une classe avec le même numéro existe déjà, merci de changer de numéro...");
@@ -160,20 +172,5 @@ class ClasseController extends AbstractController {
         }
     }
 
-    public function checkCategorieAndType(Classe $classe){
-        $targetClasse = $this->getDoctrine()->getManager()
-            ->createQuery(
-                'SELECT classe FROM App\Entity\Classe classe
-                 WHERE (classe.categorieClasse=:categorie AND classe.typeClasse=:type) 
-            ')->setParameter('categorie', $classe->getCategorieClasse())
-            ->setParameter('type', $classe->getTypeClasse())
-            ->getResult();
-
-        if($targetClasse){
-            if(count($targetClasse)!=0){
-                throw $this->createAccessDeniedException("Une classe avec les mêmes catégorie et type existent déjà.");
-            }
-        }
-    }
 
 }

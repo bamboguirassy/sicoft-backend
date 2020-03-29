@@ -47,6 +47,24 @@ class ExerciceSourceFinancementController extends AbstractController
 
         return $exerciceSourceFinancement;
     }
+    /**
+     * @Rest\Post(Path="/createMultiple", name="exercice_source_financement_createMultiple")
+     * @Rest\View(StatusCode=200)
+     * @IsGranted("ROLE_ExerciceSourceFinancement_CREATE")
+     */
+    public function createMultiple(Request $request): array{
+        $em = $this->getDoctrine()->getManager();
+        $exerciceSourceFinancements = Utils::serializeRequestContent($request);
+        foreach($exerciceSourceFinancements as $exerciceSourceFinancementItem){
+            $exerciceSourceFinancement = new ExerciceSourceFinancement();
+            $form = $this->createForm(ExerciceSourceFinancementType::class, $exerciceSourceFinancement);
+            
+            $form->submit($exerciceSourceFinancementItem);
+            $em->persist($exerciceSourceFinancement);
+        }
+        $em->flush();
+        return $exerciceSourceFinancements;
+    }
 
     /**
      * @Rest\Get(path="/{id}", name="exercice_source_financement_show",requirements = {"id"="\d+"})
@@ -70,6 +88,40 @@ class ExerciceSourceFinancementController extends AbstractController
         $this->getDoctrine()->getManager()->flush();
 
         return $exerciceSourceFinancement;
+    }
+    /**
+     * @Rest\Get(path="/sourceFinancement/budget/{id}", name="source_financement_disponible",requirements = {"entite"="\d+"})
+     * @Rest\View(StatusCode=200)
+     * @IsGranted("ROLE_ExerciceSourceFinancement_EDIT")
+     */
+    public function findSourceFinancementDisponible(\App\Entity\Budget $budget) {
+        $em = $this->getDoctrine()->getManager();
+        //$tab_exerciceSourceFinancement[] = [];
+        $sourceFinancements = $em->createQuery('SELECT sf FROM App\Entity\SourceFinancement sf 
+        WHERE NOT EXISTS (SELECT esf FROM App\Entity\ExerciceSourceFinancement esf
+        WHERE esf.budget=?1 and esf.sourceFinancement = sf)')
+        ->setParameter(1, $budget)
+        ->getResult();
+        return $sourceFinancements;
+    }
+    /**
+     * @Rest\Get(path="/budget/{id}", name="exercice_source_financement",requirements = {"id"="\d+"})
+     * @Rest\View(StatusCode=200)
+     * @IsGranted("ROLE_ExerciceSourceFinancement_EDIT")
+     */
+    public function findExerciceSourceFinancementByBudget(\App\Entity\Budget $budget) {
+        $em = $this->getDoctrine()->getManager();    
+        $tabParam[] = [];   
+        $tabExerciceSourceFinancements = $em->createQuery('SELECT esf FROM App\Entity\ExerciceSourceFinancement esf 
+        WHERE esf.budget=?1')
+        ->setParameter(1, $budget)
+        ->getResult();
+      $montantTotal = $em->createQuery('SELECT SUM(esf.montant) FROM App\Entity\ExerciceSourceFinancement esf 
+       WHERE esf.budget=?1')
+       ->setParameter(1, $budget)
+       ->getSingleScalarResult();
+       $tabParam = ['tabExerciceSourceFinancements' => $tabExerciceSourceFinancements, 'montantTotal' => intval($montantTotal)];
+       return $tabParam;
     }
     
     /**
