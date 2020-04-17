@@ -3,11 +3,6 @@
 /.env.local.php
 /.env.*.local
 /.env
-<<<<<<< HEAD
-
-=======
->>>>>>> e0a9fac8cacf8611d0fe407276c7627c76f7c5a7
-
 
 /nbproject/private/*
 
