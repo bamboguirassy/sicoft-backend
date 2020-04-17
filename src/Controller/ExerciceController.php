@@ -60,10 +60,11 @@ class ExerciceController extends AbstractController {
      */
     public function findExerciceEncours() {
         $em = $this->getDoctrine()->getManager();
-        $exerciceEncours = $em->createQuery('SELECT ex FROM App\Entity\Exercice ex WHERE ex.encours=?1')
+        /*$exerciceEncours = $em->createQuery('SELECT ex FROM App\Entity\Exercice ex WHERE ex.encours=?1')
         ->setParameter(1, 1)
-        ->getResult();
-        return count($exerciceEncours) ? $exerciceEncours: [];
+        ->getResult();*/
+        $exerciceEncours = $em->getRepository(Exercice::class)->findOneByEncours(1);
+        return $exerciceEncours;
     }
 
     /**

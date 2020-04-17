@@ -43,7 +43,8 @@ class BudgetController extends AbstractController
         $groupes = $this->getUser()->getGroups();
         foreach ($groupes as $groupe) {
         if ($groupe->getCode() == 'SA') {
-            $budgetsByEntites = $em->createQuery('SELECT bgt FROM App\Entity\Budget bgt')
+            $budgetsByEntites = $em->createQuery('SELECT bgt FROM App\Entity\Budget bgt WHERE bgt.exercice=?1')
+            ->setParameter(1, $exercice->getId())
             ->getResult();
             return count($budgetsByEntites)?$budgetsByEntites:[];
             } 
@@ -72,16 +73,18 @@ class BudgetController extends AbstractController
         $form = $this->createForm(BudgetType::class, $budget);
         $form->submit(Utils::serializeRequestContent($request));
         
-        $existBudget = $entityManager->createQuery('SELECT bgt FROM App\Entity\Budget bgt
-        WHERE bgt.exercice=?1 and bgt.entite=?2')
+       $existBudget = $entityManager->createQuery('SELECT bgt FROM App\Entity\Budget bgt
+        WHERE bgt.exercice=?1 AND bgt.entite=?2' )
         ->setParameter(1, $budget->getExercice())
         ->setParameter(2, $budget->getEntite())
         ->getResult();
         if(count($existBudget) > 0){
             throw $this->createNotFoundException("Cet exercice est dèjà rattaché à une entité!");
-        }
+        }    
+        $budget->setLibelle('Exercice' . ' ' .$budget->getExercice()->getLibelle(). ' ' .$budget->getEntite()->getCode());
         
         $entityManager = $this->getDoctrine()->getManager();
+        
         $entityManager->persist($budget);
         $entityManager->flush();
 
