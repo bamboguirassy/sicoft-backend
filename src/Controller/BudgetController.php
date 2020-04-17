@@ -74,7 +74,7 @@ class BudgetController extends AbstractController
         $form->submit(Utils::serializeRequestContent($request));
         
        $existBudget = $entityManager->createQuery('SELECT bgt FROM App\Entity\Budget bgt
-        WHERE bgt.exercice=?1 OR bgt.entite=?2' )
+        WHERE bgt.exercice=?1 AND bgt.entite=?2' )
         ->setParameter(1, $budget->getExercice())
         ->setParameter(2, $budget->getEntite())
         ->getResult();
