@@ -2,8 +2,10 @@
 
 namespace App\Controller;
 
+use App\Entity\Budget;
 use App\Entity\ExerciceSourceFinancement;
 use App\Form\ExerciceSourceFinancementType;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -75,6 +77,18 @@ class ExerciceSourceFinancementController extends AbstractController
         return $exerciceSourceFinancement;
     }
 
+    /**
+     * @Rest\Get(path="/{id}/budget-non-alloue", name="exercice_source_financement_by_budget_list",requirements = {"id"="\d+"})
+     * @Rest\View(StatusCode=200)
+     * @IsGranted("ROLE_ExerciceSourceFinancement_SHOW")
+     */
+    public function findByBudget(Request $request, EntityManagerInterface $entityManager ,Budget $budget) {
+        return $entityManager->createQuery('
+        SELECT esf 
+        FROM App\Entity\ExerciceSourceFinancement esf
+        WHERE esf.budget=:budget AND esf.montant > 0
+        ')->setParameter('budget', $budget)->getResult()  ;
+    }
     
     /**
      * @Rest\Put(path="/{id}/edit", name="exercice_source_financement_edit",requirements = {"id"="\d+"})
@@ -109,7 +123,7 @@ class ExerciceSourceFinancementController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_ExerciceSourceFinancement_EDIT")
      */
-    public function findExerciceSourceFinancementByBudget(\App\Entity\Budget $budget) {
+    public function findExerciceSourceFinancementByBudget(Budget $budget) {
         $em = $this->getDoctrine()->getManager();    
         $tabParam[] = [];   
         $tabExerciceSourceFinancements = $em->createQuery('SELECT esf FROM App\Entity\ExerciceSourceFinancement esf 

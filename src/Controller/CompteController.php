@@ -4,7 +4,9 @@ namespace App\Controller;
 
 use App\Entity\Compte;
 use App\Entity\CompteDivisionnaire;
+use App\Entity\TypeClasse;
 use App\Form\CompteType;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -89,6 +91,37 @@ class CompteController extends AbstractController
         return $compte;
     }
 
+    /**
+     * @Rest\Get(path="/recette", name="compte_recette_list")
+     * @Rest\View(StatusCode=200)
+     * @IsGranted("ROLE_Compte_SHOW")
+     */
+    public function fetchRecetteCompte(Request $request, EntityManagerInterface $entityManager) {
+        return $entityManager->createQuery(
+            'SELECT c 
+            FROM App\Entity\Compte c 
+            JOIN c.compteDivisionnaire cd 
+            JOIN cd.sousClasse scl
+            JOIN scl.classe cl WHERE cl.typeClasse IN (SELECT type FROM App\Entity\TypeClasse type WHERE type.code=1)
+            '
+        )->getResult();
+    }
+
+    /**
+     * @Rest\Get(path="/depense", name="compte_depense_show")
+     * @Rest\View(StatusCode=200)
+     * @IsGranted("ROLE_Compte_SHOW")
+     */
+    public function fetchDepenseCompte(Request $request, EntityManagerInterface $entityManager) {
+        return $entityManager->createQuery(
+            'SELECT c 
+            FROM App\Entity\Compte c 
+            JOIN c.compteDivisionnaire cd 
+            JOIN cd.sousClasse scl
+            JOIN scl.classe cl WHERE cl.typeClasse IN (SELECT type FROM App\Entity\TypeClasse type WHERE type.code=2)
+            '
+        )->getResult();
+    }
     
     /**
      * @Rest\Put(path="/{id}/edit", name="compte_edit",requirements = {"id"="\d+"})
