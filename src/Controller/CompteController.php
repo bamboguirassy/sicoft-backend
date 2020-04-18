@@ -98,11 +98,12 @@ class CompteController extends AbstractController
      */
     public function fetchRecetteCompte(Request $request, EntityManagerInterface $entityManager) {
         return $entityManager->createQuery(
-            'SELECT c 
+            'SELECT c
             FROM App\Entity\Compte c 
             JOIN c.compteDivisionnaire cd 
             JOIN cd.sousClasse scl
             JOIN scl.classe cl WHERE cl.typeClasse IN (SELECT type FROM App\Entity\TypeClasse type WHERE type.code=1)
+            AND c NOT IN ( SELECT alcompte FROM App\Entity\Allocation al JOIN al.compte alcompte)
             '
         )->getResult();
     }
@@ -119,6 +120,7 @@ class CompteController extends AbstractController
             JOIN c.compteDivisionnaire cd 
             JOIN cd.sousClasse scl
             JOIN scl.classe cl WHERE cl.typeClasse IN (SELECT type FROM App\Entity\TypeClasse type WHERE type.code=2)
+            AND c NOT IN ( SELECT alcompte FROM App\Entity\Allocation al JOIN al.compte alcompte)
             '
         )->getResult();
     }

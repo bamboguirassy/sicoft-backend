@@ -43,7 +43,7 @@ class Compte
     private $description;
 
     /**
-     * @var \CompteDivisionnaire
+     * @var CompteDivisionnaire
      *
      * @ORM\ManyToOne(targetEntity="CompteDivisionnaire")
      * @ORM\JoinColumns({
@@ -51,6 +51,12 @@ class Compte
      * })
      */
     private $compteDivisionnaire;
+
+    /**
+     * One product has many features. This is the inverse side.
+     * @ORM\OneToMany(targetEntity="App\Entity\Allocation", mappedBy="compte")
+     */
+    private $allocations;
 
     public function getId(): ?int
     {
@@ -103,6 +109,11 @@ class Compte
         $this->compteDivisionnaire = $compteDivisionnaire;
 
         return $this;
+    }
+
+    public function getAllocations(): ?Allocation
+    {
+        return $this->allocations;
     }
 
 

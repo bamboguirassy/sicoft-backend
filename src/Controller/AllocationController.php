@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Allocation;
 use App\Form\AllocationType;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -46,6 +47,27 @@ class AllocationController extends AbstractController
         $entityManager->flush();
 
         return $allocation;
+    }
+
+    /**
+     * @Rest\Post(Path="/create-multiple", name="allocation_multiple_new")
+     * @Rest\View(StatusCode=200)
+     * @IsGranted("ROLE_Allocation_CREATE")
+     */
+    public function createMultiple(Request $request, EntityManagerInterface $entityManager) {
+        $deserializedAllocations = Utils::serializeRequestContent($request);
+        $createdAllocations = [];
+        foreach ($deserializedAllocations as $deserializedAllocation) {
+            $allocation = new Allocation();
+            $form = $this->createForm(AllocationType::class, $allocation);
+            $form->submit($deserializedAllocation);
+
+            $entityManager->persist($allocation);
+            $createdAllocations[] = $allocation;
+        }
+
+        $entityManager->flush();
+        return $createdAllocations;
     }
 
     /**

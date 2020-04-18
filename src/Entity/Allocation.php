@@ -50,7 +50,7 @@ class Allocation
     private $montantRestant;
 
     /**
-     * @var \ExerciceSourceFinancement
+     * @var ExerciceSourceFinancement
      *
      * @ORM\ManyToOne(targetEntity="ExerciceSourceFinancement")
      * @ORM\JoinColumns({
@@ -60,7 +60,7 @@ class Allocation
     private $exerciceSourceFinancement;
 
     /**
-     * @var \Compte
+     * @var Compte
      *
      * @ORM\ManyToOne(targetEntity="Compte")
      * @ORM\JoinColumns({
