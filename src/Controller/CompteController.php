@@ -217,7 +217,7 @@ class CompteController extends AbstractController
     }
 
     /**
-     * @Rest\Get(path="/{id}/{divId}/allocated", name="fetch_not_allocated_accounts", requirements={"id"="\d+", "divId"="\d+"})
+     * @Rest\Get(path="/{id}/{divId}/allocated", name="fetch_allocated_accounts", requirements={"id"="\d+", "divId"="\d+"})
      * @Rest\View(StatusCode = 200)
      * @IsGranted("ROLE_Compte_INDEX")
      */

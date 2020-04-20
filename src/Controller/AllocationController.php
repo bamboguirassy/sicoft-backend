@@ -3,8 +3,11 @@
 namespace App\Controller;
 
 use App\Entity\Allocation;
+use App\Entity\Budget;
+use App\Entity\ExerciceSourceFinancement;
 use App\Form\AllocationType;
 use Doctrine\ORM\EntityManagerInterface;
+use JMS\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -33,6 +36,41 @@ class AllocationController extends AbstractController
     }
 
     /**
+     * @Rest\Get(path="/{id}/esf", name="fetch_allocated_accounts_by_budget", requirements={"id"="\d+", "budgetId"="\d+"})
+     * @Rest\View(StatusCode = 200)
+     * @IsGranted("ROLE_Allocation_INDEX")
+     */
+    public function findAllocationsByExerciceSrcFin(Request $request, ExerciceSourceFinancement $exerciceSourceFinancement ,EntityManagerInterface $entityManager) {
+        return $entityManager->createQuery('
+            SELECT a
+            FROM App\Entity\Allocation a
+            JOIN a.exerciceSourceFinancement esf
+            JOIN esf.budget budget
+            WHERE esf=:exSrcFin 
+        ')->setParameter('exSrcFin', $exerciceSourceFinancement)
+            ->getResult();
+    }
+
+    /**
+     * @Rest\Get(path="/{id}/{divId}/budget-cd", name="fetch_allocation", requirements={"id"="\d+", "divId"="\d+"})
+     * @Rest\View(StatusCode = 200)
+     * @IsGranted("ROLE_Compte_INDEX")
+     */
+    public function findAllocatedAccountByBudgetAndCompteDivisionnaire(Request $request, Budget $budget, $divId, EntityManagerInterface $entityManager) {
+
+        return $entityManager->createQuery('
+            SELECT a
+            FROM App\Entity\Allocation a
+            JOIN a.compte c
+            JOIN c.compteDivisionnaire cd
+            JOIN a.exerciceSourceFinancement esf
+            WHERE cd.id=:compteDiv AND esf.budget=:budget
+        ')->setParameter('compteDiv', $divId)
+            ->setParameter('budget', $budget)
+            ->getResult();
+    }
+
+    /**
      * @Rest\Post(Path="/create", name="allocation_new")
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Allocation_CREATE")
@@ -57,15 +95,20 @@ class AllocationController extends AbstractController
     public function createMultiple(Request $request, EntityManagerInterface $entityManager) {
         $deserializedAllocations = Utils::serializeRequestContent($request);
         $createdAllocations = [];
+        $newAmount = 0;
         foreach ($deserializedAllocations as $deserializedAllocation) {
             $allocation = new Allocation();
             $form = $this->createForm(AllocationType::class, $allocation);
             $form->submit($deserializedAllocation);
 
             $entityManager->persist($allocation);
+            $newAmount += $allocation->getMontantInitial();
             $createdAllocations[] = $allocation;
         }
-
+        /** @var ExerciceSourceFinancement $esf */
+        $esf = $entityManager->getRepository(ExerciceSourceFinancement::class)
+            ->find($deserializedAllocations[0]['exerciceSourceFinancement']);
+        $esf->setMontantRestant($esf->getMontantInitial() - $newAmount);
         $entityManager->flush();
         return $createdAllocations;
     }
@@ -92,6 +135,34 @@ class AllocationController extends AbstractController
         $this->getDoctrine()->getManager()->flush();
 
         return $allocation;
+    }
+
+    /**
+     * @Rest\Put(path="/edit-multiple", name="allocation_edit_multiple")
+     * @Rest\View(StatusCode=200)
+     * @IsGranted("ROLE_Allocation_EDIT")
+     */
+    public function editMultiple(Request $request, EntityManagerInterface $entityManager, SerializerInterface $serializer) {
+        //Fonction mettant à jour aussi le montant du source financement
+        $deserializedAllocations = Utils::serializeRequestContent($request);
+        $updatedAllocation = [];
+        $newAmount = 0;
+        foreach ($deserializedAllocations as $allocation) {
+            /** @var Allocation $persistedAllocation */
+            $persistedAllocation = $entityManager
+                ->getRepository(Allocation::class)
+                ->find($allocation['id']);
+            $form = $this->createForm(AllocationType::class, $persistedAllocation);
+            $form->submit($allocation);
+            $newAmount += $persistedAllocation->getMontantInitial();
+            $updatedAllocation[] = $persistedAllocation;
+        }
+        /** @var ExerciceSourceFinancement $esf */
+        $esf = $entityManager->getRepository(ExerciceSourceFinancement::class)
+            ->find($deserializedAllocations[0]['exerciceSourceFinancement']['id']);
+        $esf->setMontantRestant($esf->getMontantInitial() - $newAmount);
+        $entityManager->flush();
+        return $updatedAllocation;
     }
     
     /**

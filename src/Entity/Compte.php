@@ -52,11 +52,7 @@ class Compte
      */
     private $compteDivisionnaire;
 
-    /**
-     * One product has many features. This is the inverse side.
-     * @ORM\OneToMany(targetEntity="App\Entity\Allocation", mappedBy="compte")
-     */
-    private $allocations;
+
 
     public function getId(): ?int
     {
@@ -110,11 +106,4 @@ class Compte
 
         return $this;
     }
-
-    public function getAllocations(): ?Allocation
-    {
-        return $this->allocations;
-    }
-
-
 }

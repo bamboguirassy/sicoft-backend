@@ -86,7 +86,7 @@ class ExerciceSourceFinancementController extends AbstractController
         return $entityManager->createQuery('
         SELECT esf 
         FROM App\Entity\ExerciceSourceFinancement esf
-        WHERE esf.budget=:budget AND esf.montant > 0
+        WHERE esf.budget=:budget AND esf.montantInitial > 0
         ')->setParameter('budget', $budget)->getResult()  ;
     }
     
@@ -130,7 +130,7 @@ class ExerciceSourceFinancementController extends AbstractController
         WHERE esf.budget=?1')
         ->setParameter(1, $budget)
         ->getResult();
-      $montantTotal = $em->createQuery('SELECT SUM(esf.montant) FROM App\Entity\ExerciceSourceFinancement esf 
+      $montantTotal = $em->createQuery('SELECT SUM(esf.montantInitial) FROM App\Entity\ExerciceSourceFinancement esf 
        WHERE esf.budget=?1')
        ->setParameter(1, $budget)
        ->getSingleScalarResult();
