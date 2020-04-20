@@ -2,8 +2,10 @@
 
 namespace App\Controller;
 
+use App\Entity\Budget;
 use App\Entity\Compte;
 use App\Entity\CompteDivisionnaire;
+use App\Entity\ExerciceSourceFinancement;
 use App\Entity\TypeClasse;
 use App\Form\CompteType;
 use Doctrine\ORM\EntityManagerInterface;
@@ -92,37 +94,48 @@ class CompteController extends AbstractController
     }
 
     /**
-     * @Rest\Get(path="/recette", name="compte_recette_list")
+     * @Rest\Get(path="/{id}/recette", name="compte_recette_list", requirements = {"id"="\d+"})
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Compte_SHOW")
      */
-    public function fetchRecetteCompte(Request $request, EntityManagerInterface $entityManager) {
+    public function fetchRecetteCompteByBudget(Request $request, EntityManagerInterface $entityManager, Budget $budget) {
         return $entityManager->createQuery(
             'SELECT c
             FROM App\Entity\Compte c 
             JOIN c.compteDivisionnaire cd 
             JOIN cd.sousClasse scl
             JOIN scl.classe cl WHERE cl.typeClasse IN (SELECT type FROM App\Entity\TypeClasse type WHERE type.code=1)
-            AND c NOT IN ( SELECT alcompte FROM App\Entity\Allocation al JOIN al.compte alcompte)
+            AND c NOT IN (
+                           SELECT alcompte 
+                           FROM App\Entity\Allocation al 
+                           JOIN al.compte alcompte
+                           JOIN al.exerciceSourceFinancement esf
+                           WHERE esf.budget=:budget 
+                         )
             '
-        )->getResult();
+        )->setParameter('budget', $budget)->getResult();
     }
 
     /**
-     * @Rest\Get(path="/depense", name="compte_depense_show")
+     * @Rest\Get(path="/{id}/depense", name="compte_depense_list", requirements = {"id"="\d+"})
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Compte_SHOW")
      */
-    public function fetchDepenseCompte(Request $request, EntityManagerInterface $entityManager) {
+    public function fetchDepenseCompteByBudget(Request $request, EntityManagerInterface $entityManager, Budget $budget) {
         return $entityManager->createQuery(
             'SELECT c 
             FROM App\Entity\Compte c 
             JOIN c.compteDivisionnaire cd 
             JOIN cd.sousClasse scl
             JOIN scl.classe cl WHERE cl.typeClasse IN (SELECT type FROM App\Entity\TypeClasse type WHERE type.code=2)
-            AND c NOT IN ( SELECT alcompte FROM App\Entity\Allocation al JOIN al.compte alcompte)
+            AND c NOT IN ( SELECT alcompte 
+                           FROM App\Entity\Allocation al 
+                           JOIN al.compte alcompte
+                           JOIN al.exerciceSourceFinancement esf
+                           WHERE esf.budget=:budget 
+                         )
             '
-        )->getResult();
+        )->setParameter('budget', $budget)->getResult();
     }
     
     /**
@@ -201,6 +214,25 @@ class CompteController extends AbstractController
             ->findByCompteDivisionnaire($compteDivisionnaire);
 
         return count($comptes)?$comptes:[];
+    }
+
+    /**
+     * @Rest\Get(path="/{id}/{divId}/allocated", name="fetch_not_allocated_accounts", requirements={"id"="\d+", "divId"="\d+"})
+     * @Rest\View(StatusCode = 200)
+     * @IsGranted("ROLE_Compte_INDEX")
+     */
+    public function findAllocatedAccountByBudgetAndCompteDivisionnaire(Request $request, Budget $budget, $divId, EntityManagerInterface $entityManager) {
+
+        return $entityManager->createQuery('
+            SELECT c
+            FROM App\Entity\Compte c
+            JOIN c.compteDivisionnaire cd
+            JOIN c.allocations calloc
+            JOIN calloc.exerciceSourceFinancement esf
+            WHERE cd.id=:compteDiv AND esf.budget=:budget
+        ')->setParameter('compteDiv', $divId)
+            ->setParameter('budget', $budget)
+            ->getResult();
     }
 
 }
