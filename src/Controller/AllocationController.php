@@ -108,7 +108,8 @@ class AllocationController extends AbstractController
         /** @var ExerciceSourceFinancement $esf */
         $esf = $entityManager->getRepository(ExerciceSourceFinancement::class)
             ->find($deserializedAllocations[0]['exerciceSourceFinancement']);
-        $esf->setMontantRestant($esf->getMontantInitial() - $newAmount);
+        $allocatedAmount = $esf->getMontantInitial() - $esf->getMontantRestant();
+        $esf->setMontantRestant($esf->getMontantInitial() - ($newAmount + $allocatedAmount));
         $entityManager->flush();
         return $createdAllocations;
     }
@@ -160,7 +161,8 @@ class AllocationController extends AbstractController
         /** @var ExerciceSourceFinancement $esf */
         $esf = $entityManager->getRepository(ExerciceSourceFinancement::class)
             ->find($deserializedAllocations[0]['exerciceSourceFinancement']['id']);
-        $esf->setMontantRestant($esf->getMontantInitial() - $newAmount);
+        $allocatedAmount = $esf->getMontantInitial() - $esf->getMontantRestant();
+        $esf->setMontantRestant($esf->getMontantRestant() + $allocatedAmount - $newAmount);
         $entityManager->flush();
         return $updatedAllocation;
     }
