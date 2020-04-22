@@ -216,23 +216,6 @@ class CompteController extends AbstractController
         return count($comptes)?$comptes:[];
     }
 
-    /**
-     * @Rest\Get(path="/{id}/{divId}/allocated", name="fetch_allocated_accounts", requirements={"id"="\d+", "divId"="\d+"})
-     * @Rest\View(StatusCode = 200)
-     * @IsGranted("ROLE_Compte_INDEX")
-     */
-    public function findAllocatedAccountByBudgetAndCompteDivisionnaire(Request $request, Budget $budget, $divId, EntityManagerInterface $entityManager) {
 
-        return $entityManager->createQuery('
-            SELECT c
-            FROM App\Entity\Compte c
-            JOIN c.compteDivisionnaire cd
-            JOIN c.allocations calloc
-            JOIN calloc.exerciceSourceFinancement esf
-            WHERE cd.id=:compteDiv AND esf.budget=:budget
-        ')->setParameter('compteDiv', $divId)
-            ->setParameter('budget', $budget)
-            ->getResult();
-    }
 
 }

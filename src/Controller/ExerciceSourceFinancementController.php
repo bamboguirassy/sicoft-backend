@@ -86,7 +86,20 @@ class ExerciceSourceFinancementController extends AbstractController
         return $entityManager->createQuery('
         SELECT esf 
         FROM App\Entity\ExerciceSourceFinancement esf
-        WHERE esf.budget=:budget AND esf.montantInitial > 0
+        WHERE esf.budget=:budget AND esf.montantRestant > 0
+        ')->setParameter('budget', $budget)->getResult()  ;
+    }
+
+    /**
+     * @Rest\Get(path="/{id}/budget", name="exercice_source_financement_by_budget_all",requirements = {"id"="\d+"})
+     * @Rest\View(StatusCode=200)
+     * @IsGranted("ROLE_ExerciceSourceFinancement_SHOW")
+     */
+    public function findAllByBudget(Request $request, EntityManagerInterface $entityManager ,Budget $budget) {
+        return $entityManager->createQuery('
+        SELECT esf 
+        FROM App\Entity\ExerciceSourceFinancement esf
+        WHERE esf.budget=:budget
         ')->setParameter('budget', $budget)->getResult()  ;
     }
     
