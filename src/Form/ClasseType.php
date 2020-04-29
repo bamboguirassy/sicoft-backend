@@ -16,9 +16,7 @@ class ClasseType extends AbstractType
             ->add('libelle')
             ->add('description')
             ->add('categorieClasse')
-            ->add('typeClasse')
-            ->add('sousClasses')
-        ;
+            ->add('typeClasse');
     }
 
     public function configureOptions(OptionsResolver $resolver)

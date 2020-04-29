@@ -269,8 +269,13 @@ class UserController extends AbstractController
      * @IsGranted("ROLE_User_EDIT")
      */
     public function uploadFileProfil(Request $request) {
-        
-       $fileSystem = new \Symfony\Component\Filesystem\Filesystem();
+        /** @var UploadedFile $file */
+        $file = $request->files->get('image');
+        $fileName = $request->request->get('filename');
+        $contentFile = base64_decode($file);
+        return $file;  
+
+        $fileSystem = new \Symfony\Component\Filesystem\Filesystem();
         $em = $this->getDoctrine()->getManager();
         $path = $this->params->get('photo_files_directory') . '/' . $this->getUser()->getPhotoUrl();
 
@@ -282,9 +287,10 @@ class UserController extends AbstractController
             echo "An error occurred while deleting the file at" . $exception->getPath();
         }
         //manage new file upload
-        /** @var UploadedFile $file */
+        
         $file = NULL;
             $file = $request->files->get('image');
+            return $file;
             
         if (!$file){
             throw $this->createAccessDeniedException('Aucun fichier trouvé');
