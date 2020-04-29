@@ -45,7 +45,7 @@ class Classe
     private $description;
 
     /**
-     * @var \CategorieClasse
+     * @var CategorieClasse
      *
      * @ORM\ManyToOne(targetEntity="CategorieClasse")
      * @ORM\JoinColumns({
@@ -55,7 +55,7 @@ class Classe
     private $categorieClasse;
 
     /**
-     * @var \TypeClasse
+     * @var TypeClasse
      *
      * @ORM\ManyToOne(targetEntity="TypeClasse")
      * @ORM\JoinColumns({
