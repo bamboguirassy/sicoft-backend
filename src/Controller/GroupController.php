@@ -169,6 +169,7 @@ class GroupController extends AbstractController {
             new AccessGroup("Gestion Budget", [
                 new AccessModel('Budget', 'Budget'),
                 new AccessModel('ExerciceSourceFinancement', 'Exercice Source financement'),
+                new AccessModel('Allocation', 'Allocation'),
                     ])
         ];
         return $accessGroups;

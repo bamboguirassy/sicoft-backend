@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Compte;
 use App\Entity\CompteDivisionnaire;
 use App\Entity\SousClasse;
 use App\Form\CompteDivisionnaireType;
@@ -136,7 +137,9 @@ class CompteDivisionnaireController extends AbstractController
      */
     public function delete(CompteDivisionnaire $compteDivisionnaire): CompteDivisionnaire
     {
-        if (count($compteDivisionnaire->getComptes())) {
+        $associatedComptes = $this->getDoctrine()->getRepository(Compte::class)
+            ->findByCompteDivisionnaire($compteDivisionnaire);
+        if (count($associatedComptes)) {
             throw new HttpException(417, "Impossible de supprimer le compte divisionnaire");
         }
 

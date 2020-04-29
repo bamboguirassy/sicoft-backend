@@ -12,9 +12,8 @@ class ExerciceSourceFinancementType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('montant')
-            //->add('entite')
-            //->add('exercice')
+            ->add('montantInitial')
+            ->add('montantRestant')
             ->add('sourceFinancement')
             ->add('budget')
         ;

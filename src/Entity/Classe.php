@@ -64,14 +64,9 @@ class Classe
      */
     private $typeClasse;
 
-    /**
-     * @ORM\OneToMany(targetEntity="App\Entity\SousClasse", mappedBy="classe")
-     */
-    private $sousClasses;
 
     public function __construct()
     {
-        $this->sousClasses = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -138,37 +133,4 @@ class Classe
 
         return $this;
     }
-
-    /**
-     * @return Collection|SousClasse[]
-     */
-    public function getSousClasses(): Collection
-    {
-        return $this->sousClasses;
-    }
-
-    public function addSousClass(SousClasse $sousClass): self
-    {
-        if (!$this->sousClasses->contains($sousClass)) {
-            $this->sousClasses[] = $sousClass;
-            $sousClass->setClasse($this);
-        }
-
-        return $this;
-    }
-
-    public function removeSousClass(SousClasse $sousClass): self
-    {
-        if ($this->sousClasses->contains($sousClass)) {
-            $this->sousClasses->removeElement($sousClass);
-            // set the owning side to null (unless already changed)
-            if ($sousClass->getClasse() === $this) {
-                $sousClass->setClasse(null);
-            }
-        }
-
-        return $this;
-    }
-
-
 }

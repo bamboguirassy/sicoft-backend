@@ -24,12 +24,19 @@ class ExerciceSourceFinancement
     /**
      * @var int
      *
-     * @ORM\Column(name="montant", type="bigint", nullable=false)
+     * @ORM\Column(name="montant_initial", type="bigint", nullable=false)
      */
-    private $montant;
+    private $montantInitial;
 
     /**
-     * @var \Budget
+     * @var int
+     *
+     * @ORM\Column(name="montant_restant", type="bigint", nullable=false)
+     */
+    private $montantRestant;
+
+    /**
+     * @var Budget
      *
      * @ORM\ManyToOne(targetEntity="Budget")
      * @ORM\JoinColumns({
@@ -39,7 +46,7 @@ class ExerciceSourceFinancement
     private $budget;
 
     /**
-     * @var \SourceFinancement
+     * @var SourceFinancement
      *
      * @ORM\ManyToOne(targetEntity="SourceFinancement")
      * @ORM\JoinColumns({
@@ -53,14 +60,26 @@ class ExerciceSourceFinancement
         return $this->id;
     }
 
-    public function getMontant(): ?string
+    public function getMontantInitial(): ?string
     {
-        return $this->montant;
+        return $this->montantInitial;
     }
 
-    public function setMontant(string $montant): self
+    public function setMontantInitial(string $montant): self
     {
-        $this->montant = $montant;
+        $this->montantInitial = $montant;
+
+        return $this;
+    }
+
+    public function getMontantRestant(): ?string
+    {
+        return $this->montantRestant;
+    }
+
+    public function setMontantRestant(int $montantRestant): self
+    {
+        $this->montantRestant = $montantRestant;
 
         return $this;
     }
