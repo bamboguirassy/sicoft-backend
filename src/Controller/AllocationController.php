@@ -56,7 +56,7 @@ class AllocationController extends AbstractController
      * @Rest\View(StatusCode = 200)
      * @IsGranted("ROLE_Compte_INDEX")
      */
-    public function findAllocatedAccountByBudgetAndCompteDivisionnaire(Request $request, Budget $budget, $divId, EntityManagerInterface $entityManager) {
+    public function findAllocationsByBudgetAndCompteDivisionnaire(Request $request, Budget $budget, $divId, EntityManagerInterface $entityManager) {
 
         return $entityManager->createQuery('
             SELECT a

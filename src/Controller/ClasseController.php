@@ -41,12 +41,11 @@ class ClasseController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Classe_CREATE")
      */
-    public function create(Request $request): Classe
+    public function create(Request $request, EntityManagerInterface $entityManager): Classe
     {
         $classe = new Classe();
         $form = $this->createForm(ClasseType::class, $classe);
         $form->submit(Utils::serializeRequestContent($request));
-        $entityManager = $this->getDoctrine()->getManager();
 
         // check if numero and libelle already exist
         $this->checkNumeroAndLibelle($classe, $entityManager);
