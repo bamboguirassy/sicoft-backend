@@ -65,9 +65,9 @@ class ExerciceSourceFinancement
         return $this->montantInitial;
     }
 
-    public function setMontantInitial(string $montant): self
+    public function setMontantInitial(string $montantInitial): self
     {
-        $this->montantInitial = $montant;
+        $this->montantInitial = $montantInitial;
 
         return $this;
     }
