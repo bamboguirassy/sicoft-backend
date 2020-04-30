@@ -111,10 +111,10 @@ class BudgetController extends AbstractController
         $form->submit(Utils::serializeRequestContent($request));
 
         $existBudget = $entityManager->createQuery('SELECT bgt FROM App\Entity\Budget bgt
-        WHERE bgt.exercice=?1 and bgt.entite=?2 and bgt!=?3')
-        ->setParameter(1, $budget->getExercice())
-        ->setParameter(2, $budget->getEntite())
-        ->setParameter(3, $budget)
+        WHERE (bgt.exercice=:exercice OR bgt.entite=:entite)and bgt!=:budget')
+        ->setParameter('exercice', $budget->getExercice())
+        ->setParameter('entite', $budget->getEntite())
+        ->setParameter('budget', $budget)
         ->getResult();
         if(count($existBudget) > 0){
             throw $this->createNotFoundException("Cet exercice est dèjà rattaché à une entité!");
@@ -123,6 +123,7 @@ class BudgetController extends AbstractController
         $this->getDoctrine()->getManager()->flush();
 
         return $budget;
+        
     }
     
     /**
