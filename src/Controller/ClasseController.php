@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Classe;
 use App\Entity\SousClasse;
+use App\Entity\TypeClasse;
 use App\Form\ClasseType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -40,12 +41,11 @@ class ClasseController extends AbstractController
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Classe_CREATE")
      */
-    public function create(Request $request): Classe
+    public function create(Request $request, EntityManagerInterface $entityManager): Classe
     {
         $classe = new Classe();
         $form = $this->createForm(ClasseType::class, $classe);
         $form->submit(Utils::serializeRequestContent($request));
-        $entityManager = $this->getDoctrine()->getManager();
 
         // check if numero and libelle already exist
         $this->checkNumeroAndLibelle($classe, $entityManager);
@@ -111,7 +111,10 @@ class ClasseController extends AbstractController
      */
     public function delete(Classe $classe): Classe
     {
-        if (count($classe->getSousClasses())) {
+        $associatedSousClasse = $this->getDoctrine()->getRepository(SousClasse::class)
+            ->findByClasse($classe);
+
+        if (count($associatedSousClasse)) {
             throw new HttpException(417, "Impossible de supprimer la classe n'est pas indépendante.");
         }
         $entityManager = $this->getDoctrine()->getManager();

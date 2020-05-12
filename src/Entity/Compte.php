@@ -43,7 +43,7 @@ class Compte
     private $description;
 
     /**
-     * @var \CompteDivisionnaire
+     * @var CompteDivisionnaire
      *
      * @ORM\ManyToOne(targetEntity="CompteDivisionnaire")
      * @ORM\JoinColumns({
@@ -51,6 +51,8 @@ class Compte
      * })
      */
     private $compteDivisionnaire;
+
+
 
     public function getId(): ?int
     {
@@ -104,6 +106,4 @@ class Compte
 
         return $this;
     }
-
-
 }

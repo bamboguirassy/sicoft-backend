@@ -2,9 +2,13 @@
 
 namespace App\Controller;
 
+use App\Entity\Budget;
 use App\Entity\Compte;
 use App\Entity\CompteDivisionnaire;
+use App\Entity\ExerciceSourceFinancement;
+use App\Entity\TypeClasse;
 use App\Form\CompteType;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -89,6 +93,50 @@ class CompteController extends AbstractController
         return $compte;
     }
 
+    /**
+     * @Rest\Get(path="/{id}/recette", name="compte_recette_list", requirements = {"id"="\d+"})
+     * @Rest\View(StatusCode=200)
+     * @IsGranted("ROLE_Compte_SHOW")
+     */
+    public function fetchRecetteCompteByBudget(Request $request, EntityManagerInterface $entityManager, Budget $budget) {
+        return $entityManager->createQuery(
+            'SELECT c
+            FROM App\Entity\Compte c 
+            JOIN c.compteDivisionnaire cd 
+            JOIN cd.sousClasse scl
+            JOIN scl.classe cl WHERE cl.typeClasse IN (SELECT type FROM App\Entity\TypeClasse type WHERE type.code=1)
+            AND c NOT IN (
+                           SELECT alcompte 
+                           FROM App\Entity\Allocation al 
+                           JOIN al.compte alcompte
+                           JOIN al.exerciceSourceFinancement esf
+                           WHERE esf.budget=:budget 
+                         )
+            '
+        )->setParameter('budget', $budget)->getResult();
+    }
+
+    /**
+     * @Rest\Get(path="/{id}/depense", name="compte_depense_list", requirements = {"id"="\d+"})
+     * @Rest\View(StatusCode=200)
+     * @IsGranted("ROLE_Compte_SHOW")
+     */
+    public function fetchDepenseCompteByBudget(Request $request, EntityManagerInterface $entityManager, Budget $budget) {
+        return $entityManager->createQuery(
+            'SELECT c 
+            FROM App\Entity\Compte c 
+            JOIN c.compteDivisionnaire cd 
+            JOIN cd.sousClasse scl
+            JOIN scl.classe cl WHERE cl.typeClasse IN (SELECT type FROM App\Entity\TypeClasse type WHERE type.code=2)
+            AND c NOT IN ( SELECT alcompte 
+                           FROM App\Entity\Allocation al 
+                           JOIN al.compte alcompte
+                           JOIN al.exerciceSourceFinancement esf
+                           WHERE esf.budget=:budget 
+                         )
+            '
+        )->setParameter('budget', $budget)->getResult();
+    }
     
     /**
      * @Rest\Put(path="/{id}/edit", name="compte_edit",requirements = {"id"="\d+"})
@@ -167,5 +215,7 @@ class CompteController extends AbstractController
 
         return count($comptes)?$comptes:[];
     }
+
+
 
 }

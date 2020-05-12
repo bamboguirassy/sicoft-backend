@@ -159,11 +159,7 @@
         "version": "2.1.1"
     },
     "php": {
-<<<<<<< HEAD
         "version": "7.3"
-=======
-        "version": "7.2"
->>>>>>> develop
     },
     "phpcollection/phpcollection": {
         "version": "0.5.0"
@@ -369,9 +365,6 @@
     },
     "symfony/security-http": {
         "version": "v4.3.5"
-    },
-    "symfony/serializer": {
-        "version": "v4.4.3"
     },
     "symfony/service-contracts": {
         "version": "v1.1.7"
