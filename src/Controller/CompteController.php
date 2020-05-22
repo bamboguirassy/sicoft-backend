@@ -131,8 +131,7 @@ class CompteController extends AbstractController
             AND c NOT IN ( SELECT alcompte 
                            FROM App\Entity\Allocation al 
                            JOIN al.compte alcompte
-                           JOIN al.exerciceSourceFinancement esf
-                           WHERE esf.budget=:budget 
+                           WHERE al.budget=:budget 
                          )
             '
         )->setParameter('budget', $budget)->getResult();

@@ -69,6 +69,16 @@ class Allocation
      */
     private $compte;
 
+    /**
+     * @var Budget
+     *
+     * @ORM\ManyToOne(targetEntity="App\Entity\Budget")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="budget", referencedColumnName="id")
+     * })
+     */
+    private $budget;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -142,6 +152,18 @@ class Allocation
     public function setCompte(?Compte $compte): self
     {
         $this->compte = $compte;
+
+        return $this;
+    }
+
+    public function getBudget(): ?Budget
+    {
+        return $this->budget;
+    }
+
+    public function setBudget(?Budget $budget): self
+    {
+        $this->budget = $budget;
 
         return $this;
     }
