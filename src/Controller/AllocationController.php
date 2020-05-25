@@ -38,11 +38,11 @@ class AllocationController extends AbstractController
     }
 
     /**
-     * @Rest\Get(path="/{id}/esf", name="fetch_allocated_accounts_by_budget", requirements={"id"="\d+", "budgetId"="\d+"})
+     * @Rest\Get(path="/{id}/esf", name="fetch_recette_allocation", requirements={"id"="\d+", "budgetId"="\d+"})
      * @Rest\View(StatusCode = 200)
      * @IsGranted("ROLE_Allocation_INDEX")
      */
-    public function findAllocationsByExerciceSrcFin(Request $request, ExerciceSourceFinancement $exerciceSourceFinancement, EntityManagerInterface $entityManager)
+    public function findByExerciceSrcFin(Request $request, ExerciceSourceFinancement $exerciceSourceFinancement, EntityManagerInterface $entityManager)
     {
         return $entityManager->createQuery('
             SELECT a
@@ -55,18 +55,70 @@ class AllocationController extends AbstractController
     }
 
     /**
+     * @Rest\Get(path="/{id}/budget-depense", name="fetch_depense_allocation", requirements={"id"="\d+"})
+     * @Rest\View(StatusCode = 200)
+     * @IsGranted("ROLE_Allocation_INDEX")
+     */
+    public function findDepenseByBudget(Request $request, Budget $budget, EntityManagerInterface $entityManager)
+    {
+        $totalDepense = 0.0;
+        $totalRecette = 0.0;
+
+        try {
+            $totalDepense = (float)$entityManager->createQuery('
+                SELECT SUM(a.montantInitial) as totalDepense
+                FROM App\Entity\Allocation a
+                JOIN a.compte c
+                JOIN c.compteDivisionnaire cd 
+                JOIN cd.sousClasse scl
+                JOIN scl.classe cl 
+                WHERE cl.typeClasse IN (SELECT type FROM App\Entity\TypeClasse type WHERE type.code=2)
+                AND a.budget=:budget
+            ')->setParameter('budget', $budget)->getSingleScalarResult();
+            $totalRecette = (float)$entityManager->createQuery('
+                    SELECT SUM(a.montantInitial) - :totalDepense
+                    FROM App\Entity\Allocation a
+                    JOIN a.exerciceSourceFinancement esf
+                    JOIN a.compte c
+                    JOIN c.compteDivisionnaire cd 
+                    JOIN cd.sousClasse scl
+                    JOIN scl.classe cl 
+                    WHERE cl.typeClasse IN (SELECT type FROM App\Entity\TypeClasse type WHERE type.code=1)
+                    AND esf.budget=:budget
+                ')->setParameter('budget', $budget)
+                ->setParameter('totalDepense', $totalDepense)
+                ->getSingleScalarResult();
+        } catch (NoResultException $e) {
+        } catch (NonUniqueResultException $e) {
+        }
+
+        $allocationsDepenses = $entityManager->createQuery('
+            SELECT a
+            FROM App\Entity\Allocation a
+            WHERE a.budget=:budget
+        ')->setParameter('budget', $budget)
+            ->getResult();
+
+        return [
+            'totalRecette' => $totalRecette,
+            'totalDepense' => $totalDepense,
+            'allocationDepenses' => $allocationsDepenses
+        ];
+    }
+
+    /**
      * @Rest\Get(path="/{id}/{divId}/budget-cd", name="fetch_allocation", requirements={"id"="\d+", "divId"="\d+"})
      * @Rest\View(StatusCode = 200)
      * @IsGranted("ROLE_Allocation_INDEX")
      * @Rest\QueryParam(
-     *  name="accountType",
+     *  name="compteType",
      *  requirements="recette|depense",
      *  default="recette"
      * )
      */
-    public function findAllocationsByBudgetAndCompteDivisionnaire(Request $request, Budget $budget, $divId, EntityManagerInterface $entityManager, $accountType)
+    public function findByBudgetAndCompteDivisionnaire(Request $request, Budget $budget, $divId, EntityManagerInterface $entityManager, $compteType)
     {
-        $dqlQuery = $accountType === 'recette' ?
+        $dqlQuery = $compteType === 'recette' ?
             'SELECT a
             FROM App\Entity\Allocation a
             JOIN a.compte c
@@ -85,7 +137,7 @@ class AllocationController extends AbstractController
     }
 
     /**
-     * @Rest\Get(path="/{id}/budget", name="fetch_recette_allocations", requirements={"id"="\d+"})
+     * @Rest\Get(path="/{id}/montant-recette-depense", name="fetch_recette_allocations", requirements={"id"="\d+"})
      * @Rest\View(StatusCode = 200)
      * @IsGranted("ROLE_Allocation_INDEX")
      */
@@ -226,11 +278,11 @@ class AllocationController extends AbstractController
     }
 
     /**
-     * @Rest\Put(path="/edit-multiple", name="allocation_edit_multiple")
+     * @Rest\Put(path="/edit-multiple-recette", name="allocation_edit_multiple_recette")
      * @Rest\View(StatusCode=200)
      * @IsGranted("ROLE_Allocation_EDIT")
      */
-    public function editMultiple(Request $request, EntityManagerInterface $entityManager, SerializerInterface $serializer)
+    public function editMultipleRecette(Request $request, EntityManagerInterface $entityManager, SerializerInterface $serializer)
     {
         //Fonction mettant à jour aussi le montant du source financement
         $deserializedAllocations = Utils::serializeRequestContent($request);
@@ -251,6 +303,28 @@ class AllocationController extends AbstractController
             ->find($deserializedAllocations[0]['exerciceSourceFinancement']['id']);
         $allocatedAmount = $esf->getMontantInitial() - $esf->getMontantRestant();
         $esf->setMontantRestant($esf->getMontantRestant() + $allocatedAmount - $newAmount);
+        $entityManager->flush();
+        return $updatedAllocation;
+    }
+
+    /**
+     * @Rest\Put(path="/edit-multiple-depense", name="allocation_edit_multiple_depense")
+     * @Rest\View(StatusCode=200)
+     * @IsGranted("ROLE_Allocation_EDIT")
+     */
+    public function editMultipleDepense(Request $request, EntityManagerInterface $entityManager, SerializerInterface $serializer)
+    {
+        $deserializedAllocations = Utils::serializeRequestContent($request);
+        $updatedAllocation = [];
+        foreach ($deserializedAllocations as $allocation) {
+            /** @var Allocation $persistedAllocation */
+            $persistedAllocation = $entityManager
+                ->getRepository(Allocation::class)
+                ->find($allocation['id']);
+            $form = $this->createForm(AllocationType::class, $persistedAllocation);
+            $form->submit($allocation);
+            $updatedAllocation[] = $persistedAllocation;
+        }
         $entityManager->flush();
         return $updatedAllocation;
     }
