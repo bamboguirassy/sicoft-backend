@@ -218,7 +218,7 @@ class SousClasseController extends AbstractController
     }
 
     /**
-     * @Rest\Get(path="/{id}/classe", name="classe")
+     * @Rest\Get(path="/{id}/classe/", name="classe")
      * @Rest\View(StatusCode = 200)
      * @IsGranted("ROLE_SousClasse_INDEX")
      */

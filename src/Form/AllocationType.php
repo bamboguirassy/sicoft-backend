@@ -18,6 +18,7 @@ class AllocationType extends AbstractType
             ->add('montantRestant')
             ->add('exerciceSourceFinancement')
             ->add('compte')
+            ->add('budget')
         ;
     }
 
