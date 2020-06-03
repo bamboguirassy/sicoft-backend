@@ -73,9 +73,29 @@ class ClasseController extends AbstractController
      */
     public function edit(Request $request, Classe $classe, EntityManagerInterface $em)
     {
+        $oldType = $classe->getTypeClasse();
         $form = $this->createForm(ClasseType::class, $classe);
         $form->submit(Utils::serializeRequestContent($request));
+        if ($oldType->getNom() !== $classe->getTypeClasse()->getNom()) {
 
+            $classe->setTypeClasse($oldType);
+
+            //extrait tous les allocations concernant les comptes de la classe dont le type est entrain d'être modifié!
+            $allocations = $em->createQuery('
+                SELECT al 
+                FROM App\Entity\Allocation al 
+                JOIN al.compte alcompte
+                JOIN alcompte.compteDivisionnaire cd
+                JOIN cd.sousClasse scl
+                JOIN scl.classe cl
+                WHERE cl=:classe             
+          ')->setParameter('classe', $classe)
+                ->getResult();
+
+            if (count($allocations)) {
+                throw $this->createAccessDeniedException("Impossible de modifier le type de cette classe car elle contient au moins un compte ayant déjà fait objet d'allocation budgétaire.");
+            }
+        }
         // check if numero and libelle already exist
         $this->checkEditClasseNumeroAndLibelle($classe, $em);
 

@@ -131,7 +131,7 @@ class AllocationController extends AbstractController
             JOIN a.compte c
             JOIN c.compteDivisionnaire cd
             WHERE cd.id=:compteDiv AND a.budget=:budget';
-        return $entityManager->createQuery($dqlQuery)->setParameter('compteDiv', $divId)
+        return $entityManager->createQuery($dqlQuery)->setParameter('compteDiv', $divId) 
             ->setParameter('budget', $budget)
             ->getResult();
     }
