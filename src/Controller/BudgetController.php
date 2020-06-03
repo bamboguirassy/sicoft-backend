@@ -79,7 +79,7 @@ class BudgetController extends AbstractController
         ->setParameter(2, $budget->getEntite())
         ->getResult();
         if(count($existBudget) > 0){
-            throw $this->createNotFoundException("Cet exercice est dèjà rattaché à une entité!");
+            throw $this->createNotFoundException("Ce budget existe dèjà! ");
         }    
         $budget->setLibelle('Budget' . ' ' .$budget->getEntite()->getCode(). ' '. $budget->getExercice()->getLibelle());
 
